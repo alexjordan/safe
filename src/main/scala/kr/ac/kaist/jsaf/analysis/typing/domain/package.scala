@@ -161,9 +161,7 @@ package object domain {
   val PValueBot = PValue(UndefBot, NullBot, BoolBot, NumBot, StrBot)
     
   val ValueBot = Value(PValueBot, LocSetBot)
-
-  val IValueBot = IValue(PValueBot, LocSetBot)
-
+  
   val ObjectValueBot = ObjectValue(ValueBot, BoolBot, BoolBot, BoolBot)
 
   // null represents symbolic bottom for intersection domain of must-oldified set.
