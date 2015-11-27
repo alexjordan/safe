@@ -13,8 +13,8 @@ import java.io.OutputStream
 import java.io.PrintStream
 import kr.ac.kaist.jsaf.exceptions.UserError
 
-import scala.collection.immutable.HashMap
 import scala.collection.immutable.HashSet
+import scala.collection.mutable
 import junit.framework.Assert.fail
 import junit.framework.TestCase
 import kr.ac.kaist.jsaf.analysis.cfg.CFG
@@ -133,6 +133,7 @@ class SemanticsTest(dir: String, tc: String, typing_mode: String) extends TestCa
 object SemanticsTest {
   val RESULT = "__result"
   val EXPECT = "__expect"
+  val EXPECTEQ = "___expect"  // enforce equality (===) check
 
   def checkResult(typing: TypingInterface) = {
     // find global object at program exit node
@@ -146,18 +147,20 @@ object SemanticsTest {
     }
 
     // collect result/expect values
-    var resultMap: Map[Int, Value] = HashMap()
-    var expectMap: Map[Int, Value] = HashMap()
+    val resultMap = mutable.Map[Int, Value]()
+    val expectMap = mutable.Map[Int, (Value, Boolean)]()
 
     for (prop <- map) {
       try {
         val pvalue = obj(prop)
+        def index(keyword: String) = prop.substring(keyword.length).toInt
         if (prop.startsWith(RESULT)) {
-          val index = prop.substring(RESULT.length).toInt
-          resultMap += (index -> pvalue._1._1)
+          resultMap += (index(RESULT) -> pvalue._1._1)
         } else if (prop.startsWith(EXPECT)) {
-          val index = prop.substring(EXPECT.length).toInt
-          expectMap += (index -> pvalue._1._1)
+          expectMap += (index(EXPECT) -> (pvalue._1._1, false))
+        } else if (prop.startsWith(EXPECTEQ)) {
+          // ___expect will enforce equality (===) between the (abstract) values
+          expectMap += (index(EXPECTEQ) -> (pvalue._1._1, true))
         }
       } catch {
         case _: Throwable => fail("Invalid result/expect variable found: " + prop.toString)
@@ -179,15 +182,18 @@ object SemanticsTest {
           fail("No corresponding expect variable is detected for " +
                RESULT +
                index.toString)
-        case Some(expect) =>
-          val success = expect <= result
+        case Some((expect, testEq)) =>
+          val success = expect <= result && (!testEq || result <= expect)
           if (!success) {
             val sb = new StringBuilder
             sb.append(RESULT)
             sb.append(index.toString)
             sb.append(" = {")
             sb.append(DomainPrinter.printValue(result))
-            sb.append("} >= {")
+            if (testEq)
+              sb.append("} === {")
+            else
+              sb.append("} >= {")
             sb.append(DomainPrinter.printValue(expect))
             sb.append("}")
             fail(sb.toString)
