@@ -89,57 +89,6 @@ object DOMStringList extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      ("DOMStringList.item"-> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          /* arguments */
-          val n_index = PreHelper.toNumber(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "0", PureLocalLoc)))
-          if (n_index </ NumBot) {
-            val lset_this = h(PureLocalLoc)("@this")._2._2
-            val n_length = lset_this.foldLeft[AbsNumber](NumBot)((n, l) =>
-              n + PreHelper.toNumber(PreHelper.toPrimitive(PreHelper.Proto(h, l, AbsString.alpha("length")))))
-            val s_index = PreHelper.toString(PValue(n_index))
-            // Returns the indexth item in the collection.
-            val v_return = lset_this.foldLeft(ValueBot)((v, l) => v + PreHelper.Proto(h, l, s_index))
-            // If index is greater than or equal to the number of nodes in the list, this returns null.
-            val v_null = AbsDomUtils.checkIndex(n_index, n_length)
-            ((PreHelper.ReturnStore(h, PureLocalLoc, v_return + v_null), ctx), (he, ctxe))
-          }
-          else
-            ((h, ctx), (he, ctxe))
-        })),
-      ("DOMStringList.contains"-> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          /* arguments */
-          val s_str = PreHelper.toString(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "0", PureLocalLoc)))
-          if (s_str </ StrBot)
-          /* imprecise semantic */
-            ((PreHelper.ReturnStore(h, PureLocalLoc, Value(BoolTop)), ctx), (he, ctxe))
-          else
-            ((h, ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-    // TODO: NYI
-      // case "DOMStringList.item"     =>
-      // case "DOMStringList.contains" =>
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-    // TODO: NYI
-      // case "DOMStringList.item"     =>
-      // case "DOMStringList.contains" =>
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMStringList should have 'length' property

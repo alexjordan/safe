@@ -57,24 +57,6 @@ object MouseEvent extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "MouseEvent.initMouseEvent"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "MouseEvent.initMouseEvent"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "MouseEvent.initMouseEvent"
-    )
-  }
-
   /* instance */
   def getInstList(lset_currenttarget: LocSet, lset_target: LocSet): List[(String, PropValue)] = {
     // this object has all properties of the UIEvent object

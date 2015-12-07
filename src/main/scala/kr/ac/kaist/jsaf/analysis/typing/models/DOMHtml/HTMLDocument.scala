@@ -160,39 +160,6 @@ object HTMLDocument extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLDocument.open" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.close" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.write" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.writeln" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.getElementsByName" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLDocument.open" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.close" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.write" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.writeln" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.getElementsByName" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLDocument.open" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.close" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.write" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.writeln" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.getElementsByName" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   // only one 'document' can be present in the heap
   var loc_ins_status: Option[Loc]  = None

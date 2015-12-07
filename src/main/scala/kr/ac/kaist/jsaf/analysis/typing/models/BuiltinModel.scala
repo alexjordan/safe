@@ -26,18 +26,10 @@ class BuiltinModel(cfg: CFG) extends Model(cfg)  {
 
   private var map_fid = Map[FunctionId, String]()
   private var map_semantic = Map[String, SemanticFun]()
-  private var map_presemantic =  Map[String, SemanticFun]()
-  private var map_def =  Map[String, AccessFun]()
-  private var map_use =  Map[String, AccessFun]()
-
 
   def initialize(h: Heap): Heap = {
     /* init function map */
     map_semantic = list_builtin.foldLeft(map_semantic)((m, builtin) => m ++ builtin.getSemanticMap())
-    map_presemantic = list_builtin.foldLeft(map_presemantic)((m, builtin) => m ++ builtin.getPreSemanticMap())
-    map_def = list_builtin.foldLeft(map_def)((m, builtin) => m ++ builtin.getDefMap())
-    map_use = list_builtin.foldLeft(map_use)((m, builtin) => m ++ builtin.getUseMap())
-
 
     /* init api objects */
     val h_1 = list_builtin.foldLeft(h)((h1, builtin) =>
@@ -80,9 +72,7 @@ class BuiltinModel(cfg: CFG) extends Model(cfg)  {
   def isModelFid(fid: FunctionId) = map_fid.contains(fid)
   def getFIdMap(): Map[FunctionId, String] = map_fid
   def getSemanticMap(): Map[String, SemanticFun] = map_semantic
-  def getPreSemanticMap(): Map[String, SemanticFun] = map_presemantic
-  def getDefMap(): Map[String, AccessFun] = map_def
-  def getUseMap(): Map[String, AccessFun] = map_use
+
   def asyncSemantic(sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG,
                     name: String, list_addr: List[Address]): ((Heap, Context), (Heap, Context)) = {
     ((HeapBot, ContextBot),(HeapBot, ContextBot))

@@ -346,11 +346,6 @@ object AnalyzeMain {
         Shell.params.command == ShellParameters.CMD_HTML ||
         Shell.params.command == ShellParameters.CMD_BUG_DETECTOR ||
         Shell.params.command == ShellParameters.CMD_WEBAPP_BUG_DETECTOR) typingInterface = new Typing(cfg, quiet, locclone)
-    else if (Shell.params.command == ShellParameters.CMD_PREANALYZE) typingInterface = new PreTyping(cfg, quiet, true)
-    else if (Shell.params.command == ShellParameters.CMD_HTML_PRE) typingInterface = new PreTyping(cfg, quiet, true)
-    else if (Shell.params.command == ShellParameters.CMD_SPARSE) typingInterface = new SparseTyping(cfg, quiet, locclone)
-    else if (Shell.params.command == ShellParameters.CMD_NEW_SPARSE ||
-             Shell.params.command == ShellParameters.CMD_HTML_SPARSE) typingInterface = new DSparseTyping(cfg, quiet, locclone)
     else throw new UserError("Cannot create the Typing. The command is unknown.")
     Config.setTypingInterface(typingInterface)
 
@@ -380,24 +375,7 @@ object AnalyzeMain {
     else if (Shell.params.command == ShellParameters.CMD_SPARSE ||
              Shell.params.command == ShellParameters.CMD_NEW_SPARSE ||
              Shell.params.command == ShellParameters.CMD_HTML_SPARSE) {
-      val preTyping = new PreTyping(cfg, quiet, false)
-      preTyping.analyze(init)
-
-      // unsound because states among instructions are omitted.
-      val pre_result = preTyping.getMergedState
-      // computes def/use set
-      val access_start = System.nanoTime
-      val duanalysis = new Access(cfg, preTyping.computeCallGraph, pre_result)
-      duanalysis.process(quiet)
-      val accessTime = (System.nanoTime - access_start) / 1000000000.0
-      if (!quiet) printf("# Time for access analysis(s): %.2f\n", accessTime)
-
-      val cg = preTyping.computeCallGraph()
-      // computes def/use graph
-      if (typingInterface.env != null) typingInterface.env.drawDDG(cg, duanalysis.result, quiet)
-
-      // Analyze
-      typingInterface.analyze(init, duanalysis.result)
+      throw new UserError("Pre/Sparse not supported.")
     }
 
     if(!quiet || Shell.params.command == ShellParameters.CMD_WEBAPP_BUG_DETECTOR) 

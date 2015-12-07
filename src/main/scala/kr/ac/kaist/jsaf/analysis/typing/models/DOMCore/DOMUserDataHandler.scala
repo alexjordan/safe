@@ -62,24 +62,6 @@ object DOMUserDataHandler extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      // case "DOMUserDataHandler.handle" =>
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      // case "DOMUserDataHandler.handle" =>
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      // case "DOMUserDataHandler.handle" =>
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMUserDataHandler should have no property

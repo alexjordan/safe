@@ -226,17 +226,6 @@ object JQueryEvent extends ModelData {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map()
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map()
-  }
   private def on( h: Heap, ctx: Context, he: Heap, ctxe: Context,
                   v_types: Value, v_selector: Value, v_data: Value, v_fn: Value): ((Heap, Context), (Heap, Context)) = {
     val lset_this = h(SinglePureLocalLoc)("@this")._2._2

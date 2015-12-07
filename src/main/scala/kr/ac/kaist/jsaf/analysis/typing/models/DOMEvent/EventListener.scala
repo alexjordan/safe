@@ -43,21 +43,4 @@ object EventListener extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "EventListener.handleEvent"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "EventListener.handleEvent"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "EventListener.handleEvent"
-    )
-  }
 }

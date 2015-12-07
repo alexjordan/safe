@@ -139,18 +139,6 @@ object HTMLTopElement extends DOM {
     Map()
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map()
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
   def getInsLoc(h: Heap): LocSet = h(TopElementLoc)(AbsString.alpha("elements"))._1._1._2
   def setInsLoc(h: Heap, l: Loc): Heap = {
     val l_set = getInsLoc(h) 

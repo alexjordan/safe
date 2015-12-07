@@ -57,24 +57,6 @@ object UIEvent extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "UIEvent.initUIEvent"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "UIEvent.initUIEvent"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "UIEvent.initUIEvent"
-    )
-  }
-
   /* instance */
   def getInstList(lset_currenttarget: LocSet, lset_target: LocSet): List[(String, PropValue)] = {
     // this object has all properties of the Event object

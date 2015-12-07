@@ -98,56 +98,6 @@ object HTMLSelectElement extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLSelectElement.add"    => ((h,ctx),(he,ctxe))
-      //case "HTMLSelectElement.remove" => ((h,ctx),(he,ctxe))
-      ("HTMLSelectElement.blur" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-        })),
-      ("HTMLSelectElement.focus" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLSelectElement.add"    => ((h,ctx),(he,ctxe))
-      //case "HTMLSelectElement.remove" => ((h,ctx),(he,ctxe))
-      ("HTMLSelectElement.blur" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      ("HTMLSelectElement.focus" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLSelectElement.add"    => ((h,ctx),(he,ctxe))
-      //case "HTMLSelectElement.remove" => ((h,ctx),(he,ctxe))
-      ("HTMLSelectElement.blur" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      ("HTMLSelectElement.focus" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
   /* instance */
   override def getInstance(cfg: CFG): Option[Loc] = Some(newRecentLoc())
   /* list of properties in the instance object */

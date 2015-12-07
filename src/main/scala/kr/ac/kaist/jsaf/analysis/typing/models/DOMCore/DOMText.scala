@@ -78,30 +78,6 @@ object DOMText extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMText.splitText" => ((h,ctx),(he,ctxe))
-      //case "DOMText.replaceWholeText" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMText.splitText" => ((h,ctx),(he,ctxe))
-      //case "DOMText.replaceWholeText" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMText.splitText" => ((h,ctx),(he,ctxe))
-      //case "DOMText.replaceWholeText" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   override def getInstance(cfg: CFG): Option[Loc] = Some(newRecentLoc())
   /* list of properties in the instance object */

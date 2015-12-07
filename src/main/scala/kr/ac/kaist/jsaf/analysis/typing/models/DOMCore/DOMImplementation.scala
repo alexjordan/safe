@@ -64,36 +64,6 @@ object DOMImplementation extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementation.hasFeature"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.createDocumentType" => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.createDocument" => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.getFeature" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementation.hasFeature"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.createDocumentType" => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.createDocument" => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.getFeature" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementation.hasFeature"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.createDocumentType" => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.createDocument" => ((h,ctx),(he,ctxe))
-      //case "DOMImplementation.getFeature" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMImplementation should have no property

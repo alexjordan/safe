@@ -99,60 +99,6 @@ private val prop_ins: List[(String, AbsProperty)] =
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      ("HTMLTextAreaElement.blur" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-        })),
-      ("HTMLTextAreaElement.focus" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-        })),
-      ("HTMLTextAreaElement.select" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      ("HTMLTextAreaElement.blur" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      ("HTMLTextAreaElement.focus" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      ("HTMLTextAreaElement.select" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      ("HTMLTextAreaElement.blur" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      ("HTMLTextAreaElement.focus" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      ("HTMLTextAreaElement.select" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
   /* instance */
   override def getInstance(cfg: CFG): Option[Loc] = Some(newRecentLoc())
   /* list of properties in the instance object */

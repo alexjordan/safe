@@ -91,42 +91,6 @@ object DOMNamedNodeMap extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMNamedNodeMap.getNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.setNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.removeNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.getNamedItemNS" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.setNamedItemNS" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.removeNamedItemNS" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMNamedNodeMap.getNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.setNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.removeNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.getNamedItemNS" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.setNamedItemNS" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.removeNamedItemNS" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMNamedNodeMap.getNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.setNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.removeNamedItem" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.getNamedItemNS" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.setNamedItemNS" => ((h,ctx),(he,ctxe))
-      //case "DOMNamedNodeMap.removeNamedItemNS" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   override def getInstance(cfg: CFG): Option[Loc] = Some(newRecentLoc())
   /* list of properties in the instance object */

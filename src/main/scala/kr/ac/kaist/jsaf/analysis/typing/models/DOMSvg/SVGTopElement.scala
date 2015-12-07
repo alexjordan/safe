@@ -37,18 +37,6 @@ object SVGTopElement extends DOM {
     Map()
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map()
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map()
-  }
-  
   // this object has all properites of all svg elements
   override def default_getInsList(): List[(String, PropValue)] = {
     val proplist = elementList.foldLeft[List[(String, PropValue)]](List())((propl, ele) =>

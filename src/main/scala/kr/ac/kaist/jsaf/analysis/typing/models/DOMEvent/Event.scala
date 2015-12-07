@@ -75,30 +75,6 @@ object Event extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "Event.stopPropagation"
-      //case "Event.preventDefault"
-      //case "Event.initEvent"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "Event.stopPropagation"
-      //case "Event.preventDefault"
-      //case "Event.initEvent"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "Event.stopPropagation"
-      //case "Event.preventDefault"
-      //case "Event.initEvent"
-    )
-  }
-
   /* instance */
   def getInstList(lset_currenttarget: LocSet, lset_target: LocSet): List[(String, PropValue)] = {
     List(

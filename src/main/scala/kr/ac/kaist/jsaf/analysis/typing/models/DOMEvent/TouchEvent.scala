@@ -55,21 +55,6 @@ object TouchEvent extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-    )
-  }
-
   /* instance */
   def getInstList(lset_currenttarget: LocSet, lset_target: LocSet): List[(String, PropValue)] = {
     // this object has all properties of the UIEvent object

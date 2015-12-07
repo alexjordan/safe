@@ -10,7 +10,7 @@
 package kr.ac.kaist.jsaf.analysis.typing.models
 
 import kr.ac.kaist.jsaf.analysis.cfg._
-import kr.ac.kaist.jsaf.analysis.typing.Config
+import kr.ac.kaist.jsaf.analysis.typing.{NotYetImplemented, Config}
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
 import kr.ac.kaist.jsaf.widl.WIDLModel
@@ -39,7 +39,7 @@ object ModelManager {
 
     /* tizen model */
     if (Config.tizenMode)
-      model_map = model_map + ("Tizen" -> new TizenModel(cfg))
+      throw new NotYetImplemented()
 
     /* jQuery model */
     if (Config.jqMode)

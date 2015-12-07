@@ -53,36 +53,4 @@ object JQueryEffect extends ModelData {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    List("animate", "delay", "fadeIn", "fadeOut", "fadeTo", "fadeToggle", "finish", "hide", "show",
-      "slideDown", "slideToggle", "slideUp", "stop").foldLeft[Map[String, SemanticFun]](Map())((_m, name) =>
-      _m + ("jQuery.prototype." + name -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          // do nothing
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          val lset_this = h(PureLocalLoc)("@this")._2._2
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(lset_this)), ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    List("animate", "delay", "fadeIn", "fadeOut", "fadeTo", "fadeToggle", "finish", "hide", "show",
-      "slideDown", "slideToggle", "slideUp", "stop").foldLeft[Map[String, AccessFun]](Map())((_m, name) =>
-      _m + ("jQuery.prototype." + name -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    List("animate", "delay", "fadeIn", "fadeOut", "fadeTo", "fadeToggle", "finish", "hide", "show",
-      "slideDown", "slideToggle", "slideUp", "stop").foldLeft[Map[String, AccessFun]](Map())((_m, name) =>
-      _m + ("jQuery.prototype." + name -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return")) + (SinglePureLocalLoc, "@this")
-        }))
-    )
-  }
 }

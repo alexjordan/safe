@@ -11,7 +11,7 @@ package kr.ac.kaist.jsaf.analysis.typing.models
 
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
-import kr.ac.kaist.jsaf.analysis.typing.{SemanticsExpr => SE, PreSemanticsExpr => PSE, AccessHelper => AH, _}
+import kr.ac.kaist.jsaf.analysis.typing.{SemanticsExpr => SE, AccessHelper => AH, _}
 import org.w3c.dom.Node
 import kr.ac.kaist.jsaf.nodes_util.IRFactory
 
