@@ -812,9 +812,7 @@ class TSModel(cfg: CFG) extends Model(cfg) {
   def isModelFid(fid: FunctionId) = map_fid.contains(fid)
   def getFIdMap(): Map[FunctionId, String] = map_fid
   def getSemanticMap(): Map[String, SemanticFun] = map_semantic
-  def getPreSemanticMap(): Map[String, SemanticFun] = map_presemantic
-  def getDefMap(): Map[String, AccessFun] = map_def
-  def getUseMap(): Map[String, AccessFun] = map_use
+
   def asyncSemantic(sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG,
                     name: String, list_addr: List[Address]): ((Heap, Context), (Heap, Context)) = {
     ((HeapBot, ContextBot),(HeapBot, ContextBot))

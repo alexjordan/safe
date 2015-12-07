@@ -60,30 +60,6 @@ object DOMImplementationSource extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementationSource.getDOMImplementation"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementationSource.getDOMImplementationList" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementationSource.getDOMImplementation"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementationSource.getDOMImplementationList" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementationSource.getDOMImplementation"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementationSource.getDOMImplementationList" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMImplementationSource should have no property

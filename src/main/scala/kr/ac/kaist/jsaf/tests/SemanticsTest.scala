@@ -11,6 +11,8 @@ package kr.ac.kaist.jsaf.tests
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
+import kr.ac.kaist.jsaf.exceptions.UserError
+
 import scala.collection.immutable.HashMap
 import scala.collection.immutable.HashSet
 import junit.framework.Assert.fail
@@ -101,10 +103,8 @@ class SemanticsTest(dir: String, tc: String, typing_mode: String) extends TestCa
     // typing
     val typing: TypingInterface =
       typing_mode match {
-        case "pre"     => cfg.computeReachableNodes(); new PreTyping(cfg, false, true)
         case "dense"   => new Typing(cfg, false, false)
-        case "sparse"  => cfg.computeReachableNodes(); new SparseTyping(cfg, false, false)
-        case "dsparse" => cfg.computeReachableNodes(); new DSparseTyping(cfg, false, false)
+        case _ => throw new UserError("not supported")
       }
     
     CONTEXT_SENSITIVITY match {
@@ -119,20 +119,10 @@ class SemanticsTest(dir: String, tc: String, typing_mode: String) extends TestCa
     //typing.analyze(init_heap)
 
     typing_mode match {
-      case "pre" |"dense" =>
+      case  "dense" =>
         typing.analyze(init)
-      case "sparse" | "dsparse" =>
-        // pre analysis
-        val preTyping = new PreTyping(cfg, false, false);
-        preTyping.analyze(init);
-        val pre_result = preTyping.getMergedState
-        // computes def/use set
-        val duanalysis = new Access(cfg, preTyping.computeCallGraph(), pre_result);
-        duanalysis.process();
-        // computes def/use graph
-        typing.env.drawDDG(preTyping.computeCallGraph(), duanalysis.result)
-        // Analyze
-        typing.analyze(init, duanalysis.result);
+      case "pre" | "sparse" | "dsparse" =>
+        throw new UserError("Not supported")
     }
 
     // return resulting Typing instance
@@ -147,9 +137,9 @@ object SemanticsTest {
   def checkResult(typing: TypingInterface) = {
     // find global object at program exit node
     val state = 
-      if (typing.isInstanceOf[PreTyping])
-        typing.getMergedState
-      else
+      //if (typing.isInstanceOf[PreTyping])
+      //  typing.getMergedState
+      //else
         typing.readTable(((typing.cfg.getGlobalFId, LExit), CallContext.globalCallContext))
     val heap = state._1
     val obj = heap(GlobalLoc)

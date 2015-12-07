@@ -9,6 +9,7 @@
 package kr.ac.kaist.jsaf.tests
 
 import java.io.File
+import kr.ac.kaist.jsaf.exceptions.UserError
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
 
 //import scala.collection.immutable.HashMap
@@ -77,30 +78,17 @@ class SemanticsDOMTest(dir: String, tc: String, typing_mode: String) extends Sem
     // typing
     val typing =
       typing_mode match {
-        case "pre"     => cfg.computeReachableNodes(); new PreTyping(cfg, false, true)
         case "dense"   => new Typing(cfg, false, false)
-        case "sparse"  => cfg.computeReachableNodes(); new SparseTyping(cfg, false, false)
-        case "dsparse" => cfg.computeReachableNodes(); new DSparseTyping(cfg, false, false)
+        case _  => throw new UserError("not supported")
       }
 
     Config.setAssertMode(true)
     typing.analyze(init)
 
     typing_mode match {
-      case "pre" |"dense" =>
+      case "dense" =>
         typing.analyze(init)
-      case "sparse" | "dsparse" =>
-        // pre analysis
-        val preTyping = new PreTyping(cfg, false, false);
-        preTyping.analyze(init);
-        val pre_result = preTyping.getMergedState
-        // computes def/use set
-        val duanalysis = new Access(cfg, preTyping.computeCallGraph(), pre_result);
-        duanalysis.process();
-        // computes def/use graph
-        typing.env.drawDDG(preTyping.computeCallGraph(), duanalysis.result)
-        // Analyze
-        typing.analyze(init, duanalysis.result);
+      case _ => throw new UserError("not supported")
     }
 
     // return resulting Typing instance

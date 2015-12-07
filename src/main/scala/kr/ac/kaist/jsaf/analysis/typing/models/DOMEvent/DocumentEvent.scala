@@ -38,24 +38,6 @@ object DocumentEvent extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "DocumentEvent.createEvent"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "DocumentEvent.createEvent"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "DocumentEvent.createEvent"
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DocumentEvent should have no property.

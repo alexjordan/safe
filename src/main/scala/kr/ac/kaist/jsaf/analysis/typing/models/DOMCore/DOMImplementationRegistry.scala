@@ -61,30 +61,6 @@ object DOMImplementationRegistry extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementationRegistry.getDOMImplementation"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementationRegistry.getDOMImplementationList" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementationRegistry.getDOMImplementation"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementationRegistry.getDOMImplementationList" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "DOMImplementationRegistry.getDOMImplementation"     => ((h,ctx),(he,ctxe))
-      //case "DOMImplementationRegistry.getDOMImplementationList" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMImplementationList should have no property

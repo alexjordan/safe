@@ -499,15 +499,4 @@ private val prop_const: List[(String, AbsProperty)] = List(
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map()
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map()
-  }
 }

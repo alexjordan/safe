@@ -101,48 +101,6 @@ object HTMLTableElement extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLTableElement.createTHead" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteTHead" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.createTFoot" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteTFoot" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.createCaption" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteCaption" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.insertRow" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteRow" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLTableElement.createTHead" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteTHead" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.createTFoot" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteTFoot" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.createCaption" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteCaption" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.insertRow" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteRow" => ((h,ctx),(he,ctxe))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //TODO: not yet implemented
-      //case "HTMLTableElement.createTHead" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteTHead" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.createTFoot" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteTFoot" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.createCaption" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteCaption" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.insertRow" => ((h,ctx),(he,ctxe))
-      //case "HTMLTableElement.deleteRow" => ((h,ctx),(he,ctxe))
-    )
-  }
-
   /* instance */
   override def getInstance(cfg: CFG): Option[Loc] = Some(newRecentLoc())
   /* list of properties in the instance object */

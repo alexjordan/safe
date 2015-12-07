@@ -66,35 +66,6 @@ object CanvasGradient extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      ("CanvasGradient.addColorStop" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          /* imprecise semantics : no exception handling */
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      ("CanvasGradient.addColorStop" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      ("CanvasGradient.addColorStop" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
   /* instance */
   def getInstance(): Option[Loc] = Some (loc_cons)
 }

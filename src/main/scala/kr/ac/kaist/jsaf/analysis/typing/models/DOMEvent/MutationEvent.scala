@@ -60,22 +60,4 @@ object MutationEvent extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "MutationEvent.initMutationEvent"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "MutationEvent.initMutationEvent"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "MutationEvent.initMutationEvent"
-    )
-  }
-
 }

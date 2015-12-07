@@ -86,67 +86,6 @@ object DOMConfiguration extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      ("DOMConfiguration.setParameter" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          /* arguments */
-          val s_name = PreHelper.toString(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "0", PureLocalLoc)))
-          val lset_value  = getArgValue_pre(h, ctx, args, "1", PureLocalLoc)._2
-          if (s_name </ StrBot || !lset_value.isEmpty)
-          /* imprecise semantic */
-          // do nothing???
-            ((PreHelper.ReturnStore(h, PureLocalLoc, Value(UndefTop)), ctx), (he, ctxe))
-          else
-            ((h, ctx), (he, ctxe))
-        })),
-      // case "DOMConfiguration.getParameter" =>
-      ("DOMConfiguration.canSetParameter" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          /* arguments */
-          val s_name = PreHelper.toString(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "0", PureLocalLoc)))
-          val lset_value  = getArgValue_pre(h, ctx, args, "1", PureLocalLoc)._2
-          if (s_name </ StrBot || !lset_value.isEmpty)
-          /* imprecise semantic */
-            ((PreHelper.ReturnStore(h, PureLocalLoc, Value(BoolTop)), ctx), (he, ctxe))
-          else
-            ((h, ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      ("DOMConfiguration.setParameter" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        })),
-      // case "DOMConfiguration.getParameter" =>
-      ("DOMConfiguration.canSetParameter" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      ("DOMConfiguration.setParameter" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          val LP1 = getArgValue_use(h, ctx, args, "0") ++ getArgValue_use(h, ctx, args, "1")
-          LP1 + (SinglePureLocalLoc, "@return")
-        })),
-      // case "DOMConfiguration.getParameter" =>
-      ("DOMConfiguration.canSetParameter" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          val LP1 = getArgValue_use(h, ctx, args, "0") ++ getArgValue_use(h, ctx, args, "1")
-          LP1 + (SinglePureLocalLoc, "@return")
-        }))
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMConfiguration should have 'parameterNames'  property

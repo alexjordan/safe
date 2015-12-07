@@ -17,7 +17,6 @@ import kr.ac.kaist.jsaf.analysis.cfg.{DotWriter, CFG, CFGBuilder}
 import kr.ac.kaist.jsaf.analysis.typing.Config
 import kr.ac.kaist.jsaf.compiler.Parser
 import kr.ac.kaist.jsaf.analysis.typing.InitHeap
-import kr.ac.kaist.jsaf.analysis.typing.PreTyping
 import kr.ac.kaist.jsaf.analysis.typing.Semantics
 import kr.ac.kaist.jsaf.analysis.typing.Typing
 import kr.ac.kaist.jsaf.analysis.typing.TypingInterface

@@ -51,17 +51,5 @@ object MimeType extends DOM {
     Map()
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map()
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
   /* instance */
 }

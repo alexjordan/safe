@@ -103,42 +103,6 @@ object Navigator extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "Navigator.registerProtocolHandler"
-      //case "Navigator.registerContentHandler"
-      //case "Navigator.isProtocolHandlerRegistered"
-      //case "Navigator.isContentHandlerRegistered"
-      //case "Navigator.unregisterProtocolHandler"
-      //case "Navigator.unregisterContentHandler"
-      //case "Navigator.yieldForStorageUpdates"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "Navigator.registerProtocolHandler"
-      //case "Navigator.registerContentHandler"
-      //case "Navigator.isProtocolHandlerRegistered"
-      //case "Navigator.isContentHandlerRegistered"
-      //case "Navigator.unregisterProtocolHandler"
-      //case "Navigator.unregisterContentHandler"
-      //case "Navigator.yieldForStorageUpdates"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "Navigator.registerProtocolHandler"
-      //case "Navigator.registerContentHandler"
-      //case "Navigator.isProtocolHandlerRegistered"
-      //case "Navigator.isContentHandlerRegistered"
-      //case "Navigator.unregisterProtocolHandler"
-      //case "Navigator.unregisterContentHandler"
-      //case "Navigator.yieldForStorageUpdates"
-    )
-  }
-
   /* instance */
   def getInstance(): Option[Loc] = Some (loc_ins)
 }

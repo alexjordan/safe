@@ -66,19 +66,7 @@ object Screen extends DOM {
     Map()
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map()
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map()
-  }
-
-  override def getProto(): Option[Loc] = Some(loc_proto) 
+  override def getProto(): Option[Loc] = Some(loc_proto)
 
   /* semantics */  
   // no function

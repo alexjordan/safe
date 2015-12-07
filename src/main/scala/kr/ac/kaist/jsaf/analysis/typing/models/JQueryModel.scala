@@ -33,18 +33,11 @@ class JQueryModel(cfg: CFG) extends Model(cfg) {
 
   private var map_fid = Map[FunctionId, String]()
   private var map_semantic = Map[String, SemanticFun]()
-  private var map_presemantic =  Map[String, SemanticFun]()
-  private var map_def =  Map[String, AccessFun]()
-  private var map_use =  Map[String, AccessFun]()
 
 
   def initialize(h: Heap): Heap = {
     /* init function map */
     map_semantic = list_data.foldLeft(map_semantic)((m, data) => m ++ data.getSemanticMap())
-    map_presemantic = list_data.foldLeft(map_presemantic)((m, data) => m ++ data.getPreSemanticMap())
-    map_def = list_data.foldLeft(map_def)((m, data) => m ++ data.getDefMap())
-    map_use = list_data.foldLeft(map_use)((m, data) => m ++ data.getUseMap())
-
 
     /* init api objects */
     val h_1 = list_data.foldLeft(h)((h1, data) =>
@@ -115,9 +108,6 @@ class JQueryModel(cfg: CFG) extends Model(cfg) {
   def isModelFid(fid: FunctionId) = map_fid.contains(fid)
   def getFIdMap(): Map[FunctionId, String] = map_fid
   def getSemanticMap(): Map[String, SemanticFun] = map_semantic
-  def getPreSemanticMap(): Map[String, SemanticFun] = map_presemantic
-  def getDefMap(): Map[String, AccessFun] = map_def
-  def getUseMap(): Map[String, AccessFun] = map_use
 
   def asyncSemantic(sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG,
                     name: String, list_addr: List[Address]): ((Heap, Context), (Heap, Context)) = {

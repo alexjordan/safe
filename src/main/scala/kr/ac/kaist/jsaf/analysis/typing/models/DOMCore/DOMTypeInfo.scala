@@ -76,43 +76,6 @@ object DOMTypeInfo extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      ("DOMTypeInfo.isDerivedFrom" -> (
-        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val PureLocalLoc = cfg.getPureLocal(cp)
-          /* arguments */
-          val s_name   = PreHelper.toString(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "0", PureLocalLoc)))
-          val s_ns     = PreHelper.toString(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "1", PureLocalLoc)))
-          val n_method = PreHelper.toNumber(PreHelper.toPrimitive(getArgValue_pre(h, ctx, args, "2", PureLocalLoc)))
-          if (s_name </StrBot || s_ns </ StrBot || n_method </ NumBot)
-          /* imprecise semantic */
-            ((PreHelper.ReturnStore(h, PureLocalLoc, Value(BoolTop)), ctx), (he, ctxe))
-          else
-            ((h, ctx), (he, ctxe))
-        }))
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      ("DOMTypeInfo.isDerivedFrom" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          LPSet((SinglePureLocalLoc, "@return"))
-        }))
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      ("DOMTypeInfo.isDerivedFrom" -> (
-        (h: Heap, ctx: Context, cfg: CFG, fun: String, args: CFGExpr, fid: FunctionId) => {
-          getArgValue_use(h, ctx, args, "0") ++ getArgValue_use(h, ctx, args, "1") ++
-            getArgValue_use(h, ctx, args, "2") + (SinglePureLocalLoc, "@return")
-        }))
-    )
-  }
-
   /* instance */
   //def instantiate() = Unit // not yet implemented
   // intance of DOMTypeInfo should have 'typeName', 'typeNamespace' property

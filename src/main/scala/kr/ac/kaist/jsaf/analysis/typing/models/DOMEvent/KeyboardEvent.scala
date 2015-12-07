@@ -66,30 +66,6 @@ object KeyboardEvent extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "KeyboardEvent.getModifierState"
-      //case "KeyboardEvent.initKeyboardEvent"
-      //case "KeyboardEvent.initKeyboardEventNS"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "KeyboardEvent.getModifierState"
-      //case "KeyboardEvent.initKeyboardEvent"
-      //case "KeyboardEvent.initKeyboardEventNS"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "KeyboardEvent.getModifierState"
-      //case "KeyboardEvent.initKeyboardEvent"
-      //case "KeyboardEvent.initKeyboardEventNS"
-    )
-  }
-
   /* instance */
   def getInstList(lset_currenttarget: LocSet, lset_target: LocSet): List[(String, PropValue)] = {
     // this object has all properties of the UIEvent object

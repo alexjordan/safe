@@ -92,30 +92,6 @@ object DOMLocation extends DOM {
     )
   }
 
-  def getPreSemanticMap(): Map[String, SemanticFun] = {
-    Map(
-      //case "Location.assign"
-      //case "Location.replace"
-      //case "Location.reload"
-    )
-  }
-
-  def getDefMap(): Map[String, AccessFun] = {
-    Map(
-      //case "Location.assign"
-      //case "Location.replace"
-      //case "Location.reload"
-    )
-  }
-
-  def getUseMap(): Map[String, AccessFun] = {
-    Map(
-      //case "Location.assign"
-      //case "Location.replace"
-      //case "Location.reload"
-    )
-  }
-
 
   /* instance */
   def getInstance(): Option[Loc] = Some (loc_ins)
