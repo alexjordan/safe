@@ -1,6 +1,46 @@
 SAFE
 ====
 
+### Qickstart
+
+Building SAFE:  
+```bash
+# launch SBT with Java 7 runtime
+sbt -java-home /usr/lib/jvm/java-7-oracle
+ 
+ # set proxy for SBT to download software packages
+-Dhttps.proxyHost=your.https.proxy.com -Dhttps.proxyPort=80
+ 
+# compile (in sbt), 1st antRun will end in an error
+> antRun clean compile
+> antRun compile
+> compile
+ 
+# to build and run tests (in sbt)
+> antRun test
+```
+
+Running SAFE:  
+```bash
+# standard analysis (abstract interpretation)
+jsaf analyze foo.js
+ 
+# analyze and report bugs
+jsaf bug-detector foo.js
+jsaf webapp-bug-detector foo.html
+ 
+# visual: output .dot files
+jsaf analyze -visual foo.js
+ 
+# console: step through abstract interpretation
+jsaf analyze -console foo.js
+ 
+# sparse analysis (not available in minisafe branch)
+jsaf sparse foo.js
+```
+
+For more hidden command line options, see this [file](src/main/java/kr/ac/kaist/jsaf/ShellParameters.java).
+
 ### News
 
 SAFE is now available at GitHub.  Older versions are still available at:
