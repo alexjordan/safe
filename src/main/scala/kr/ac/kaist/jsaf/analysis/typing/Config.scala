@@ -157,8 +157,6 @@ object Config {
    */
   val DEBUG = true
 
-  var compare = false
-  def setCompareMode(flag: Boolean) = compare = flag
 
   /**
    * DOM mode flag
@@ -192,12 +190,6 @@ object Config {
    */
   var tsMode = false
   def setTSMode = tsMode = true
-
-  /**
-   * compare mode flag for html pre-analysis test
-   */
-  var compareMode = false
-  def setCompareMode = compareMode = true
 
   /**
    * Loop unrolling count

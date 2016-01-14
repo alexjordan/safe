@@ -75,8 +75,6 @@ object AnalyzeMain {
       System.out.println("Assert mode disabled.")
     }
 
-    if (Shell.params.opt_Compare) Config.setCompareMode
-
     // Context-sensitivity for main analysis
     var context: Int = -1
     context = Config.contextSensitivityMode

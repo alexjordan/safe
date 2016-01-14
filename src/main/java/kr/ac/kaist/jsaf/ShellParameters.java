@@ -84,7 +84,6 @@ public class ShellParameters
     public boolean                                 opt_Visual;
     public boolean                                 opt_CheckResult;
     public boolean                                 opt_NoAssert;
-    public boolean                                 opt_Compare;
     public boolean                                 opt_ContextTrace;
     public boolean                                 opt_ContextLoop;
     public boolean                                 opt_ContextInsensitive;
@@ -178,7 +177,6 @@ public class ShellParameters
         opt_Visual = false;
         opt_CheckResult = false;
         opt_NoAssert = false;
-        opt_Compare = false;
         opt_ContextTrace = false;
         opt_ContextInsensitive = false;
         opt_Context1Callsite = false;
@@ -397,7 +395,6 @@ public class ShellParameters
             feasibleOptions.add("-visual");
             feasibleOptions.add("-checkResult");
             feasibleOptions.add("-no-assert");
-            feasibleOptions.add("-compare");
             feasibleOptions.add("-context-loop");
             feasibleOptions.add("-context-insensitive");
             feasibleOptions.add("-context-1-callsite");
@@ -640,7 +637,6 @@ public class ShellParameters
         else if(opt.compareTo("-visual") == 0) opt_Visual = true;
         else if(opt.compareTo("-checkResult") == 0) opt_CheckResult = true;
         else if(opt.compareTo("-no-assert") == 0) opt_NoAssert = true;
-        else if(opt.compareTo("-compare") == 0) opt_Compare = true;
         else if(opt.compareTo("-context-loop") == 0) opt_ContextLoop = true;
         else if(opt.compareTo("-context-trace") == 0) opt_ContextTrace = true;
         else if(opt.compareTo("-context-insensitive") == 0) opt_ContextInsensitive = true;

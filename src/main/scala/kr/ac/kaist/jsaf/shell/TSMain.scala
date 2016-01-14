@@ -203,10 +203,6 @@ object TSMain {
                          JOption.none[Pair[FileWriter,BufferedWriter]])
     }
 
-    // compare mode to test the html pre-analysis
-    if(Shell.params.opt_Compare)
-      Config.setCompareMode
-
     // Initialize AbsString cache
     kr.ac.kaist.jsaf.analysis.typing.domain.AbsString.initCache
     // Initialize Web IDL Libraries(Database) for InitHeap
