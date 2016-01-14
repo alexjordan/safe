@@ -186,9 +186,21 @@ private class DomainPrinter(verbose_lv: Int) {
 
   def ppValue(v: Value): Unit = {
     var first = true
-    
+
+    def appendPretty(sb: StringBuilder, str: String) = {
+      val maxlen = 40
+      if (str.indexOf('\n') != -1) {
+        sb.append("{multi-line-string} ")
+        sb.append(str.substring(0, math.min(maxlen, str.length())).replaceAll("[\n\r]+", """\\n"""))
+        if (str.length() > maxlen)
+          sb.append("""(..)"""")
+      } else {
+        sb.append(str)
+      }
+    }
+
     if (v._1 != PValueBot) {
-      sb.append(v._1.toString)
+      appendPretty(sb, v._1.toString)
       first = false
     }
     
