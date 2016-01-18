@@ -62,7 +62,7 @@ object CGWriter {
   def drawNode(cfg:CFG, caller:FunctionId, callees:Set[FunctionId]):String = {
     var sb = new StringBuilder()
     
-    sb.append("\"" + name(cfg, caller) + "\"]" + nodeShape(NormalNodeShape) + newLine)
+    sb.append("\"" + name(cfg, caller) + "\"" + nodeShape(NormalNodeShape) + newLine)
     for (callee <- callees) {
       sb.append("\"" + name(cfg, callee)+"\"" + nodeShape(NormalNodeShape) + newLine)
     }
