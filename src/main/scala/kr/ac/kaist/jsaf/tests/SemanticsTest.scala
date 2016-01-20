@@ -134,23 +134,27 @@ object SemanticsTest {
   val RESULT = "__result"
   val EXPECT = "__expect"
 
-  def checkResult(typing: TypingInterface) = {
-    // find global object at program exit node
-    val state = 
+  // helper to retrieve global object at end of analysis
+  def getGlobalObject(typing: TypingInterface): Obj = {
+    val state =
       //if (typing.isInstanceOf[PreTyping])
       //  typing.getMergedState
       //else
         typing.readTable(((typing.cfg.getGlobalFId, LExit), CallContext.globalCallContext))
     val heap = state._1
-    val obj = heap(GlobalLoc)
-    val map: Set[String] =
-      try {
-        obj.getProps
-      } catch {
-        case _: Throwable =>
-          fail("Global object is not found at program exit node")
-          HashSet()
-      }
+    return heap(GlobalLoc)
+  }
+
+  def checkResult(typing: TypingInterface) = {
+    // find global object at program exit node
+    val obj = getGlobalObject(typing)
+    val map = try {
+      obj.getProps
+    } catch {
+      case _: Throwable =>
+        fail("Global object is not found at program exit node")
+        HashSet()
+    }
 
     // collect result/expect values
     var resultMap: Map[Int, Value] = HashMap()
