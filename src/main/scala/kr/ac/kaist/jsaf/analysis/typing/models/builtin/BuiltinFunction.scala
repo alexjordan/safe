@@ -79,9 +79,9 @@ object BuiltinFunction extends ModelData {
             else
               ExceptionBot
           val (h_e, ctx_e) = Helper.RaiseException(h, ctx, es)
-          
-          // web bug-detector
-          if(Shell.params.command == ShellParameters.CMD_WEBAPP_BUG_DETECTOR && es == ExceptionBot){
+
+          // this only approximates 19.2.3.5
+          if(es == ExceptionBot){
             val strval = lset_this.foldLeft(StrBot)((s, l_f) => {
               val o_f = h(l_f)
               o_f("@function")._3.foldLeft(s)((_s, fid) => {
