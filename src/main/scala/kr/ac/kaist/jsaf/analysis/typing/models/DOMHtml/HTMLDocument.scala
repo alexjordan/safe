@@ -70,7 +70,7 @@ object HTMLDocument extends DOM {
       ("@extensible", AbsConstValue(PropValue(BoolTrue))),
       // DOM Level 1
       ("title", AbsConstValue(PropValue(ObjectValue(StrTop, T, T, T)))),
-      ("referer", AbsConstValue(PropValue(ObjectValue(StrTop, F, T, T)))),
+      ("referrer", AbsConstValue(PropValue(ObjectValue(StrTop, F, T, T)))),
       ("domain", AbsConstValue(PropValue(ObjectValue(StrTop, F, T, T)))),
       ("images", AbsConstValue(PropValue(ObjectValue(Value(HTMLCollection.loc_ins), F, T, T)))),
       ("applets", AbsConstValue(PropValue(ObjectValue(Value(HTMLCollection.loc_ins), F, T, T)))),
