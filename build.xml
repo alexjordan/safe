@@ -194,9 +194,6 @@ This is the main Ant build file.
        Taskdefs
   -->
 
-  <taskdef name="astgen" classpath="${lib}/astgen.jar;${build}"
-           classname="edu.rice.cs.astgen.AntTask"/>
-
   <taskdef name="junit" classpath="${lib}/junit.jar;${lib}/ant-junit.jar;${build}"
            classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"/>
 
@@ -337,7 +334,9 @@ This is the main Ant build file.
   <target name="makeJS" unless="nodes.uptodate" depends="checkNodesUptodate"
           description="Automatically generate JS AST nodes.">
     <echo message="Processing ${generate-JS}" />
-    <astgen file="${generate-JS}" />
+    <taskdef name="astgen" classpath="${lib}/astgen.jar;${build}"
+             classname="edu.rice.cs.astgen.AntTask"/>
+    <astgen file="${generate-JS}"/>
     <move todir="${nodes}">
       <fileset dir="${astgen.src}">
         <include name="**/*.java"/>
