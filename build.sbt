@@ -11,3 +11,6 @@ libraryDependencies += "junit" % "junit" % "4.11" % "test"
 parallelExecution in Test := false
 
 antSettings
+
+addAntTasks("compile", "clean")
+compile <<= (compile in Compile) dependsOn antTaskKey("compile")
