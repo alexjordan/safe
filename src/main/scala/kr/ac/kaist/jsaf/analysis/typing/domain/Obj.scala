@@ -562,6 +562,9 @@ class Obj(_map: ObjMap) {
     }
   }
 
+  // for iterating over properties (TODO make traversable?)
+  def asMap = map.toMap
+
   def size: Int = this.map.size
 }
 
