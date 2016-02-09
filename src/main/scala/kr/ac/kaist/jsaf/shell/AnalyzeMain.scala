@@ -145,12 +145,6 @@ object AnalyzeMain {
     Config.setDefaultUnrollingCount(Shell.params.opt_unrollingCount)
     Config.setDefaultForinUnrollingCount(Shell.params.opt_forinunrollingCount)
 
-    // Unsound mode
-    if (Shell.params.opt_Unsound) {
-      Config.setUnsoundMode(Shell.params.opt_Unsound)
-      System.out.println("Unsound mode enabled.")
-    }
-
     // noStop mode
     if (Shell.params.opt_noStop) {
       Config.setNoStopMode(Shell.params.opt_noStop)

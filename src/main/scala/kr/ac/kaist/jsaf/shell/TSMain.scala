@@ -148,12 +148,6 @@ object TSMain {
     // Unrolling count
     Config.setDefaultUnrollingCount(Shell.params.opt_unrollingCount)
 
-    // Unsound mode
-    if (Shell.params.opt_Unsound) {
-      Config.setUnsoundMode(Shell.params.opt_Unsound)
-      System.out.println("Unsound mode enabled.")
-    }
-
     // for Tizen
     if (Shell.params.opt_Tizen) {
       Config.setTizenMode

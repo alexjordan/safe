@@ -110,7 +110,6 @@ public class ShellParameters
     public boolean                                 opt_Context1CallsiteOrObject;
     public boolean                                 opt_ContextIdentity;
     public boolean                                 opt_PreContextSensitive;
-    public boolean                                 opt_Unsound;
     public boolean                                 opt_Dom;
     public boolean                                 opt_Domprop;
     public boolean                                 opt_Dommodel2;
@@ -204,7 +203,6 @@ public class ShellParameters
         opt_Context1CallsiteOrObject = false;
         opt_ContextIdentity = false;
         opt_PreContextSensitive = false;
-        opt_Unsound = false;
         opt_Dom = false;
         opt_Domprop = false;
         opt_Dommodel2 = false;
@@ -682,7 +680,6 @@ public class ShellParameters
         else if(opt.compareTo("-context-1-callsite-or-object") == 0) opt_Context1CallsiteOrObject = true;
         else if(opt.compareTo("-context-identity") == 0) opt_ContextIdentity = true;
         else if(opt.compareTo("-pre-context-sensitive") == 0) opt_PreContextSensitive = true;
-        else if(opt.compareTo("-unsound") == 0) opt_Unsound = true;
         else if(opt.compareTo("-nostop") == 0) opt_noStop = true;
         else if(opt.compareTo("-skipexternal") == 0) opt_skipExternal = true;
         else if(opt.compareTo("-dom") == 0) opt_Dom = true;
