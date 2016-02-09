@@ -142,12 +142,6 @@ object Config {
   def setPreContextSensitiveMode(flag: Boolean) = preContextSensitiveMode = flag
 
   /**
-   * Unsound flag.
-   */
-  var unsoundMode = false
-  def setUnsoundMode(flag: Boolean) = unsoundMode = flag
-
-  /**
    * NoStop flag.
    */
   var noStopMode = false
