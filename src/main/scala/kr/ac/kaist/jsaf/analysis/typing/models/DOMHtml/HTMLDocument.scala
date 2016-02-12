@@ -109,8 +109,20 @@ object HTMLDocument extends DOM {
       //TODO: not yet implemented
       //case "HTMLDocument.open" => ((h,ctx),(he,ctxe))
       //case "HTMLDocument.close" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.write" => ((h,ctx),(he,ctxe))
-      //case "HTMLDocument.writeln" => ((h,ctx),(he,ctxe))
+      "HTMLDocument.write" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          /* arguments */
+          val arg0_str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          System.err.println("Bad HTMLDocument.write(%s)".format(if (arg0_str.isConcrete) "<concrete>" else arg0_str.toString))
+          ((h, ctx), (he, ctxe))
+        }),
+      "HTMLDocument.writeln" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          /* arguments */
+          val arg0_str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          System.err.println("Bad HTMLDocument.writeln(%s)".format(if (arg0_str.isConcrete) "<concrete>" else arg0_str.toString))
+          ((h, ctx), (he, ctxe))
+        }),
       "HTMLDocument.getElementsByName" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val lset_env = h(SinglePureLocalLoc)("@env")._2._2
