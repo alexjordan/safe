@@ -40,6 +40,7 @@ object AbsStringSet {
   val NumTop = NumStr
 
   def alpha(str: String): AbsString = StrSet(str)
+  def alpha(strs: IHashSet[String]): AbsString = StrSet(strs)
 }
 
 class AbsStringSet(_kind: AbsString.AbsStringCase) extends AbsString(_kind) {
