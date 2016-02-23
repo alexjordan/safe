@@ -235,10 +235,6 @@ class Predefined(params: ShellParameters) {
     "encodeURI",
     "encodeURIComponent"
   )
-  val tizens =
-    if (params.opt_Tizen == true)
-      List("tizen")
-    else List()
 
   val jquery =
     if (params.opt_jQuery == true)
@@ -246,7 +242,7 @@ class Predefined(params: ShellParameters) {
     else List()
 
   //val all = varsAll ++ funs ++ tizens ++ jquery
-  val all = varsAll ++ funs ++ tizens
+  val all = varsAll ++ funs
 
   def contains(name: String): Boolean =
     varsAll.contains(name) || funs.contains(name)

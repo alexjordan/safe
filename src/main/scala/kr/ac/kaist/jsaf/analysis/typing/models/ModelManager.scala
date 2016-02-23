@@ -13,7 +13,6 @@ import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.{NotYetImplemented, Config}
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
-import kr.ac.kaist.jsaf.widl.WIDLModel
 import kr.ac.kaist.jsaf.ts.TSModel
 import kr.ac.kaist.jsaf.nodes_util.IRFactory
 
@@ -37,17 +36,9 @@ object ModelManager {
       model_map = model_map + ("DOM" -> new DOMModel(cfg))
     }
 
-    /* tizen model */
-    if (Config.tizenMode)
-      throw new NotYetImplemented()
-
     /* jQuery model */
     if (Config.jqMode)
       model_map = model_map + ("jQuery" -> new JQueryModel(cfg))
-
-    /* WIDL model */
-    if (Config.widlMode)
-      model_map = model_map + ("WIDL" -> new WIDLModel(cfg))
 
     /* TS model */
     if (Config.tsMode)

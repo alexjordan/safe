@@ -187,38 +187,4 @@ trait Walkers {
     case Some(node) => walkCFG(parent, node)
     case None =>
   }
-
-  // WIDL nodes
-  def walkWIDL(parent: Any, node: Any): Unit = node match {
-    case SWModule(info, attrs, name, defs) => walkWIDL(node, attrs); walkWIDL(node, defs)
-    case SWInterface(info, attrs, name, parent, members) => walkWIDL(node, attrs); walkWIDL(node, parent); walkWIDL(node, members)
-    case SWCallback(info, attrs, name, returnType, args) => walkWIDL(node, attrs); walkWIDL(node, returnType); walkWIDL(node, args)
-    case SWDictionary(info, attrs, name, parent, members) => walkWIDL(node, attrs); walkWIDL(node, parent); walkWIDL(node, members)
-    case SWException(info, attrs, name, parent, members) => walkWIDL(node, attrs); walkWIDL(node, parent); walkWIDL(node, members)
-    case SWEnum(info, attrs, name, enumValueList) => walkWIDL(node, attrs); walkWIDL(node, enumValueList)
-    case SWTypedef(info, attrs, typ, name) => walkWIDL(node, attrs); walkWIDL(node, typ)
-    case SWImplementsStatement(info, attrs, name, parent) => walkWIDL(node, attrs)
-    case SWConst(info, attrs, typ, name, value) => walkWIDL(node, attrs); walkWIDL(node, typ); walkWIDL(node, value)
-    case SWAttribute(info, attrs, typ, name, exns) => walkWIDL(node, attrs); walkWIDL(node, typ); walkWIDL(node, exns)
-    case SWOperation(info, attrs, qualifiers, returnType, name, args, exns) => walkWIDL(node, attrs); walkWIDL(node, qualifiers); walkWIDL(node, returnType); walkWIDL(node, args); walkWIDL(node, exns)
-    case SWDictionaryMember(info, attrs, typ, name, default) => walkWIDL(node, attrs); walkWIDL(node, typ); walkWIDL(node, default)
-    case SWExceptionField(info, attrs, typ, name) => walkWIDL(node, attrs); walkWIDL(node, typ)
-    case SWBoolean(info, value) =>
-    case SWFloat(info, value) =>
-    case SWInteger(info, value) =>
-    case SWString(info, str) =>
-    case SWNull(info) =>
-    case SWAnyType(info, suffix) => walkWIDL(node, suffix)
-    case SWNamedType(info, suffix, name) => walkWIDL(node, suffix)
-    case SWArrayType(info, suffix, typ) => walkWIDL(node, suffix); walkWIDL(node, typ)
-    case SWSequenceType(info, suffix, typ) => walkWIDL(node, suffix); walkWIDL(node, typ)
-    case SWUnionType(info, suffix, types) => walkWIDL(node, suffix); walkWIDL(node, types)
-    case SWArgument(info, attributes, typ, name, default) => walkWIDL(node, attributes); walkWIDL(node, typ); walkWIDL(node, default)
-    case SWId(info, name) =>
-    case SWQId(info, name) => walkWIDL(node, name)
-    case list: List[_] => for(node <- list) walkWIDL(parent, node)
-    case Some(node) => walkWIDL(parent, node)
-    case None =>
-    case _ => // This line should be deleted
-  }
 }

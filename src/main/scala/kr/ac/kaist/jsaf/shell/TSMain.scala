@@ -148,12 +148,6 @@ object TSMain {
     // Unrolling count
     Config.setDefaultUnrollingCount(Shell.params.opt_unrollingCount)
 
-    // for Tizen
-    if (Shell.params.opt_Tizen) {
-      Config.setTizenMode
-      System.out.println("Tizen mode enabled.")
-    }
-
     if (!quiet) System.out.println("Context-sensitivity mode is \"" + kr.ac.kaist.jsaf.analysis.typing.CallContext.getModeName + "\".")
 
     // Turn on '-max-loc-count' option
