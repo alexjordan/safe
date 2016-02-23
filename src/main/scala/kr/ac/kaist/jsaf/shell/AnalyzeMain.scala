@@ -343,17 +343,6 @@ object AnalyzeMain {
     else throw new UserError("Cannot create the Typing. The command is unknown.")
     Config.setTypingInterface(typingInterface)
 
-    // Compare with Pre Analysis
-    /*
-    if (Config.compare && params.command != ShellParameters.CMD_PREANALYZE) {
-      Config.setContextSensitivityMode(new Integer(Config.Context_Insensitive))
-      val preTyping = new PreTyping(cfg, quiet)
-      preTyping.analyze(model)
-      Config.setPreTyping(preTyping.state)
-      preTyping.dump
-    }
-    */
-
     // Check global variables in initial heap against list of predefined variables.
     init.checkPredefined
 
@@ -434,16 +423,6 @@ object AnalyzeMain {
       detector.detectBug
     }
 
-    val isGlobalSparse = false
-    if (Shell.params.opt_DDGFileName != null) {
-      DotWriter.ddgwrite(cfg, typingInterface.env, Shell.params.opt_DDGFileName + ".dot", Shell.params.opt_DDGFileName + ".svg", "dot", false, isGlobalSparse)
-    }
-    if (Shell.params.opt_DDG0FileName != null) {
-      DotWriter.ddgwrite(cfg, typingInterface.env, Shell.params.opt_DDG0FileName + ".dot", Shell.params.opt_DDG0FileName + ".svg", "dot", true, isGlobalSparse)
-    }
-    if (Shell.params.opt_FGFileName != null) {
-      DotWriter.fgwrite(cfg, typingInterface.env, Shell.params.opt_FGFileName + ".dot", Shell.params.opt_FGFileName + ".svg", "dot", isGlobalSparse)
-    }
     if (!quiet) System.out.println("Ok")
     
     return_code

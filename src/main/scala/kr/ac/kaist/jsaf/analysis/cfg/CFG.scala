@@ -350,15 +350,6 @@ class CFG {
   def getGlobalFId = globalFId
   def setGlobalFId(fid: FunctionId): Unit = globalFId = fid
 
-  def dump_du(du: DUSet): Unit = {
-    System.out.println("== DU Set ==")
-    nodes.foreach((n) => {
-      System.out.println("* Node "+n)
-      System.out.println("defset: "+du(n)._1.toString)
-      System.out.println("useset: "+du(n)._2.toString)
-    })
-  }
-
 
   // Get all reachable nodes from a specific node.
   private def reachable(e: Node): List[Node] = {

@@ -17,7 +17,6 @@ import kr.ac.kaist.jsaf.analysis.typing.OrderMap
 import kr.ac.kaist.jsaf.analysis.typing.Fixpoint
 import kr.ac.kaist.jsaf.analysis.typing.Worklist
 import kr.ac.kaist.jsaf.analysis.typing.Environment
-import kr.ac.kaist.jsaf.analysis.typing.SparseEnv
 
 object DotWriter {
   def NormalNodeShape:String = "shape=record, fontsize=11"
@@ -243,28 +242,4 @@ object DotWriter {
     spawnDot(dotExe, outputFile, writeDotFile(g, o, dotFile))
   }
 
-  def ddgwrite(g: CFG, env: Environment, dotFile: String, outputFile: String, dotExe: String, ddg0: Boolean, global: Boolean) = {
-    val wo = Worklist.computes(g)
-    val o = wo.getOrder()
-    if(!global) spawnDot(dotExe, "local"+outputFile, ddgwriteDotFile(env.asInstanceOf[SparseEnv].getDDGStr(ddg0), o, "local"+dotFile))
-  }
-
-  def ddgwriteDotFile(str: String, o: OrderMap, dotfile: String) = {
-    try {
-      val f = new File(dotfile)
-      val fw = new FileWriter(f)
-      fw.write(str);
-      fw.close
-      f
-    } catch {
-      case e:Throwable =>
-        JSAFError.error("Error writing dot file " + dotfile + ".")
-    }
-  }
-
-  def fgwrite(g: CFG, env:Environment, dotFile: String, outputFile: String, dotExe: String, global: Boolean) = {
-    val wo = Worklist.computes(g)
-    val o = wo.getOrder()
-    spawnDot(dotExe, "local"+outputFile, ddgwriteDotFile(env.asInstanceOf[SparseEnv].getFGStr(global), o, "local"+dotFile))
-  }
 }

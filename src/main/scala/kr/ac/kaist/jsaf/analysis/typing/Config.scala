@@ -154,10 +154,6 @@ object Config {
 
   var compare = false
   def setCompareMode(flag: Boolean) = compare = flag
-  def setPreTyping(state: State) = preTyping = state
-  var preTyping = StateBot
-  var preDebug = false
-  def setPreDebug(flag: Boolean) = preDebug = flag
 
   /**
    * DOM mode flag
