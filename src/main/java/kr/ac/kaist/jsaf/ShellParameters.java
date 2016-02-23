@@ -116,7 +116,6 @@ public class ShellParameters
     public boolean                                 opt_Domstat;
     public boolean                                 opt_disEvent;
     public boolean                                 opt_loop;
-    public boolean                                 opt_Tizen;
     public boolean                                 opt_jQuery;
     public boolean                                 opt_SingleThread;
     public boolean                                 opt_MultiThread;
@@ -204,7 +203,6 @@ public class ShellParameters
         opt_Domprop = false;
         opt_Dommodel2 = false;
         opt_Domstat = false;
-        opt_Tizen = false;
         opt_jQuery = false;
         opt_SingleThread = false;
         opt_MultiThread = false;
@@ -679,7 +677,6 @@ public class ShellParameters
         else if(opt.compareTo("-domstatistics") == 0) opt_Domprop = true;
         else if(opt.compareTo("-disableEvent") == 0) opt_disEvent = true;
         else if(opt.compareTo("-loop") == 0) opt_loop = true;
-        else if(opt.compareTo("-tizen") == 0) opt_Tizen = true;
         else if(opt.compareTo("-jq") == 0) opt_jQuery = true;
         else if(opt.compareTo("-single-thread") == 0) opt_SingleThread = true;
         else if(opt.compareTo("-multi-thread") == 0) opt_MultiThread = true;

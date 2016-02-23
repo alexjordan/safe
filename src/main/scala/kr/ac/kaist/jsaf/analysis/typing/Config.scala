@@ -162,12 +162,6 @@ object Config {
   def setDomMode = domMode = true
 
   /**
-   * Tizen mode flag
-   */
-  var tizenMode = false
-  def setTizenMode = tizenMode = true
-
-  /**
    * jQuery mode flag
    */
   var jqMode = false
@@ -187,12 +181,6 @@ object Config {
   
   var loopMode = false
   def setLoopMode = loopMode = true
-
-  /**
-   * WIDL mode flag
-   */
-  var widlMode = false
-  def setWIDLMode = widlMode = true
 
   /**
    * TS mode flag

@@ -43,7 +43,6 @@ This is the main Ant build file.
   <property name="generate-JS" value="${astgen.src}/JS.ast" />
   <property name="generate-IR" value="${astgen.src}/IR.ast" />
   <property name="generate-RegExp" value="${astgen.src}/RegExp.ast" />
-  <property name="generate-WIDL" value="${astgen.src}/WIDL.ast" />
   <property name="scala.nodes"  location="${scalaNodes}"/>
   <property name="astgen.third" location="${JS}/lib/astgen"/>
   <property name="test.results" location="${JS}/TEST-RESULTS"/>
@@ -201,7 +200,7 @@ This is the main Ant build file.
        Targets
   -->
   <target name="help">
-    <echo message="ant astGenerators, checkAstgen, checkJSParserUptodate, checkJsonParserUptodate, checkNodesUptodate, checkParserUptodate, checkRegExpParserUptodate, checkTSParserUptodate, checkWIDLParserUptodate, clean, cleanNodes, compile, compileCommon, cron, debug, help, init, jsonparser, jsparser, makeIR, makeJS, makeNodes, makeRegExp, makeWIDL, parser, reparser, test, testAssert, testBugDetector, testCFG, testCompiler, testConcolic, testDisambiguator, testInterpreter, testNightly, testParser, testTSParser, testTyping, testUnparser, testWIDLParser, tsparser, widlparser"/>
+    <echo message="ant astGenerators, checkAstgen, checkJSParserUptodate, checkJsonParserUptodate, checkNodesUptodate, checkParserUptodate, checkRegExpParserUptodate, checkTSParserUptodate, clean, cleanNodes, compile, compileCommon, cron, debug, help, init, jsonparser, jsparser, makeIR, makeJS, makeNodes, makeRegExp, parser, reparser, test, testAssert, testBugDetector, testCFG, testCompiler, testConcolic, testDisambiguator, testInterpreter, testNightly, testParser, testTSParser, testTyping, testUnparser, tsparser"/>
     <echo message="If you are building JSAF, you want ant compile."/>
   </target>
 
@@ -254,11 +253,9 @@ This is the main Ant build file.
     <delete file="${scalaNodes}/JSAst.scala" />
     <delete file="${scalaNodes}/JSIR.scala" />
     <delete file="${scalaNodes}/JSRegExp.scala" />
-    <delete file="${scalaNodes}/JSWIDL.scala" />
     <delete file="${parser}/JS.java"/>
     <delete file="${parser}/IR.java"/>
     <delete file="${parser}/RegExp.java"/>
-    <delete file="${parser}/WIDL.java"/>
     <delete file="${parser}/Json.java"/>
     <delete file="${parser}/TS.java"/>
     <delete>
@@ -276,9 +273,6 @@ This is the main Ant build file.
           <srcfiles dir="${javaPackagePrefix}/astgen/" includes="*.java"/>
         </uptodate>
         <uptodate targetfile="${build}/kr/ac/kaist/jsaf/astgen/ScalaRegExpGenerator.class">
-          <srcfiles dir="${javaPackagePrefix}/astgen/" includes="*.java"/>
-        </uptodate>
-        <uptodate targetfile="${build}/kr/ac/kaist/jsaf/astgen/ScalaWIDLGenerator.class">
           <srcfiles dir="${javaPackagePrefix}/astgen/" includes="*.java"/>
         </uptodate>
       </and>
@@ -320,14 +314,12 @@ This is the main Ant build file.
                   targetfile="${nodes}/AbstractNode.java"/>
         <uptodate srcfile="${astgen.src}/RegExp.ast"
                   targetfile="${nodes}/AbstractNode.java"/>
-        <uptodate srcfile="${astgen.src}/WIDL.ast"
-                  targetfile="${nodes}/AbstractNode.java"/>
       </and>
     </condition>
     <echo message="Nodes up to date? ${nodes.uptodate}"/>
   </target>
 
-  <target name="makeNodes" depends="makeJS, makeIR, makeRegExp, makeWIDL"
+  <target name="makeNodes" depends="makeJS, makeIR, makeRegExp"
           description="Create all automatically generated nodes">
   </target>
 
@@ -393,26 +385,6 @@ This is the main Ant build file.
     </move>
   </target>
 
-  <target name="makeWIDL" unless="nodes.uptodate" depends="checkNodesUptodate"
-          description="Automatically generate WIDL nodes.">
-    <echo message="Processing ${generate-WIDL}" />
-    <astgen file="${generate-WIDL}" />
-    <move todir="${nodes}">
-      <fileset dir="${astgen.src}">
-        <include name="**/*.java"/>
-        <exclude name="**/WIDL.ast"/>
-      </fileset>
-    </move>
-    <replace dir="${nodes}"
-             token="java.lang.Object"
-             value="Object" />
-    <move todir="${scala.nodes}">
-      <fileset dir="${astgen.src}">
-        <include name="JSWIDL.scala" />
-      </fileset>
-    </move>
-  </target>
-
   <!-- If the generated file JS.java is no older than all the rats files
        in the parser directory, then the parser must be up to date.
        This is a conservative test; a more precise test would perform a
@@ -425,9 +397,6 @@ This is the main Ant build file.
         </uptodate>
         <uptodate targetfile="${parser}/RegExp.java">
           <srcfiles dir="${parser}" includes="**/RegExp.rats"/>
-        </uptodate>
-        <uptodate targetfile="${parser}/WIDL.java">
-          <srcfiles dir="${parser}" includes="**/WIDL.rats"/>
         </uptodate>
         <uptodate targetfile="${parser}/TS.java">
           <srcfiles dir="${parser}" includes="**/TS.rats"/>
@@ -444,7 +413,6 @@ This is the main Ant build file.
     <condition property="jsparser.uptodate">
       <uptodate targetfile="${parser}/JS.java" >
         <srcfiles dir= "${parser}" includes="**/*.rats" excludes="**/RegExp.rats"/>
-        <srcfiles dir= "${parser}" includes="**/*.rats" excludes="**/WIDL.rats"/>
         <srcfiles dir= "${parser}" includes="**/*.rats" excludes="**/TS.rats"/>
         <srcfiles dir= "${parser}" includes="**/*.rats" excludes="**/Json.rats"/>
       </uptodate>
@@ -457,13 +425,6 @@ This is the main Ant build file.
       <srcfiles dir= "${parser}" includes="RegExp.rats"/>
     </uptodate>
     <echo>JavaScript RegExp parser up to date? ${reparser.uptodate}</echo>
-  </target>
-
-  <target name="checkWIDLParserUptodate" depends="init">
-    <uptodate property="widlparser.uptodate" targetfile="${parser}/WIDL.java" >
-      <srcfiles dir= "${parser}" includes="WIDL.rats"/>
-    </uptodate>
-    <echo>JavaScript WIDL parser up to date? ${widlparser.uptodate}</echo>
   </target>
 
   <target name="checkTSParserUptodate" depends="init">
@@ -512,12 +473,6 @@ This is the main Ant build file.
     <buildparser name="RegExp" dir="${parser}" file="RegExp.rats" />
   </target>
 
-  <target name="widlparser" unless="widlparser.uptodate"
-          depends="checkWIDLParserUptodate"
-          description="WIDL Parser">
-    <buildparser name="WIDL" dir="${parser}" file="WIDL.rats" />
-  </target>
-
   <target name="tsparser" unless="tsparser.uptodate"
           depends="checkTSParserUptodate"
           description="TypeScript Parser">
@@ -535,7 +490,6 @@ This is the main Ant build file.
           description="JavaScript Parser">
     <ant target="jsparser" />
     <ant target="reparser" />
-    <ant target="widlparser" />
     <ant target="tsparser" />
     <ant target="jsonparser" />
   </target>
@@ -562,7 +516,7 @@ This is the main Ant build file.
   <target name="test" depends="compile, testParser, testUnparser,
                                testDisambiguator, testCompiler, testInterpreter,
                                testCFG, testTyping, testAssert, testBugDetector,
-                               testWIDLParser, testTSParser"
+                               testTSParser"
           description="Clean, compile everything, and run all unit and system tests.">
   </target>
 
@@ -827,35 +781,6 @@ This is the main Ant build file.
     <fail message="Tests expected to pass are failing!" if="tests.failed"/>
   </target>
 
-  <target name="testWIDLParser"
-          description="Run the WIDL parser tests">
-    <mkdir dir="${test.results}"/>
-    <mkdir dir="${JS}/test-tmp" />
-    <junit printsummary="on"
-           haltonerror="off"
-           haltonfailure="off"
-           showoutput="yes"
-           fork="true"
-           maxmemory="${junitMem}"
-           errorProperty="tests.failed"
-           failureProperty="tests.failed">
-      <classpath refid="compile.classpath"/>
-      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
-      <jvmarg value="${bigStack}" />
-      <formatter type="plain" usefile="true"/>
-      <batchtest fork="true" todir="${junit.dir}">
-        <formatter type="brief" usefile="false" />
-        <formatter type="xml" />
-        <fileset dir="${build}">
-          <include name="**/WIDLParserJUTest.class"/>
-          <exclude name="**/*$*.class"/>
-        </fileset>
-      </batchtest>
-    </junit>
-    <delete dir="${JS}/test-tmp" />
-    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
-  </target>
-
   <target name="testTSParser"
           description="Run the TypeScript parser tests">
     <mkdir dir="${test.results}"/>
@@ -945,7 +870,6 @@ This is the main Ant build file.
           <include name="**/AssertJUTest.class"/>
           <include name="**/TypingJUTest.class"/>
           <include name="**/BugDetectorJUTest.class"/>
-          <include name="**/WIDLParserJUTest.class"/>
           <include name="**/TSJUTest.class"/>
           <include name="**/TypingTizenTest.class"/>
           <!--include name="**/ConcolicJUTest.class"/-->

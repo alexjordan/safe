@@ -167,13 +167,6 @@ object AnalyzeMain {
       if(Shell.params.opt_loop) Config.setLoopMode
     }
 
-    // for Tizen
-    if (Shell.params.opt_Tizen) {
-      Config.setTizenMode
-      System.out.println("Tizen mode enabled.")
-    }
-
-
     // default setting for webapp bug detector
     if(Shell.params.command == ShellParameters.CMD_WEBAPP_BUG_DETECTOR) {
       Config.setDefaultForinUnrollingCount(1)

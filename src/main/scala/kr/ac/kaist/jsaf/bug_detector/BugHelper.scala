@@ -14,8 +14,6 @@ import kr.ac.kaist.jsaf.analysis.typing._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.nodes.ASTNode
 import kr.ac.kaist.jsaf.nodes_util.{NodeUtil => NU, JSAstToConcrete}
-import kr.ac.kaist.jsaf.widl.WIDLTypeMap
-import kr.ac.kaist.jsaf.ts.TSTypeMap
 
 object BugHelper {
   ////////////////////////////////////////////////////////////////
@@ -24,11 +22,6 @@ object BugHelper {
   def getBuiltinArgumentSize(funcName: String): (Int, Int) = {
     // Built-in function
     argSizeMap.get(funcName) match {
-      case Some(as) => return as
-      case None =>
-    }
-    // WIDL function
-    WIDLTypeMap.argSizeMap.get(funcName) match {
       case Some(as) => return as
       case None =>
     }

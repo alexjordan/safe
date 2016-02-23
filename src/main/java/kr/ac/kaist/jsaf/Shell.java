@@ -105,9 +105,6 @@ public final class Shell {
             case ShellParameters.CMD_TSPARSE :
                 return_code = TSMain.tsparse();
                 break;
-            case ShellParameters.CMD_WIDLPARSE :
-                return_code = WIDLMain.widlparse();
-                break;
             case ShellParameters.CMD_TSCHECK :
                 return_code = TSMain.tscheck();
                 break;

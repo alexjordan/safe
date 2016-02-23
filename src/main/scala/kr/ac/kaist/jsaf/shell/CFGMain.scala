@@ -48,10 +48,6 @@ object CFGMain {
       Config.setDomMode
       System.out.println("DOM mode enabled.")
     }
-    if (Shell.params.opt_Tizen) {
-      Config.setTizenMode
-      System.out.println("Tizen mode enabled.")
-    }
     if (Shell.params.opt_jQuery) {
       Config.setJQueryMode
       System.out.println("jQuery mode enabled.")

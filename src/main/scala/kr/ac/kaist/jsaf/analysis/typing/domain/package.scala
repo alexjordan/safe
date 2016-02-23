@@ -125,10 +125,6 @@ package object domain {
   /* temp use */
   val TempStyleLoc: Loc  = newSystemLoc("TempStyle", Old)
 
-  /* Tizen Callback table */
-  val TizenCallbackTableLoc: Loc = newSystemLoc("TizenCallbackTable", Recent)
-  val TizenCallbackArgTableLoc: Loc = newSystemLoc("TizenCallbackArgTable", Recent)
-
   /* Map type for Heap */
   type HeapMap = HeapTreeMap
   val HeapMapBot: HeapMap = HeapTreeMap.Empty
