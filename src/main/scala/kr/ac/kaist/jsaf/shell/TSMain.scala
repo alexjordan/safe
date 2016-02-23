@@ -254,26 +254,6 @@ object TSMain {
     val typingInterface: TypingInterface = new Typing(cfg, quiet, locclone) //dense
     typingInterface.analyze(init) // dense
 
-    /* sparse
-    val preTyping = new PreTyping(cfg, quiet, false)
-    preTyping.analyze(init)
-
-    // unsound because states among instructions are omitted.
-    val pre_result = preTyping.getMergedState
-    // computes def/use set
-    val access_start = System.nanoTime
-    val duanalysis = new Access(cfg, preTyping.computeCallGraph, pre_result)
-    duanalysis.process(quiet)
-    val accessTime = (System.nanoTime - access_start) / 1000000000.0
-    if (!quiet) printf("# Time for access analysis(s): %.2f\n", accessTime)
-
-    // computes def/use graph
-    if (typingInterface.env != null) typingInterface.env.drawDDG(preTyping.computeCallGraph, duanalysis.result, quiet)
-
-    // Analyze
-    typingInterface.analyze(init, duanalysis.result)
-    */
-
     // Turn off '-max-loc-count' option
     Shell.params.opt_MaxLocCount = 0
 
@@ -325,16 +305,6 @@ object TSMain {
 
     if (!quiet) printf("\nAnalysis took %.2fs\n", (System.nanoTime - analyzeStartTime) / 1000000000.0)
 
-    val isGlobalSparse = false
-    if (Shell.params.opt_DDGFileName != null) {
-      DotWriter.ddgwrite(cfg, typingInterface.env, Shell.params.opt_DDGFileName + ".dot", Shell.params.opt_DDGFileName + ".svg", "dot", false, isGlobalSparse)
-    }
-    if (Shell.params.opt_DDG0FileName != null) {
-      DotWriter.ddgwrite(cfg, typingInterface.env, Shell.params.opt_DDG0FileName + ".dot", Shell.params.opt_DDG0FileName + ".svg", "dot", true, isGlobalSparse)
-    }
-    if (Shell.params.opt_FGFileName != null) {
-      DotWriter.fgwrite(cfg, typingInterface.env, Shell.params.opt_FGFileName + ".dot", Shell.params.opt_FGFileName + ".svg", "dot", isGlobalSparse)
-    }
     if (!quiet) System.out.println("Ok")
 
     return_code

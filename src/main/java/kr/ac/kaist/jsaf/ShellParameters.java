@@ -133,9 +133,6 @@ public class ShellParameters
     public int                                     opt_unrollingCount;
     public int                                     opt_forinunrollingCount;
     public int                                     opt_WorklistOrder;
-    public String                                  opt_DDGFileName;
-    public String                                  opt_DDG0FileName;
-    public String                                  opt_FGFileName;
     public String[]                                FileNames;
     public String                                  url;
 
@@ -223,9 +220,6 @@ public class ShellParameters
         opt_unrollingCount = 0;
         opt_forinunrollingCount = 0;
         opt_WorklistOrder = Worklist.WORKLIST_ORDER_DEFAULT();
-        opt_DDGFileName = null;
-        opt_DDG0FileName = null;
-        opt_FGFileName = null;
         FileNames = new String[0];
         url = "";
     }
@@ -571,9 +565,6 @@ public class ShellParameters
                 else if(opt.compareTo("-max-loc-count") == 0) opt_MaxLocCount = Integer.parseInt(args[index + 1]);
                 else if(opt.compareTo("-unroll") == 0) opt_unrollingCount = Integer.parseInt(args[index + 1]);
                 else if(opt.compareTo("-forin-unroll") == 0) opt_forinunrollingCount = Integer.parseInt(args[index + 1]);
-                else if(opt.compareTo("-ddgout") == 0) opt_DDGFileName = args[index + 1];
-                else if(opt.compareTo("-ddg0out") == 0) opt_DDG0FileName = args[index + 1];
-                else if(opt.compareTo("-fgout") == 0) opt_FGFileName = args[index + 1];
 
                 if(opt.compareTo("-domstatistics") == 0) {
                   opt_Domstat = true;

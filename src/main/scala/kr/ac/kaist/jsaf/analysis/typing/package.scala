@@ -27,7 +27,5 @@ package object typing {
   type OrderEntry = (Int, ControlPoint)
   type OrderMap = TreeMap[Node, Int]
 
-  type DUSet = Map[Node, (LPSet, LPSet)]
-
   implicit def CFGId2String(v: CFGId): String = v.toString
 }

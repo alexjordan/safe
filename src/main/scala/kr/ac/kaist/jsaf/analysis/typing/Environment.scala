@@ -20,19 +20,7 @@ import kr.ac.kaist.jsaf.analysis.cfg.CFGAssert
 import kr.ac.kaist.jsaf.analysis.cfg.Block
 
 abstract class Environment(cfg: CFG) {
-  // defuse set of the function
-  protected var joinpointsMap: Map[FunctionId, Map[ENode, LocSet]] = HashMap()
-  protected var intraDefuseMap: Map[FunctionId, Map[Node, (LocSet,LocSet)]] = HashMap()
   def getCFG = cfg
-  
-  def drawDDG(cg: Map[CFGInst, Set[FunctionId]], du: DUSet): Unit = drawDDG(cg, du, false)
-  def drawDDG(cg: Map[CFGInst, Set[FunctionId]], du: DUSet, quiet: Boolean): Unit
-  def getIntraDefuse(fid: FunctionId): Map[Node, (LocSet,LocSet)] = {
-    intraDefuseMap.get(fid) match {
-      case Some(m) => m
-      case None => Map()
-    }
-  }
 
   // Compute the defuse set between the functions
   def interFuncDefuse(callgraph: Map[FunctionId, Set[FunctionId]], fdu: Map[FunctionId, (LPSet, LPSet)]): Map[FunctionId, (LPSet, LPSet)] = {
@@ -72,17 +60,4 @@ abstract class Environment(cfg: CFG) {
     fixpoint(fdu)
   }
 
-  def isEmptyNode(node: Node) = {
-    if (getCFG.getAftercalls.contains(node)) false
-    else {
-      getCFG.getCmd(node) match {
-        case Block(i) if (i.length == 1) => i.head match {
-          case CFGAssert(_,_,_,_) => false
-          case _ => (intraDefuseMap(node._1)(node)._1.isEmpty)
-        }
-        case Block(i) => (i.length == 0) || (intraDefuseMap(node._1)(node)._1.isEmpty)
-        case _ => false
-      }
-    }
-  }
 }

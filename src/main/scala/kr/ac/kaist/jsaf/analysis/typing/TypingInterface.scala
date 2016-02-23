@@ -22,7 +22,7 @@ trait TypingInterface {
   def cfg: CFG
   def getMergedState: State
   def analyze(init: InitHeap): Unit = {}
-  def analyze(init: InitHeap, duset: DUSet): Unit = {}
+
   def dump(): Unit
   def dump_callgraph(): Unit = {}
   def statistics(statdump: Boolean): Unit = {}
