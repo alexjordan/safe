@@ -948,7 +948,7 @@ This is the main Ant build file.
           <include name="**/WIDLParserJUTest.class"/>
           <include name="**/TSJUTest.class"/>
           <include name="**/TypingTizenTest.class"/>
-          <include name="**/ConcolicJUTest.class"/>
+          <!--include name="**/ConcolicJUTest.class"/-->
           <exclude name="**/*$*.class"/>
         </fileset>
       </batchtest>
