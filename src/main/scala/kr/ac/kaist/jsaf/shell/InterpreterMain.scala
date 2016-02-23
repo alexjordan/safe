@@ -70,7 +70,7 @@ object InterpreterMain {
       for(i <- tmp.size - 1 to 0 by -1) fileNames.add(tmp.get(i))
     }
 
-    System.out.println("Interpreter input files: " + fileNames);
+    System.err.println("Interpreter input files: " + fileNames);
 
     val return_code = 0
     val irOpt: JOption[IRRoot] = Shell.fileToIR(fileNames, Shell.toOption(Shell.params.opt_OutFileName))
