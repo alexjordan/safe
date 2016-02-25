@@ -159,7 +159,6 @@ class Predefined(params: ShellParameters) {
     "close",
     "confirm",
     "dispatchEvent",
-    "escape",
     "focus",
     "foward",
     "getComputedStyle",
@@ -183,7 +182,6 @@ class Predefined(params: ShellParameters) {
     "setInterval",
     "setTimeout",
     "stop",
-    "unescape",
     "Image"
   )
 
@@ -229,6 +227,8 @@ class Predefined(params: ShellParameters) {
     "parseFloat",
     "isNaN",
     "isFinite",
+    "escape",
+    "unescape",
     // 15.1.3 URI Handling Function Properties
     "decodeURI",
     "decodeURIComponent",

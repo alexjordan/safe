@@ -43,6 +43,8 @@ object BuiltinGlobal extends ModelData {
     ("parseFloat",         AbsBuiltinFunc("Global.parseFloat", 1)),
     ("isNaN",              AbsBuiltinFunc("Global.isNaN", 1)),
     ("isFinite",           AbsBuiltinFunc("Global.isFinite", 1)),
+    ("escape",             AbsBuiltinFunc("Global.escape", 1)),
+    ("unescape",           AbsBuiltinFunc("Global.unescape", 1)),
     // 15.1.3 URI Handling Function Properties
     ("decodeURI",          AbsBuiltinFunc("Global.decodeURI", 1)),
     ("decodeURIComponent", AbsBuiltinFunc("Global.decodeURIComponent", 1)),
@@ -313,6 +315,79 @@ object BuiltinGlobal extends ModelData {
           ((Helper.ReturnStore(h, Value(b)), ctx), (he, ctxe))
         })
       ),
+      // ECMAScript B.2.1 escape (string)
+      ("Global.escape" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          /* arguments */
+          // 1. CallToString(string)
+          val str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          if (str </ StrBot){
+            val encodedStr = str.getSingle match {
+              case Some(v) =>
+                val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@*_+-./"
+                var S = ""
+                // 2. Compute the number of characters in Result(1)
+                val len = v.size
+                // 3. Let R be the empty string.
+                var R = ""
+                // 4, Let k be 0
+                var k = 0
+                // 5, if k equals Result(2), return R
+                while (k != len) {
+                  // 6, Get the caracter at position k within Result(1)
+                  val r6 = v.charAt(k)
+                  // 7, If Result(6) is one of the 69 nonblack characters, then go to step 13
+                  S = if(!chars.contains(r6)) {
+                    // 8, If Resut (6) is less tan 256, go to step 11.
+                    if(r6.toInt < 256) {
+                      // 11, Let S be a String containing three characters "%xy" where sy are ...
+                      val hex2 = r6.toInt.toHexString.take(2)
+                      "%" + (if (hex2.size == 1) "0" + hex2 else hex2)
+                      // 12, Go to step 14
+                    }
+                    else {
+                      // 9, Let S be a String containing six characters “%uwxyz” where wxyz are four hexadecimal digits encoding the
+                      // value of Result(6).
+                      var hex4 = r6.toInt.toHexString.take(4)
+                      while(hex4.size!=4)
+                        hex4 = "0" + hex4
+                      "%u" + hex4
+                    }
+
+                  }
+                  else {
+                    // 13, Let S be a String containing the single character Result(6)
+                    "" + r6
+                  }
+                  // 14, Let R be a new String value computed by concatenating the previous value of R and S
+                  R = R ++ S
+                  k = k + 1
+                }
+                AbsString.alpha(R)
+              case None => StrTop
+            }
+            ((Helper.ReturnStore(h, Value(encodedStr)), ctx), (he, ctxe))
+          }
+          else
+            ((HeapBot, ContextBot), (he, ctxe))
+
+        })),
+      ("Global.unescape" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          /* arguments */
+          val str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          if (str </ StrBot) {
+            val encodedStr = str.getSingle match {
+              case Some(v) =>
+                // encoding
+                StrTop
+              case None => StrTop
+            }
+            ((Helper.ReturnStore(h, Value(encodedStr)), ctx), (he, ctxe))
+          }
+          else
+            ((HeapBot, ContextBot), (he, ctxe))
+        })),
       ("Global.alert" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           ((Helper.ReturnStore(h, Value(UndefTop)), ctx), (he, ctxe))
