@@ -120,8 +120,21 @@ object Parser {
       NF.makeProgram(mergedSourceInfo, NF.makeTopLevel(mergedSourceInfo, stmts))
   }
 
+  // deprecate this Java interface
   def fileToAST(fs: JList[String]): Program = toList(fs) match {
     case List(file) =>
+      val (info, stmts) = fileToStmts(file)
+      NF.makeProgram(info, NF.makeTopLevel(info, List(stmts)))
+    case files =>
+      val stmts = files.foldLeft(List[SourceElements]())((l, f) => {
+        val (_, ss) = fileToStmts(f)
+        l++List(ss)})
+      NF.makeProgram(mergedSourceInfo, NF.makeTopLevel(mergedSourceInfo, stmts))
+  }
+
+  // use this instead of deprecated fileToAST()
+  def filesToAST(fs: Seq[String]): Program = fs match {
+    case Seq(file) =>
       val (info, stmts) = fileToStmts(file)
       NF.makeProgram(info, NF.makeTopLevel(info, List(stmts)))
     case files =>
