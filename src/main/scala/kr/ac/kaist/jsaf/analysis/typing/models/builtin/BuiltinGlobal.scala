@@ -372,18 +372,74 @@ object BuiltinGlobal extends ModelData {
             ((HeapBot, ContextBot), (he, ctxe))
 
         })),
+      // ECMAScript B.2.2 unescape (string)
       ("Global.unescape" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* arguments */
-          val str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
-          if (str </ StrBot) {
-            val encodedStr = str.getSingle match {
-              case Some(v) =>
-                // encoding
-                StrTop
+          // 1. Call ToString(string).
+          val aString = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          if (aString </ StrBot) {
+            val unescapedString = aString.getSingle match {
+              case Some(str) =>
+                // 2. Compute the number of characters in Result(1).
+                val len = str.length
+                // 3. Let R be the empty String.
+                val R = new StringBuffer
+                // 4. Let k be 0.
+                var k = 0
+                while (k < len) {
+                  // 6. Let c be the character at position k within Result(1).
+                  val c = str.charAt(k)
+                  var codepoint: Option[Int] = None
+                  // 7. If c is not %, go to step 18.
+                  if (c == '%') {
+                    val rest = str.substring(k).tail.take(5)
+                    // 8. If k is greater than Result(2)−6, go to step 14.
+                    // 9. If the character at position k+1 within Result(1) is not u, go to step 14.
+                    if (k <= len - 6 && rest.head == 'u') {
+                      // 10. If the four characters at positions k+2, k+3, k+4, and k+5 within Result(1) are not all
+                      // hexadecimal digits, go to step 14.
+                      try {
+                        // 11. Let c be the character whose code unit value is the integer represented by the four
+                        // hexadecimal digits at positions k+2, k+3, k+4, and k+5 within Result(1).
+                        codepoint = Some(Integer.valueOf(rest.tail.mkString, 16))
+                        // 12. Increase k by 5.
+                        k += 5
+                        // 13. Go to step 18.
+                      } catch {
+                        case nfe: NumberFormatException => ()
+                      }
+                    }
+                    // 14. If k is greater than Result(2)−3, go to step 18.
+                    if (codepoint.isEmpty && k <= len - 3) {
+                      // 15. If the two characters at positions k+1 and k+2 within Result(1) are not both hexadecimal
+                      // digits, go to step 18.
+                      try {
+                        // 16. Let c be the character whose code unit value is the integer represented by two zeroes
+                        // plus the two hexadecimal digits at positions k+1 and k+2 within Result(1).
+                        codepoint = Some(Integer.valueOf(rest.take(2).mkString, 16))
+                        // 17. Increase k by 2.
+                        k += 2
+                      } catch {
+                        case nfe: NumberFormatException => ()
+                      }
+                    }
+                  }
+
+                  // 18. Let R be a new String value computed by concatenating the previous value of R and c.
+                  codepoint match {
+                    case Some(cp) => R.appendCodePoint(cp)
+                    case None => R.append(c)
+                  }
+
+                  // 19. Increase k by 1.
+                  k += 1
+                }
+                // 5. If k equals Result(2), return R.
+                AbsString.alpha(R.toString)
               case None => StrTop
             }
-            ((Helper.ReturnStore(h, Value(encodedStr)), ctx), (he, ctxe))
+            ((Helper.ReturnStore(h, Value(unescapedString)), ctx), (he, ctxe))
           }
           else
             ((HeapBot, ContextBot), (he, ctxe))
