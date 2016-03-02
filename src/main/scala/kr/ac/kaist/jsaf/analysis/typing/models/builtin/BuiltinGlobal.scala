@@ -341,14 +341,14 @@ object BuiltinGlobal extends ModelData {
                     // 8, If Resut (6) is less tan 256, go to step 11.
                     if(r6.toInt < 256) {
                       // 11, Let S be a String containing three characters "%xy" where sy are ...
-                      val hex2 = r6.toInt.toHexString.take(2)
+                      val hex2 = r6.toInt.toHexString.take(2).toUpperCase
                       "%" + (if (hex2.size == 1) "0" + hex2 else hex2)
                       // 12, Go to step 14
                     }
                     else {
                       // 9, Let S be a String containing six characters “%uwxyz” where wxyz are four hexadecimal digits encoding the
                       // value of Result(6).
-                      var hex4 = r6.toInt.toHexString.take(4)
+                      var hex4 = r6.toInt.toHexString.take(4).toUpperCase
                       while(hex4.size!=4)
                         hex4 = "0" + hex4
                       "%u" + hex4
