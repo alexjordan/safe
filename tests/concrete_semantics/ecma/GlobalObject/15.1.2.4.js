@@ -94,11 +94,12 @@ SAFE_TESTS = 16
 writeHeaderToLog( SECTION + " "+ TITLE);
 
 new TestCase( SECTION, "escape.length",         1,          escape.length );
+// TODO no eval() support
 //new TestCase( SECTION, "escape.length = null; escape.length",   1,  eval("escape.length = null; escape.length") );
 new TestCase( SECTION, "delete escape.length",                  false,  delete escape.length );
 //new TestCase( SECTION, "delete escape.length; escape.length",   1,      eval("delete escape.length; escape.length") );
 //new TestCase( SECTION, "var MYPROPS=''; for ( var p in escape ) { MYPROPS+= p}; MYPROPS",    "",    eval("var MYPROPS=''; for ( var p in escape ) { MYPROPS+= p}; MYPROPS") );
-//
+
 new TestCase( SECTION, "escape()",              "undefined",    escape() );
 new TestCase( SECTION, "escape('')",            "",             escape('') );
 new TestCase( SECTION, "escape( null )",        "null",         escape(null) );
@@ -118,6 +119,10 @@ new TestCase( SECTION, "escape( Number.NEGATIVE_INFINITY )",    "-Infinity", esc
 var ASCII_TEST_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@*_+-./";
 
 new TestCase( SECTION, "escape( " +ASCII_TEST_STRING+" )",    ASCII_TEST_STRING,  escape( ASCII_TEST_STRING ) );
+
+//
+// The remaining tests have been split off into 15.1.2.4-generated.js
+//
 
 // ASCII value less than
 /*
