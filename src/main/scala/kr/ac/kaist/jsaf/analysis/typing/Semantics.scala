@@ -1355,7 +1355,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
       // System.out.println("out heap#####\n" + DomainPrinter.printHeap(4, s._1._1, cfg))
 
       // Collect bottom heaps
-      if(Shell.params.opt_BottomDump && s._1._1 == HeapBot && !i.isInstanceOf[CFGAssert]) insertHeapBottom(cp, i)
+      if(s._1._1 == HeapBot && !i.isInstanceOf[CFGAssert]) insertHeapBottom(cp, i)
 
       s
     }
