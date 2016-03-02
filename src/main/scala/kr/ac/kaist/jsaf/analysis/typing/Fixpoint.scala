@@ -97,7 +97,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       System.out.println("=========================================================================")
     }
 
-    if (Shell.params.opt_BottomDump) sem.dumpHeapBottoms()
+    if (sem.heapBotMap.nonEmpty) sem.dumpHeapBottoms()
   }
 
   var timeSum: Long = 0

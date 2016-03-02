@@ -80,7 +80,6 @@ public class ShellParameters
     public boolean                                 opt_MemDump;
     public boolean                                 opt_ExitDump;
     public boolean                                 opt_StatDump;
-    public boolean                                 opt_BottomDump;
     public boolean                                 opt_ScriptDump;
     public boolean                                 opt_Visual;
     public boolean                                 opt_CheckResult;
@@ -175,7 +174,6 @@ public class ShellParameters
         opt_MemDump = false;
         opt_ExitDump = false;
         opt_StatDump = false;
-        opt_BottomDump = false;
         opt_ScriptDump = false;
         opt_Visual = false;
         opt_CheckResult = false;
@@ -395,7 +393,6 @@ public class ShellParameters
             feasibleOptions.add("-memdump");
             feasibleOptions.add("-exitdump");
             feasibleOptions.add("-statdump");
-            feasibleOptions.add("-bottomdump");
             feasibleOptions.add("-scriptdump");
             feasibleOptions.add("-visual");
             feasibleOptions.add("-checkResult");
@@ -639,7 +636,6 @@ public class ShellParameters
         else if(opt.compareTo("-memdump") == 0) opt_MemDump = true;
         else if(opt.compareTo("-exitdump") == 0) opt_ExitDump = true;
         else if(opt.compareTo("-statdump") == 0) opt_StatDump = true;
-        else if(opt.compareTo("-bottomdump") == 0) opt_BottomDump = true;
         else if(opt.compareTo("-scriptdump") == 0) opt_ScriptDump = true;
         else if(opt.compareTo("-visual") == 0) opt_Visual = true;
         else if(opt.compareTo("-checkResult") == 0) opt_CheckResult = true;
