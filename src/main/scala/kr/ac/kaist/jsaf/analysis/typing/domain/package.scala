@@ -216,7 +216,8 @@ package object domain {
   // Pseudo top value for JSON parsing results.
   val JSONValueTop = Value(PValueTop, LocSet(JSONObjTopLoc))
   val JSONObjectValueTop = ObjectValue(JSONValueTop, BoolTop,BoolTop,BoolTop)
-  val JSONObjTop =
+  // lazy because the singleton object 'Obj' depends on us (creating a circle)
+  lazy val JSONObjTop =
     Obj.empty.
       update(Prop_class, PropValueStrTop).
       update(Prop_extensible, PropValueBoolTop).
@@ -229,7 +230,8 @@ package object domain {
   val FIdTop = -2
   val LibModeValueTop = Value(PValueTop, LocSet(LibModeObjTopLoc))
   val LibModeObjectValueTop = ObjectValue(LibModeValueTop, BoolTop,BoolTop,BoolTop)
-  val LibModeObjTop =
+  // lazy because the singleton object 'Obj' depends on us (creating a circle)
+  lazy val LibModeObjTop =
     Obj.empty.
       update(Prop_class, PropValueStrTop).
       update(Prop_extensible, PropValueBoolTop).
