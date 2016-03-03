@@ -72,5 +72,27 @@ class DomainTest extends TestCase("DomainTest") {
     assertTrue((toValue("") + Value(AbsUndef.UndefTop)) <= (Value(AbsString.StrTop) + Value(AbsUndef.UndefTop)))
     assertTrue(Value(AbsStringSet.OtherStr) <= (Value(AbsString.StrTop) + Value(AbsUndef.UndefTop)))
   }
+
+  // TODO scala 2.9 workaround
+  def absEqHelper(lhs: AnyRef, rhs: AnyRef): Boolean =
+    (lhs, rhs) match {
+      case (v1: Value, v2: Value) => v1 <= v2 && v2 <= v1
+    }
+
+  def testObjectStore = {
+    var o = Obj.empty
+    o = o.update(strsAlpha("foo", "bar"), PropValue(toValue(42))) // update with abstract string set
+    assertTrue(o.dom("foo"))  // foo is a possible property key
+    assertTrue(o.dom("bar"))  // bar is a possible property key
+    assertTrue(o.domIn("no such key") eq BoolFalse)  // key does definitely not exist
+    o = o.update(StrTop, PropValue(toValue("white horse")))  // update with string top
+    assertTrue(o.domIn("no such key") eq BoolTop)  // now any key may exist
+    assertTrue(absEqHelper(o("no such key")._2, toValue("white horse")))  // its value is still concrete
+    val size = o.size
+    o = o.update(StrTop, PropValue(toValue("red horse")))  // string value no longer concrete
+    assertEquals(size, o.size)  // size unchanged
+    o = o.update("baz", PropValue(toValue(42)))  // strong update with concrete string
+    assertEquals(size + 1, o.size)  // object map size increased by 1
+  }
 }
 
