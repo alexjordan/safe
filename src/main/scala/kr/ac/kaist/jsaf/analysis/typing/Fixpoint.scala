@@ -9,6 +9,7 @@
 
 package kr.ac.kaist.jsaf.analysis.typing
 
+import kr.ac.kaist.jsaf.analysis.typing
 import scala.collection.immutable.HashMap
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
@@ -93,7 +94,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
 
     if (Shell.params.opt_ExitDump) {
       System.out.println("** Dump Exit Heap **\n=========================================================================")
-      System.out.println(DomainPrinter.printHeap(4, readTable(((cfg.getGlobalFId,LExit),CallContext.globalCallContext))._1, cfg))
+      System.out.println(DomainPrinter.printHeap(4, Helper.getHeapAtExit(cfg, inTable), cfg))
       System.out.println("=========================================================================")
     }
 
@@ -466,13 +467,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
   }
   
   private def readTable(cp: ControlPoint): State = inTable.synchronized {
-    inTable.get(cp._1) match {
-      case None => StateBot
-      case Some(map) => map.get(cp._2) match {
-        case None => StateBot
-        case Some(state) => state
-      }
-    }
+    typing.readTable(inTable, cp)
   }
   
   private def updateTable(cp: ControlPoint, state: State): Unit = inTable.synchronized {

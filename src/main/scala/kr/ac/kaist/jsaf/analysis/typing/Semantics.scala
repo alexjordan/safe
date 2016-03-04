@@ -391,26 +391,6 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
     }
   }
 
-  private def readTable(cp: ControlPoint, inTable: Table): State = {
-    inTable.get(cp._1) match {
-      case None => StateBot
-      case Some(map) => map.get(cp._2) match {
-        case None => StateBot
-        case Some(state) => state
-      }   
-    }   
-  }
-  
-  private def updateTable(cp: ControlPoint, state: State, inTable: Table): Unit = {
-    inTable.get(cp._1) match {
-      case None =>
-        inTable.update(cp._1, HashMap((cp._2, state)))
-      case Some(map) =>
-        inTable.update(cp._1, map.updated(cp._2, state))
-    }   
-  }
-
-
   def I(cp: ControlPoint, i: CFGInst, h: Heap, ctx: Context, he: Heap, ctxe: Context, inTable: Table = MHashMap()) = {
     def noStop(oh: Heap, octx: Context): (Heap, Context) = {
       if (Config.noStopMode) {

@@ -23,6 +23,7 @@ import kr.ac.kaist.jsaf.nodes_util.Span
 import kr.ac.kaist.jsaf.scala_src.useful.Lists._
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
+import kr.ac.kaist.jsaf.analysis.typing
 
 class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterface {
   override def env: Environment = null
@@ -141,13 +142,7 @@ class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterfa
    * @return the state
    */
   override def readTable(cp: ControlPoint): State = {
-    inTable.get(cp._1) match {
-      case None => StateBot
-      case Some(map) => map.get(cp._2) match {
-        case None => StateBot
-        case Some(state) => state
-      }
-    }
+    typing.readTable(inTable, cp)
   }
   
   /**

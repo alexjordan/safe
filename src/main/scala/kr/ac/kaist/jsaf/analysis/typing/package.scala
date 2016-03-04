@@ -11,9 +11,8 @@ package kr.ac.kaist.jsaf.analysis
 
 import scala.collection.mutable.{Map=>MMap, HashSet => MHashSet}
 import collection.immutable.{HashSet, Map, TreeMap, Stack => IStack}
-import kr.ac.kaist.jsaf.analysis.cfg.Node
 import kr.ac.kaist.jsaf.analysis.typing.domain._
-import kr.ac.kaist.jsaf.analysis.cfg.CFGId
+import kr.ac.kaist.jsaf.analysis.cfg._
 
 package object typing {
   type ControlPoint = (Node, CallContext)
@@ -26,4 +25,14 @@ package object typing {
   type OrderMap = TreeMap[Node, Int]
 
   implicit def CFGId2String(v: CFGId): String = v.toString
+
+  def readTable(inTable: Table, cp: ControlPoint): State = {
+    inTable.get(cp._1) match {
+      case None => StateBot
+      case Some(map) => map.get(cp._2) match {
+        case None => StateBot
+        case Some(state) => state
+      }
+    }
+  }
 }
