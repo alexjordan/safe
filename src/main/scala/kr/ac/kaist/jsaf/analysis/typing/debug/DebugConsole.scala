@@ -12,6 +12,7 @@ package kr.ac.kaist.jsaf.analysis.typing.debug
 import jline.console.ConsoleReader
 import java.io.PrintWriter
 import kr.ac.kaist.jsaf.analysis.cfg._
+import kr.ac.kaist.jsaf.analysis.typing
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import scala.collection.mutable.{HashMap => MHashMap}
 import kr.ac.kaist.jsaf.analysis.typing._
@@ -66,13 +67,7 @@ class DebugConsole(cfg: CFG, worklist: Worklist, sem: Semantics, table: Table) {
   }
 
   def readTable(cp: ControlPoint): State = {
-    table.get(cp._1) match {
-      case None => StateBot
-      case Some(map) => map.get(cp._2) match {
-        case None => StateBot
-        case Some(state) => state
-      }
-    }
+    typing.readTable(table, cp)
   }
 
   protected def getLinenumber(cp: ControlPoint): (String, String, String) = {

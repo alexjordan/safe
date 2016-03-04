@@ -10,7 +10,7 @@
 package kr.ac.kaist.jsaf.analysis.typing
 
 import scala.collection.immutable.HashSet
-import kr.ac.kaist.jsaf.analysis.cfg.{CFGId, FunctionId, GlobalVar, PureLocalVar, CapturedVar, CapturedCatchVar, InternalError}
+import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolTrue => BT, BoolFalse => BF}
 import kr.ac.kaist.jsaf.analysis.typing.models.builtin._
@@ -1436,5 +1436,10 @@ object Helper {
     }
   }
 
+  def getHeapAtExit(cfg: CFG, table: Table): Heap = {
+    val state = readTable(table, ((cfg.getGlobalFId, LExit), CallContext.globalCallContext))
+    state.heap
+  }
 
+  def getHeapAtExit(t: TypingInterface): Heap = getHeapAtExit(t.cfg, t.getTable)
 }
