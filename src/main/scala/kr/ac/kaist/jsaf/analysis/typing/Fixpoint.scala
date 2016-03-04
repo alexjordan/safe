@@ -98,7 +98,10 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       System.out.println("=========================================================================")
     }
 
-    if (sem.heapBotMap.nonEmpty) sem.dumpHeapBottoms()
+    // TODO exceptions that are caught will cause heap bot occurrences
+    // if the heap is bot, dump locations where we lost it
+    if (Helper.getHeapAtExit(cfg, inTable)(GlobalLoc) == Obj.bottom && sem.heapBotMap.nonEmpty)
+      sem.dumpHeapBottoms()
   }
 
   var timeSum: Long = 0
