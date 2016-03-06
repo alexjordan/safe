@@ -6,5 +6,6 @@
 
     This distribution may include materials developed by third parties.
  ******************************************************************************/
-
+try {
 var o = RegExp("^(?:\\s*(<[\\w]+>)[^>]*|#([\\w-]*)$");
+} catch (e) {}
