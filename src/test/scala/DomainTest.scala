@@ -83,7 +83,9 @@ class DomainTest extends TestCase("DomainTest") {
     var o = Obj.empty
     o = o.update(strsAlpha("foo", "bar"), PropValue(toValue(42))) // update with abstract string set
     assertTrue(o.dom("foo"))  // foo is a possible property key
+    assertEquals(BoolTop, o.domIn("foo"))  // but may be absent (thus BoolTop)
     assertTrue(o.dom("bar"))  // bar is a possible property key
+    assertEquals(BoolTop, o.domIn("bar"))  // but may be absent (thus BoolTop)
     assertTrue(o.domIn("no such key") eq BoolFalse)  // key does definitely not exist
     o = o.update(StrTop, PropValue(toValue("white horse")))  // update with string top
     assertTrue(o.domIn("no such key") eq BoolTop)  // now any key may exist
@@ -93,6 +95,8 @@ class DomainTest extends TestCase("DomainTest") {
     assertEquals(size, o.size)  // size unchanged
     o = o.update("baz", PropValue(toValue(42)))  // strong update with concrete string
     assertEquals(size + 1, o.size)  // object map size increased by 1
+    o = o.update("bar", PropValue(toValue(42)))  // strong update with concrete string
+    assertEquals(BoolTrue, o.domIn("bar"))  // after the strong update, 'bar' can no longer be absent
   }
 }
 
