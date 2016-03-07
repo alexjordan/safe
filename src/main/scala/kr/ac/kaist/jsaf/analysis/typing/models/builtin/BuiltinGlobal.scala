@@ -6,6 +6,36 @@
 
     This distribution may include materials developed by third parties.
   ******************************************************************************/
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
+
 package kr.ac.kaist.jsaf.analysis.typing.models.builtin
 
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
@@ -43,6 +73,8 @@ object BuiltinGlobal extends ModelData {
     ("parseFloat",         AbsBuiltinFunc("Global.parseFloat", 1)),
     ("isNaN",              AbsBuiltinFunc("Global.isNaN", 1)),
     ("isFinite",           AbsBuiltinFunc("Global.isFinite", 1)),
+    ("escape",             AbsBuiltinFunc("Global.escape", 1)),
+    ("unescape",           AbsBuiltinFunc("Global.unescape", 1)),
     // 15.1.3 URI Handling Function Properties
     ("decodeURI",          AbsBuiltinFunc("Global.decodeURI", 1)),
     ("decodeURIComponent", AbsBuiltinFunc("Global.decodeURIComponent", 1)),
@@ -313,6 +345,135 @@ object BuiltinGlobal extends ModelData {
           ((Helper.ReturnStore(h, Value(b)), ctx), (he, ctxe))
         })
       ),
+      // ECMAScript B.2.1 escape (string)
+      ("Global.escape" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          /* arguments */
+          // 1. CallToString(string)
+          val str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          if (str </ StrBot){
+            val encodedStr = str.getSingle match {
+              case Some(v) =>
+                val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@*_+-./"
+                var S = ""
+                // 2. Compute the number of characters in Result(1)
+                val len = v.size
+                // 3. Let R be the empty string.
+                var R = ""
+                // 4, Let k be 0
+                var k = 0
+                // 5, if k equals Result(2), return R
+                while (k != len) {
+                  // 6, Get the caracter at position k within Result(1)
+                  val r6 = v.charAt(k)
+                  // 7, If Result(6) is one of the 69 nonblack characters, then go to step 13
+                  S = if(!chars.contains(r6)) {
+                    // 8, If Resut (6) is less tan 256, go to step 11.
+                    if(r6.toInt < 256) {
+                      // 11, Let S be a String containing three characters "%xy" where sy are ...
+                      val hex2 = r6.toInt.toHexString.take(2).toUpperCase
+                      "%" + (if (hex2.size == 1) "0" + hex2 else hex2)
+                      // 12, Go to step 14
+                    }
+                    else {
+                      // 9, Let S be a String containing six characters “%uwxyz” where wxyz are four hexadecimal digits encoding the
+                      // value of Result(6).
+                      var hex4 = r6.toInt.toHexString.take(4).toUpperCase
+                      while(hex4.size!=4)
+                        hex4 = "0" + hex4
+                      "%u" + hex4
+                    }
+
+                  }
+                  else {
+                    // 13, Let S be a String containing the single character Result(6)
+                    "" + r6
+                  }
+                  // 14, Let R be a new String value computed by concatenating the previous value of R and S
+                  R = R ++ S
+                  k = k + 1
+                }
+                AbsString.alpha(R)
+              case None => StrTop
+            }
+            ((Helper.ReturnStore(h, Value(encodedStr)), ctx), (he, ctxe))
+          }
+          else
+            ((HeapBot, ContextBot), (he, ctxe))
+
+        })),
+      // ECMAScript B.2.2 unescape (string)
+      ("Global.unescape" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          /* arguments */
+          // 1. Call ToString(string).
+          val aString = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
+          if (aString </ StrBot) {
+            val unescapedString = aString.getSingle match {
+              case Some(str) =>
+                // 2. Compute the number of characters in Result(1).
+                val len = str.length
+                // 3. Let R be the empty String.
+                val R = new StringBuffer
+                // 4. Let k be 0.
+                var k = 0
+                while (k < len) {
+                  // 6. Let c be the character at position k within Result(1).
+                  val c = str.charAt(k)
+                  var codepoint: Option[Int] = None
+                  // 7. If c is not %, go to step 18.
+                  if (c == '%') {
+                    val rest = str.substring(k).tail.take(5)
+                    // 8. If k is greater than Result(2)−6, go to step 14.
+                    // 9. If the character at position k+1 within Result(1) is not u, go to step 14.
+                    if (k <= len - 6 && rest.head == 'u') {
+                      // 10. If the four characters at positions k+2, k+3, k+4, and k+5 within Result(1) are not all
+                      // hexadecimal digits, go to step 14.
+                      try {
+                        // 11. Let c be the character whose code unit value is the integer represented by the four
+                        // hexadecimal digits at positions k+2, k+3, k+4, and k+5 within Result(1).
+                        codepoint = Some(Integer.valueOf(rest.tail.mkString, 16))
+                        // 12. Increase k by 5.
+                        k += 5
+                        // 13. Go to step 18.
+                      } catch {
+                        case nfe: NumberFormatException => ()
+                      }
+                    }
+                    // 14. If k is greater than Result(2)−3, go to step 18.
+                    if (codepoint.isEmpty && k <= len - 3) {
+                      // 15. If the two characters at positions k+1 and k+2 within Result(1) are not both hexadecimal
+                      // digits, go to step 18.
+                      try {
+                        // 16. Let c be the character whose code unit value is the integer represented by two zeroes
+                        // plus the two hexadecimal digits at positions k+1 and k+2 within Result(1).
+                        codepoint = Some(Integer.valueOf(rest.take(2).mkString, 16))
+                        // 17. Increase k by 2.
+                        k += 2
+                      } catch {
+                        case nfe: NumberFormatException => ()
+                      }
+                    }
+                  }
+
+                  // 18. Let R be a new String value computed by concatenating the previous value of R and c.
+                  codepoint match {
+                    case Some(cp) => R.appendCodePoint(cp)
+                    case None => R.append(c)
+                  }
+
+                  // 19. Increase k by 1.
+                  k += 1
+                }
+                // 5. If k equals Result(2), return R.
+                AbsString.alpha(R.toString)
+              case None => StrTop
+            }
+            ((Helper.ReturnStore(h, Value(unescapedString)), ctx), (he, ctxe))
+          }
+          else
+            ((HeapBot, ContextBot), (he, ctxe))
+        })),
       ("Global.alert" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           ((Helper.ReturnStore(h, Value(UndefTop)), ctx), (he, ctxe))

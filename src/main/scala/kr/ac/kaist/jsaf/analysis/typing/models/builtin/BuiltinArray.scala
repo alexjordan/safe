@@ -6,6 +6,35 @@
 
     This distribution may include materials developed by third parties.
   ******************************************************************************/
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
 
 package kr.ac.kaist.jsaf.analysis.typing.models.builtin
 
@@ -333,7 +362,7 @@ object BuiltinArray extends ModelData {
                 // 6. Let firstElement be the result of calling the [[Get]] internal method of array with argument "0".
                 val elements_1 =
                   if (BoolTrue <= Operator.bopLessEq(Value(AbsNumber.alpha(1)), Value(n_len))._1._3) {
-                    lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, AbsString.NumTop))
+                    lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, NumStr))
                   } else {
                     ValueBot
                   }
@@ -776,7 +805,7 @@ object BuiltinArray extends ModelData {
           })
           ((Helper.ReturnStore(h_1, Value(lset_this)), ctx), (he, ctxe))
       })),
-      ("Array.prototype.splice" -> (
+      "Array.prototype.splice" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val lset_env = h(SinglePureLocalLoc)("@env")._2._2
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
@@ -790,6 +819,12 @@ object BuiltinArray extends ModelData {
           val n_arglen = Operator.ToUInt32(getArgValue(h_1, ctx_1, args, "length"))
           val n_start = Operator.ToInteger(getArgValue(h_1, ctx_1, args, "0"))
           val n_count = Operator.ToInteger(getArgValue(h_1, ctx_1, args, "1"))
+
+          AbsNumber.getUIntSingle(n_arglen) match {
+            case Some(n) if n == 1 => System.err.println("WARNING: splice called with 1 arg, validate JS3/6 compatible")
+            case _ => ()
+          }
+
           val (h_2, o) = (n_start.getSingle, n_count.getSingle) match {
             case (Some(start), Some(count)) =>
               lset_this.foldLeft((HeapBot, Obj.bottom))((_ho, l) => {
@@ -798,21 +833,21 @@ object BuiltinArray extends ModelData {
                 val n_len = Operator.ToUInt32(Helper.Proto(h_1, l, AbsString.alpha("length")))
                 AbsNumber.getUIntSingle(n_len) match {
                   case Some(n_len) => {
-                    val from =
+                    val actualStart =
                       if (start < 0) max(n_len + start, 0).toInt
                       else min(start, n_len).toInt
                     // for browser compatibility
-                    val delCount = AbsNumber.getUIntSingle(n_arglen) match {
+                    val actualDeleteCount = AbsNumber.getUIntSingle(n_arglen) match {
                       case Some(n_arglen) if n_arglen==1 =>  n_len.toInt 
-                      case _ => min(max(count, 0), n_len - start).toInt
+                      case _ => min(max(count, 0), n_len - actualStart).toInt
                     }
-                    val o_new = Helper.NewArrayObject(AbsNumber.alpha(delCount))
-                    val o_1 = (0 until delCount).foldLeft(o_new)((__o, i) => {
+                    val o_new = Helper.NewArrayObject(AbsNumber.alpha(actualDeleteCount))
+                    val o_1 = (0 until actualDeleteCount).foldLeft(o_new)((__o, i) => {
                       val b = Helper.HasProperty(h_1, l, AbsString.alpha(i.toString))
                       val _o1 =
                         if (BoolTrue <= b)
                           __o.update(AbsString.alpha(i.toString),
-                            PropValue(ObjectValue(Helper.Proto(h_1, l, AbsString.alpha((from+i).toString)),BoolTrue,BoolTrue,BoolTrue)))
+                            PropValue(ObjectValue(Helper.Proto(h_1, l, AbsString.alpha((actualStart+i).toString)),BoolTrue,BoolTrue,BoolTrue)))
                         else Obj.bottom
                       val _o2 =
                         if (BoolFalse <= b) __o
@@ -822,11 +857,11 @@ object BuiltinArray extends ModelData {
                     val _h1 = AbsNumber.getUIntSingle(n_arglen) match {
                       case Some(n_arglen) => {
                         val add_count = if(0 <= (n_arglen.toInt - 2)) n_arglen.toInt - 2 else 0
-                        val move_start = start + count
-                        if (add_count < delCount) {
+                        val move_start = actualStart + actualDeleteCount
+                        if (add_count < actualDeleteCount) {
                           val __h1 = (move_start.toInt until n_len.toInt).foldLeft(h_1)((__h, i) => {
                             val s_from = AbsString.alpha(i.toString)
-                            val s_to = AbsString.alpha((i - count+add_count).toInt.toString)
+                            val s_to = AbsString.alpha((i - actualDeleteCount+add_count).toInt.toString)
                             val v = Helper.Proto(__h, l, s_from)
                             val b = Helper.HasProperty(__h, l, s_from)
                             val __h1 =
@@ -838,10 +873,10 @@ object BuiltinArray extends ModelData {
                             __h1 + __h2
                           })
                           val __h2 = (0 until add_count).foldLeft(__h1)((__h, i) =>
-                            Helper.PropStore(__h, l, AbsString.alpha((start + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
-                          val new_length = n_len + add_count - delCount
+                            Helper.PropStore(__h, l, AbsString.alpha((actualStart + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
+                          val new_length = n_len + add_count - actualDeleteCount
                           val k = n_len;
-                          val ss = n_len - delCount + add_count
+                          val ss = n_len - actualDeleteCount + add_count
                           val __h3 = (ss.toInt until k.toInt).foldLeft(__h2)((__h, i) =>
                             Helper.Delete(__h, l, AbsString.alpha(i.toString))._1)
                           Helper.PropStore(__h3, l,  AbsString.alpha("length"), Value(AbsNumber.alpha(new_length)))
@@ -849,7 +884,7 @@ object BuiltinArray extends ModelData {
                         else {
                           val __h1 = (0 until (n_len-move_start).toInt).foldLeft(h_1)((__h, i) => {
                             val s_from = AbsString.alpha((n_len -1 - i).toInt.toString)
-                            val s_to = AbsString.alpha((n_len -1 -i + add_count - count).toInt.toString)
+                            val s_to = AbsString.alpha((n_len -1 -i + add_count - actualDeleteCount).toInt.toString)
                             val v = Helper.Proto(__h, l, s_from)
                             val b = Helper.HasProperty(__h, l, s_from)
                             val __h1 =
@@ -861,8 +896,8 @@ object BuiltinArray extends ModelData {
                             __h1 + __h2
                           })
                           val __h2 = (0 until add_count).foldLeft(__h1)((__h, i) =>
-                            Helper.PropStore(__h, l, AbsString.alpha((start + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
-                          val new_length: Int = (n_len + add_count - count).toInt
+                            Helper.PropStore(__h, l, AbsString.alpha((actualStart + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
+                          val new_length: Int = (n_len + add_count - actualDeleteCount).toInt
                           Helper.PropStore(__h2, l,  AbsString.alpha("length"), Value(AbsNumber.alpha(new_length)))
                         }
                       }
@@ -914,7 +949,7 @@ object BuiltinArray extends ModelData {
           }
           else
             ((HeapBot, ContextBot), (he, ctxe))
-        })),
+        }),
       ("Array.prototype.unshift" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val lset_this = h(SinglePureLocalLoc)("@this")._2._2

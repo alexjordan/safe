@@ -6,6 +6,36 @@
 
     This distribution may include materials developed by third parties.
  ***************************************************************************** */
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
+
 package kr.ac.kaist.jsaf.tests
 
 import junit.framework.Test
@@ -54,6 +84,7 @@ object TypingOperatorJUTest {
       ("{UndefTop} + {} = {UndefTop}", List(UndefTop), List(), List(UndefTop), true),
       ("{NullTop} + {} = {NullTop}", List(NullTop), List(), List(NullTop), true),
       ("{true} + {} = {true}", List(true), List(), List(true), true)
+
       // TODO
       )
   val binCases:List[TypeOperator] = List(
@@ -223,7 +254,6 @@ object TypingOperatorJUTest {
       BinPlus("{\"\"} + {1, 2} = {\"1\", \"2\"}", List(""), List(1, 2), List("1", "2"), true),
       BinPlus("{\"\"} + {-1, 3.2} = {\"-1\", \"3.2\"}", List(""), List(-1, 3.2), List("-1", "3.2"), true),
       BinPlus("{\"\"} + {1, -1} = {\"1\", \"-1\"}", List(""), List(1, -1), List("1", "-1"), true),
-
       BinMinus("{} - {} = {}", List(), List(), List(), true),
       BinMinus("{} - {1} = {}", List(), List(1), List(), true),
       BinMinus("{-1} - {} = {}", List(-1), List(), List(), true),
@@ -759,7 +789,7 @@ object TypingOperatorJUTest {
       BinLessEq("{\"-5\"} >= {\"-3\", -2} = {true, false}", List("-5"), List("-3", -2), List(true, false), true),
       BinLessEq("{-2} >= {\"-3\", NaN} = {true, false}", List(-2), List("-3", NaN), List(true, false), true),
       BinLessEq("{3} >= {\"5\", NaN} = {false}", List(3), List("5", NaN), List(false), false)
-      )
+  )
   val unaCases:List[TypeOperator] = List (
       UnaVoid("void {1} = {\"undefined\"}", List(1), List(UndefTop), true),
       UnaVoid("void {null} = {\"undefined\"}", List(NullTop), List(UndefTop), true),
@@ -798,63 +828,64 @@ object TypingOperatorJUTest {
     val suiteJoin = new TestSuite("Join")
     val suiteBin = new TestSuite("Binary Operators")
     val suiteUna = new TestSuite("Unary Operators")
+    val joinAsBinaryFun= (lhs: Value, rhs: Value) => lhs.+(rhs)
     for(joinCase <-joinCases) {
-      suiteJoin.addTest(new JoinTest(joinCase._1, joinCase._2, joinCase._3, joinCase._4, joinCase._5, "testJoin"))
+      suiteJoin.addTest(new BinaryTest(joinCase._1, joinCase._2, joinCase._3, joinCase._4, joinCase._5, joinAsBinaryFun))
     }
     for(binCase <-binCases) {
       binCase match {
         case BinBitOr(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testBitOr"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopBitOr))
         case BinBitAnd(name, lhs, rhs, expec, equal) =>
-         suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testBitAnd"))
+         suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopBitAnd))
         case BinBitXor(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testBitXor"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopBitXor))
         case BinLShift(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testLShift"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopLShift))
         case BinRShift(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testRShift"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopRShift))
         case BinURShift(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testURShift"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopURShift))
         case BinPlus(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testPlus"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopPlus))
         case BinMinus(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testMinus"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopMinus))
         case BinMul(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testMul"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopMul))
         case BinDiv(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testDiv"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopDiv))
         case BinMod(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testMod"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopMod))
         case BinEq(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testEq"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopEq))
         case BinNeq(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testNeq"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopNeq))
         case BinSEq(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testSEq"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopSEq))
         case BinSNeq(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testSNeq"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopSNeq))
         case BinLess(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testLess"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopLess))
         case BinGreater(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testGreater"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopGreater))
         case BinLessEq(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testLessEq"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopLessEq))
         case BinGreaterEq(name, lhs, rhs, expec, equal) =>
-          suiteBin.addTest(new BinTest(name, lhs, rhs, expec, equal, "testGreaterEq"))
+          suiteBin.addTest(new BinaryTest(name, lhs, rhs, expec, equal, Operator.bopGreaterEq))
       }
     }
     for(unaCase <-unaCases) {
       unaCase match {
         case UnaVoid(name, oprnd, expec, equal) =>
-          suiteUna.addTest(new UnaTest(name, oprnd, expec, equal, "testVoid"))
+          suiteUna.addTest(new UnaryTest(name, oprnd, expec, equal, Operator.uVoid))
         case UnaPlus(name, oprnd, expec, equal) =>
-          suiteUna.addTest(new UnaTest(name, oprnd, expec, equal, "testPlus"))
+          suiteUna.addTest(new UnaryTest(name, oprnd, expec, equal, Operator.uopPlus))
         case UnaMinus(name, oprnd, expec, equal) =>
-          suiteUna.addTest(new UnaTest(name, oprnd, expec, equal, "testMinus"))
+          suiteUna.addTest(new UnaryTest(name, oprnd, expec, equal, Operator.uopMinus))
         case UnaBitNeg(name, oprnd, expec, equal) =>
-          suiteUna.addTest(new UnaTest(name, oprnd, expec, equal, "testBitNeg"))
+          suiteUna.addTest(new UnaryTest(name, oprnd, expec, equal, Operator.uopBitNeg))
         case UnaNeg(name, oprnd, expec, equal) =>
-          suiteUna.addTest(new UnaTest(name, oprnd, expec, equal, "testNeg"))
+          suiteUna.addTest(new UnaryTest(name, oprnd, expec, equal, Operator.uopNeg))
       }
     }
     suite.addTest(suiteJoin)
@@ -864,7 +895,7 @@ object TypingOperatorJUTest {
   }
 }
 
-class OperatorTestCase(func:String) extends TestCase(func) {
+object VHelper {
   // alpha function : concs -> abs
   def toValue(in:List[Any]):Value = {
     var v:Value = ValueBot
@@ -886,145 +917,41 @@ class OperatorTestCase(func:String) extends TestCase(func) {
   }
 }
 
-class JoinTest(name:String, lhs:List[Any], rhs:List[Any], expec:List[Any], equal:Boolean, func:String) extends OperatorTestCase(func) {
-  var _left:Value = ValueBot
-  var _right:Value = ValueBot
-  var _expec:Value = ValueBot
-  def joinTest() {}
+class BinaryTest(name: String, lhs:List[Any], rhs:List[Any], expec:List[Any], equal:Boolean, func: (Value, Value)=>Value) extends TestCase("testBin") {
+  var _left: Value = ValueBot
+  var _right: Value = ValueBot
+  var _expect: Value = ValueBot
   override def getName = name
   override def setUp() = {
-    _left = super.toValue(lhs)
-    _right = super.toValue(rhs)
-    _expec = super.toValue(expec)
-  }  
-  def testJoin = {
-    assertTrue(_expec <= (_left + _right))
-    if (equal) assertTrue((_left + _right) <= _expec)
+    _left = VHelper.toValue(lhs)
+    _right = VHelper.toValue(rhs)
+    _expect = VHelper.toValue(expec)
+  }
+  def this() { this("bad constructor", List(), List(), List(), false, (_,_) => ValueBot) }
+  def testBin = {
+    val result = func(_left,_right)
+    assertTrue("%s, expected: %s <= result: %s".format(name, _expect, result), _expect <= result)
+    if (equal)
+      assertTrue("%s, expected: %s === result: %s".format(name, _expect, result), result <= _expect)
   }
 }
 
-class BinTest(name:String, lhs:List[Any], rhs:List[Any], expec:List[Any], equal:Boolean, func:String) extends OperatorTestCase(func) {
-  var leftVal:Value = ValueBot
-  var rightVal:Value = ValueBot
-  var expecVal:Value = ValueBot
-
-  def binTest() {}
-  override def getName = name
-
-  override def setUp = {
-    leftVal = super.toValue(lhs)
-    rightVal = super.toValue(rhs)
-    expecVal = super.toValue(expec)
-  }
-  
-  def testBitOr = {
-    assertTrue(expecVal <= Operator.bopBitOr(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopBitOr(leftVal, rightVal) <= expecVal)
-  }
-  def testBitAnd = {
-    assertTrue(expecVal <= Operator.bopBitAnd(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopBitAnd(leftVal, rightVal) <= expecVal)
-  }
-  def testBitXor = {
-    assertTrue(expecVal <= Operator.bopBitXor(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopBitXor(leftVal, rightVal) <= expecVal)
-  }
-  def testLShift = {
-    assertTrue(expecVal <= Operator.bopLShift(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopLShift(leftVal, rightVal) <= expecVal)
-  }
-  def testRShift = {
-    assertTrue(expecVal <= Operator.bopRShift(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopRShift(leftVal, rightVal) <= expecVal)
-  }
-  def testURShift = {
-    assertTrue(expecVal <= Operator.bopURShift(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopURShift(leftVal, rightVal) <= expecVal)
-  }
-  def testPlus = {
-    assertTrue(expecVal <= Operator.bopPlus(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopPlus(leftVal, rightVal) <= expecVal)
-  }
-  def testMinus = {
-    assertTrue(expecVal <= Operator.bopMinus(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopMinus(leftVal, rightVal) <= expecVal)
-  }
-  def testMul = {
-    assertTrue(expecVal <= Operator.bopMul(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopMul(leftVal, rightVal) <= expecVal)
-  }
-  def testDiv = {
-    assertTrue(expecVal <= Operator.bopDiv(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopDiv(leftVal, rightVal) <= expecVal)
-  }
-  def testMod = {
-    assertTrue(expecVal <= Operator.bopMod(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopMod(leftVal, rightVal) <= expecVal)
-  }
-  def testEq = {
-    assertTrue(expecVal <= Operator.bopEq(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopEq(leftVal, rightVal) <= expecVal)
-  }
-  def testNeq = {
-    assertTrue(expecVal <= Operator.bopNeq(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopNeq(leftVal, rightVal) <= expecVal)
-  }
-  def testSEq = {
-    assertTrue(expecVal <= Operator.bopSEq(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopSEq(leftVal, rightVal) <= expecVal)
-  }
-  def testSNeq = {
-    assertTrue(expecVal <= Operator.bopSNeq(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopSNeq(leftVal, rightVal) <= expecVal)
-  }
-  def testLess = {
-    assertTrue(expecVal <= Operator.bopLess(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopLess(leftVal, rightVal) <= expecVal)
-  }
-  def testGreater = {
-    assertTrue(expecVal <= Operator.bopGreater(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopGreater(leftVal, rightVal) <= expecVal)
-  }
-  def testLessEq = {
-    assertTrue(expecVal <= Operator.bopLessEq(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopLessEq(leftVal, rightVal) <= expecVal)
-  }
-  def testGreaterEq = {
-    assertTrue(expecVal <= Operator.bopGreaterEq(leftVal, rightVal))
-    if (equal) assertTrue(Operator.bopGreaterEq(leftVal, rightVal) <= expecVal)
-  }
-}
-
-class UnaTest(name:String, oprnd:List[Any], expec:List[Any], equal:Boolean, func:String) extends OperatorTestCase(func) {
+class UnaryTest(name:String, oprnd:List[Any], expec:List[Any], equal:Boolean, func: (Value)=>Value) extends TestCase("testUna") {
   var oprndVal:Value = ValueBot
   var expecVal:Value = ValueBot
-  
-  def unaTest() {}
+
+  def this() { this("bad constructor", List(), List(), false, (_) => ValueBot) }
   override def getName = name
 
   override def setUp = {
-    oprndVal = super.toValue(oprnd)
-    expecVal = super.toValue(expec)
+    oprndVal = VHelper.toValue(oprnd)
+    expecVal = VHelper.toValue(expec)
   }
-  def testVoid = {
-    assertTrue(expecVal <= Operator.uVoid(oprndVal))
-    if (equal) assertTrue(Operator.uVoid(oprndVal) <= expecVal)
-  }
-  def testPlus = {
-    assertTrue(expecVal <= Operator.uopPlus(oprndVal))
-    if (equal) assertTrue(Operator.uopPlus(oprndVal) <= expecVal)
-  }
-  def testMinus = {
-    assertTrue(expecVal <= Operator.uopMinus(oprndVal))
-    if (equal) assertTrue(Operator.uopMinus(oprndVal) <= expecVal)
-  }
-  def testBitNeg = {
-    assertTrue(expecVal <= Operator.uopBitNeg(oprndVal))
-    if (equal) assertTrue(Operator.uopBitNeg(oprndVal) <= expecVal)
-  }
-  def testNeg = {
-    assertTrue(expecVal <= Operator.uopNeg(oprndVal))
-    if (equal) assertTrue(Operator.uopNeg(oprndVal) <= expecVal)
+  def testUna = {
+    val result = func(oprndVal)
+    assertTrue("%s, expected: %s <= result: %s".format(name, expecVal, result), expecVal <= result)
+    if (equal)
+      assertTrue("%s, expected: %s === result: %s".format(name, expecVal, result), result <= expecVal)
   }
 }
 

@@ -13,6 +13,7 @@ import kr.ac.kaist.jsaf.analysis.typing.Worklist;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 public class ShellParameters
 {
@@ -84,7 +85,6 @@ public class ShellParameters
     public boolean                                 opt_Visual;
     public boolean                                 opt_CheckResult;
     public boolean                                 opt_NoAssert;
-    public boolean                                 opt_Compare;
     public boolean                                 opt_ContextTrace;
     public boolean                                 opt_ContextLoop;
     public boolean                                 opt_ContextInsensitive;
@@ -133,6 +133,8 @@ public class ShellParameters
     public int                                     opt_WorklistOrder;
     public String[]                                FileNames;
     public String                                  url;
+    public String                                  opt_strdom;
+    public Boolean                                 opt_force_strdom;
 
     ////////////////////////////////////////////////////////////////////////////////
     // Constructor and Initialize
@@ -178,7 +180,6 @@ public class ShellParameters
         opt_Visual = false;
         opt_CheckResult = false;
         opt_NoAssert = false;
-        opt_Compare = false;
         opt_ContextTrace = false;
         opt_ContextInsensitive = false;
         opt_Context1Callsite = false;
@@ -218,6 +219,8 @@ public class ShellParameters
         opt_WorklistOrder = Worklist.WORKLIST_ORDER_DEFAULT();
         FileNames = new String[0];
         url = "";
+        opt_strdom = "sf";
+        opt_force_strdom = false;
     }
 
     /**
@@ -397,7 +400,6 @@ public class ShellParameters
             feasibleOptions.add("-visual");
             feasibleOptions.add("-checkResult");
             feasibleOptions.add("-no-assert");
-            feasibleOptions.add("-compare");
             feasibleOptions.add("-context-loop");
             feasibleOptions.add("-context-insensitive");
             feasibleOptions.add("-context-1-callsite");
@@ -450,6 +452,8 @@ public class ShellParameters
             feasibleOptions.add("-loop");
             feasibleOptions.add("-nostop");
             feasibleOptions.add("-skipexternal");
+            feasibleOptions.add("-strdom");
+            feasibleOptions.add("-force-strdom");
         }
         else if(cmd.compareTo("bug-detector") == 0)
         {
@@ -561,6 +565,9 @@ public class ShellParameters
                 else if(opt.compareTo("-unroll") == 0) opt_unrollingCount = Integer.parseInt(args[index + 1]);
                 else if(opt.compareTo("-forin-unroll") == 0) opt_forinunrollingCount = Integer.parseInt(args[index + 1]);
 
+                if (opt_MaxStrSetSize <= 0)
+                  ErrorMessage = "Maximum set size must be greater than zero!";
+
                 if(opt.compareTo("-domstatistics") == 0) {
                   opt_Domstat = true;
                   opt_Domstat_in = args[index + 1]; opt_Domstat_out = args[index+2];
@@ -618,6 +625,36 @@ public class ShellParameters
                 }
             }
         }
+        else if (opt.compareTo("-strdom") == 0) {
+          ArrayList<String> opts = new ArrayList<String>();
+          opts.add("co");
+          opts.add("ss");
+          opts.add("au");
+          opts.add("no");
+          opts.add("ci");
+          opts.add("ps");
+          opts.add("sf");
+          opts.add("ns");
+          ArrayList<String> dom = new ArrayList<String>(
+            Arrays.asList(args[index + 1].split(","))
+          );
+          if (index + 2 >= args.length || !opts.containsAll(dom))
+            ErrorMessage =
+              "`" + opt + "` parameter can be either:\n"       +
+              "  co   (constant domain)\n"                     +
+              "  ss   (string set domain)\n"                   +
+              "  no   (numeric/other domain)\n"                +
+              "  ns   (numeric/special/other domain)\n"        +
+              "  au   (automata domain --- not implemented)\n" +
+              "  ci   (character inclusion domain) \n"         +
+              "  ps   (prefix-suffix domain)\n"                +
+              "  sf   (SAFE string domain --- default)\n"      +
+              "  a comma separated list of the above parameters";
+          else
+            opt_strdom = args[index + 1];
+          ConsumedParameterCount = 1;
+        }
+        else if(opt.compareTo("-force-strdom") == 0) opt_force_strdom = true;
         else if(opt.compareTo("-time") == 0) opt_Time = true;
         else if(opt.compareTo("-module") == 0) opt_Module = true;
         else if(opt.compareTo("-ignoreErrorOnAST") == 0) opt_IgnoreErrorOnAST = true;
@@ -640,7 +677,6 @@ public class ShellParameters
         else if(opt.compareTo("-visual") == 0) opt_Visual = true;
         else if(opt.compareTo("-checkResult") == 0) opt_CheckResult = true;
         else if(opt.compareTo("-no-assert") == 0) opt_NoAssert = true;
-        else if(opt.compareTo("-compare") == 0) opt_Compare = true;
         else if(opt.compareTo("-context-loop") == 0) opt_ContextLoop = true;
         else if(opt.compareTo("-context-trace") == 0) opt_ContextTrace = true;
         else if(opt.compareTo("-context-insensitive") == 0) opt_ContextInsensitive = true;

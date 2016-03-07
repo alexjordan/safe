@@ -6,15 +6,46 @@
 
     This distribution may include materials developed by third parties.
  ***************************************************************************** */
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
 
 package kr.ac.kaist.jsaf.analysis.typing
 
 import kr.ac.kaist.jsaf.analysis.typing
+
 import scala.collection.immutable.HashMap
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.debug.DebugConsole
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.{ImprecisionStop, ImprecisionTracker}
 import kr.ac.kaist.jsaf.scala_src.useful.WorkTrait
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 
@@ -23,9 +54,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
   def getSemantics = sem
   var count = 0
   val countRef = new AnyRef
-  var isLocCountExceeded = false
-  var locCountExceededMessage = ""
-  var isTimeout = false
+  var abnormalTermination: Option[String] = None
   var startTime: Long = 0
 
   var loopInTable: Table = inTable.map(x=>x)
@@ -86,11 +115,8 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       Shell.workManager.deinitialize()
     }
 
-    if(isLocCountExceeded) {
-      System.out.println("*** Max location count(" + Shell.params.opt_MaxLocCount + ") is exceeded!")
-      System.out.println("  " + locCountExceededMessage)
-    }
-    if(isTimeout) System.out.println("*** Analysis time out! (" + Shell.params.opt_Timeout + " sec)")
+    if (abnormalTermination.isDefined)
+      System.out.println(abnormalTermination.get)
 
     if (Shell.params.opt_ExitDump) {
       System.out.println("** Dump Exit Heap **\n=========================================================================")
@@ -112,13 +138,17 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
 
       // Worklist.head print
       if(!quiet) {
-        System.out.print("\n  Dense Iteration: " + count + "(" + worklist.getSize + ")   ")
-        worklist.dump()
+        System.out.println("  Dense Iteration: " + count + "(" + worklist.getSize + ")   " +
+        "next: " + worklist.debugNext + "                ")
       }
+
+      ImprecisionTracker.updateWorklistSize(worklist.getSize)
 
       // Debugger is used for only single-thread mode
       if (Config.debugger)
         DebugConsole.runFixpoint(count)
+
+      DomainPrinter.dbgIteration = count
 
       // Iteration count
       count+= 1
@@ -127,9 +157,16 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       val cp = worklist.getHead()
 
       // Analysis termination check
-      if(isLocCountExceeded || isTimeout) return
+      if(abnormalTermination.isDefined) return
       if(Shell.params.opt_Timeout > 0) {
-        if((System.nanoTime() - startTime) / 1000000000 > Shell.params.opt_Timeout) {isTimeout = true; return}
+        if((System.nanoTime() - startTime) / 1000000000 > Shell.params.opt_Timeout) {
+          abnormalTermination = Some("*** Analysis time out! (" + Shell.params.opt_Timeout + " sec)")
+          return
+        }
+      }
+      if (Config.maxIterations > 0 && count >= Config.maxIterations) {
+        abnormalTermination = Some("*** Analysis max iterations reached (" + Config.maxIterations + ")")
+        return
       }
 
       // Read a state
@@ -137,12 +174,18 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
 
       // Execute
       val (outS, outES) = try {
+        ImprecisionTracker.nextIteration(count - 1)
         sem.C(cp, cfg.getCmd(cp._1), inS)
       }
       catch {
         case e: MaxLocCountError =>
-          if(locCountExceededMessage == "") locCountExceededMessage = e.getMessage
-          isLocCountExceeded = true
+          if (abnormalTermination.isEmpty) {
+            val msg = "*** Max location count(" + Shell.params.opt_MaxLocCount + ") is exceeded!"
+            abnormalTermination = Some(msg + "\n  " + e.getMessage)
+          }
+          return
+        case e: ImprecisionStop =>
+          abnormalTermination = Some("** " + e.getMessage)
           return
       }
 
@@ -409,6 +452,8 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
   private def loop(): Unit = {
     val work = new FixpointWork
     while(!worklist.isEmpty) work.doit()
+    if (!quiet)
+      worklist.prettyPrint.dumpFuns
     //if(Config.loopSensitive){
     //  println()
     //  println("Total time for loop : " + timeSum/1000000000.0 + "(s)")

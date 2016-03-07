@@ -31,7 +31,7 @@ This is the main Ant build file.
   <property name="scalaNodes" location="${scalaPackagePrefix}/scala_src/nodes"/>
   <property name="nodes" value="${javaPackagePrefix}/nodes"/>
   <property name="parser" location="${javaPackagePrefix}/parser"/>
-  <property name="scala-version" value="scala-2.9.2"/>
+  <property name="scala-version" value="scala-2.10"/>
   <property name="javaSourceVersion" value="1.6"/>
   <property name="junitMem" value="768m"/>
   <property name="junit.dir" value="junit-results"/>
@@ -76,8 +76,9 @@ This is the main Ant build file.
     <pathelement location="${lib}/nekohtml.jar"/>
     <pathelement location="${lib}/plt.jar"/>
     <pathelement location="${lib}/rats-runtime.jar"/>
-    <pathelement location="${lib}/scala-compiler-2.9.2.jar"/>
-    <pathelement location="${lib}/scala-library-2.9.2.jar"/>
+    <pathelement location="${lib}/scala-compiler-2.10.6.jar"/>
+    <pathelement location="${lib}/scala-library-2.10.6.jar"/>
+    <pathelement location="${lib}/scala-reflect-2.10.6.jar"/>
     <pathelement location="${lib}/urihandler.jar"/>
     <pathelement location="${lib}/wala.cast.jar"/>
     <pathelement location="${lib}/wala.cast.js.jar"/>
@@ -200,10 +201,389 @@ This is the main Ant build file.
        Targets
   -->
   <target name="help">
-    <echo message="ant astGenerators, checkAstgen, checkJSParserUptodate, checkJsonParserUptodate, checkNodesUptodate, checkParserUptodate, checkRegExpParserUptodate, checkTSParserUptodate, clean, cleanNodes, compile, compileCommon, cron, debug, help, init, jsonparser, jsparser, makeIR, makeJS, makeNodes, makeRegExp, parser, reparser, test, testAssert, testBugDetector, testCFG, testCompiler, testConcolic, testDisambiguator, testInterpreter, testNightly, testParser, testTSParser, testTyping, testUnparser, tsparser"/>
+    <echo message="ant astGenerators, checkAstgen, checkJSParserUptodate, checkJsonParserUptodate, checkNodesUptodate, checkParserUptodate, checkRegExpParserUptodate, checkTSParserUptodate, clean, cleanNodes, compile, compileCommon, cron, debug, help, init, jsonparser, jsparser, makeIR, makeJS, makeNodes, makeRegExp, parser, reparser, test, testAssert, testBugDetector, testCFG, testCompiler, testConcolic, testDisambiguator, testInterpreter, testNightly, testParser, testTSParser, testTyping, testUnparser, tsparser, 
+    testConst, testProd, testSAFE, testJSAI, testHash, testStrSet, testAbsString, testCharIncl, testNumOth, testNumOthSpl, testPrefSuff, testString, testObj"/>
     <echo message="If you are building JSAF, you want ant compile."/>
   </target>
 
+  <target name="str"
+          depends="compile, testConst, testStrSet, testAbsString, testCharIncl, testNumOth, 
+                   testNumOthSpl, testPrefSuff, testString, testProd, testSAFE, testJSAI, testHash"
+          description="Clean, compile everything, and run test on strings.">
+  </target>
+
+  <target name="testObj"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/ObjTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+
+  <target name="testAbsString"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/AbsStringTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+
+  <target name="testProd"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/ProdTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+
+  <target name="testSAFE"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/SAFETest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  <target name="testJSAI"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/JSAITest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  <target name="testHash"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/HashSetTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  <target name="testConst"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/ConstTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  
+  <target name="testStrSet"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/StrSetTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  
+  <target name="testString"
+          description="Run the domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/StringTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+
+  <target name="testCharIncl"
+          description="Run the CI domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/CharInclTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  
+  <target name="testNumOth"
+          description="Run the NO domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/NumOthTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  <target name="testNumOthSpl"
+          description="Run the NO domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/NumOthSplTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  <target name="testPrefSuff"
+          description="Run the PS domain tests">
+    <mkdir dir="${test.results}"/>
+    <mkdir dir="${JS}/test-tmp" />
+    <junit printsummary="on"
+           haltonerror="on"
+           haltonfailure="on"
+           showoutput="yes"
+           fork="true"
+           maxmemory="${junitMem}"
+           errorProperty="tests.failed"
+           failureProperty="tests.failed">
+      <classpath refid="compile.classpath"/>
+      <jvmarg value="-Djava.io.tmpdir=${JS}/test-tmp" />
+      <jvmarg value="${bigStack}" />
+      <formatter type="plain" usefile="true"/>
+      <batchtest fork="true" todir="${junit.dir}">
+        <formatter type="brief" usefile="false" />
+        <formatter type="xml" />
+        <fileset dir="${build}">
+          <include name="**/PrefSuffTest.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    <delete dir="${JS}/test-tmp" />
+    <fail message="Tests expected to pass are failing!" if="tests.failed"/>
+  </target>
+  
   <target name="debug">
     <echo message="${junit.dir}"/>
     <echo message="${astgen.classpath}"/>
@@ -516,7 +896,9 @@ This is the main Ant build file.
   <target name="test" depends="compile, testParser, testUnparser,
                                testDisambiguator, testCompiler, testInterpreter,
                                testCFG, testTyping, testAssert, testBugDetector,
-                               testTSParser"
+                               testTSParser, testAbsString, testConst, testStrSet,
+	                       testCharIncl, testNumOth, testNumOthSpl, testPrefSuff, testString,
+	                       testProd, testSAFE, testJSAI, testHash, testObj"
           description="Clean, compile everything, and run all unit and system tests.">
   </target>
 
@@ -869,9 +1251,24 @@ This is the main Ant build file.
           <include name="**/CFGJUTest.class"/>
           <include name="**/AssertJUTest.class"/>
           <include name="**/TypingJUTest.class"/>
-          <include name="**/BugDetectorJUTest.class"/>
+          <!--include name="**/BugDetectorJUTest.class"/-->
           <include name="**/TSJUTest.class"/>
           <include name="**/TypingTizenTest.class"/>
+
+          <include name="**/AbsStringTest.class"/>
+          <include name="**/CharInclTest.class"/>
+          <include name="**/ConstTest.class"/>
+          <include name="**/SAFETest.class"/>
+          <include name="**/JSAITest.class"/>
+          <include name="**/HashSetTest.class"/>
+          <include name="**/NumOthTest.class"/>
+          <include name="**/NumOthSplTest.class"/>
+          <include name="**/PrefSuffTest.class"/>
+          <include name="**/ProdTest.class"/>
+          <include name="**/StringTest.class"/>
+          <include name="**/StrSetTest.class"/>
+          <include name="**/ObjTest.class"/>
+
           <!--include name="**/ConcolicJUTest.class"/-->
           <exclude name="**/*$*.class"/>
         </fileset>

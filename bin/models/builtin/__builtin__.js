@@ -1,5 +1,5 @@
 // built-in function models
-(function() {
+(function __safe_builtin() {
 var _xx_ = String.prototype.match;
 String.prototype.match = function(exp) {
   var reg = RegExp(exp);

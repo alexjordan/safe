@@ -243,6 +243,7 @@ function binl2hex(binarray)
   return str;
 }
 
+
 /*
  * Convert an array of little-endian words to a base-64 string
  */
@@ -255,6 +256,7 @@ function binl2b64(binarray)
     var triplet = (((binarray[i   >> 2] >> 8 * ( i   %4)) & 0xFF) << 16)
                 | (((binarray[i+1 >> 2] >> 8 * ((i+1)%4)) & 0xFF) << 8 )
                 |  ((binarray[i+2 >> 2] >> 8 * ((i+2)%4)) & 0xFF);
+
     for(var j = 0; j < 4; j++)
     {
       if(i * 8 + j * 6 > binarray.length * 32) str += b64pad;

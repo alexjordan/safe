@@ -1,0 +1,19 @@
+*~
+# Copyright (c) 2016 Oracle and/or its affiliates.
+#
+# All rights reserved.
+
+# Temp files
+*~
+*.swp
+
+# SBT, IntelliJ, JUnit
+.dependencies
+.idea
+junit-results/
+target/
+
+# generated java source
+src/main/java/kr/ac/kaist/jsaf/parser/*.java
+src/main/java/kr/ac/kaist/jsaf/nodes/
+src/main/scala/kr/ac/kaist/jsaf/scala_src/nodes/

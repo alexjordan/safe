@@ -6,15 +6,46 @@
 
     This distribution may include materials developed by third parties.
  ******************************************************************************/
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
+
 package kr.ac.kaist.jsaf.tests
 
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
+
 import kr.ac.kaist.jsaf.exceptions.UserError
 
-import scala.collection.immutable.HashMap
 import scala.collection.immutable.HashSet
+import scala.collection.mutable
 import junit.framework.Assert.fail
 import junit.framework.TestCase
 import kr.ac.kaist.jsaf.analysis.cfg.CFG
@@ -22,8 +53,9 @@ import kr.ac.kaist.jsaf.analysis.cfg.CFGBuilder
 import kr.ac.kaist.jsaf.analysis.cfg.LExit
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing._
+import kr.ac.kaist.jsaf.analysis.typing.domain.StringConfig._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
-import kr.ac.kaist.jsaf.analysis.typing.models.{ModelManager, BuiltinModel}
+import kr.ac.kaist.jsaf.analysis.typing.models.{BuiltinModel, ModelManager}
 import kr.ac.kaist.jsaf.compiler.Disambiguator
 import kr.ac.kaist.jsaf.compiler.Hoister
 import kr.ac.kaist.jsaf.compiler.Parser
@@ -53,6 +85,7 @@ class SemanticsTest(dir: String, tc: String, typing_mode: String) extends TestCa
     System.setOut(nullStream)
 
     try {
+      PreConfig.strings = TestStringConfig(StrDomainSAFE)
       // Initialize AddressManager
       AddressManager.reset()
       val typing = analyze(new File(dir, tc))
@@ -133,10 +166,12 @@ class SemanticsTest(dir: String, tc: String, typing_mode: String) extends TestCa
 object SemanticsTest {
   val RESULT = "__result"
   val EXPECT = "__expect"
+  val EXPECTEQ = "___expect"  // enforce equality (===) check
 
   def checkResult(typing: TypingInterface) = {
     // find global object at program exit node
     val obj = Helper.getHeapAtExit(typing)(GlobalLoc)
+
     val map = try {
       obj.getProps
     } catch {
@@ -146,18 +181,20 @@ object SemanticsTest {
     }
 
     // collect result/expect values
-    var resultMap: Map[Int, Value] = HashMap()
-    var expectMap: Map[Int, Value] = HashMap()
+    val resultMap = mutable.Map[Int, Value]()
+    val expectMap = mutable.Map[Int, (Value, Boolean)]()
 
     for (prop <- map) {
       try {
         val pvalue = obj(prop)
+        def index(keyword: String) = prop.substring(keyword.length).toInt
         if (prop.startsWith(RESULT)) {
-          val index = prop.substring(RESULT.length).toInt
-          resultMap += (index -> pvalue._1._1)
+          resultMap += (index(RESULT) -> pvalue._1._1)
         } else if (prop.startsWith(EXPECT)) {
-          val index = prop.substring(EXPECT.length).toInt
-          expectMap += (index -> pvalue._1._1)
+          expectMap += (index(EXPECT) -> (pvalue._1._1, false))
+        } else if (prop.startsWith(EXPECTEQ)) {
+          // ___expect will enforce equality (===) between the (abstract) values
+          expectMap += (index(EXPECTEQ) -> (pvalue._1._1, true))
         }
       } catch {
         case _: Throwable => fail("Invalid result/expect variable found: " + prop.toString)
@@ -179,15 +216,18 @@ object SemanticsTest {
           fail("No corresponding expect variable is detected for " +
                RESULT +
                index.toString)
-        case Some(expect) =>
-          val success = expect <= result
+        case Some((expect, testEq)) =>
+          val success = expect <= result && (!testEq || result <= expect)
           if (!success) {
             val sb = new StringBuilder
             sb.append(RESULT)
             sb.append(index.toString)
             sb.append(" = {")
             sb.append(DomainPrinter.printValue(result))
-            sb.append("} >= {")
+            if (testEq)
+              sb.append("} === {")
+            else
+              sb.append("} >= {")
             sb.append(DomainPrinter.printValue(expect))
             sb.append("}")
             fail(sb.toString)
