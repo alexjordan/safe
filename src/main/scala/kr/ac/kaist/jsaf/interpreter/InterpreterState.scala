@@ -71,7 +71,7 @@ class InterpreterState(val I: Interpreter) {
 
   def checkPredefined() {
     val notYetImplemented = Set("JSON", "decodeURIComponent", "encodeURIComponent", "encodeURI",
-                                "<>Global<>global", "decodeURI", "Exception")
+                                "<>Global<>global", "decodeURI", "Exception", "escape", "unescape")
     val predefNames = if (Shell.pred != null)
                         Shell.pred.all.toSet.filterNot(notYetImplemented.contains(_))
                       else
