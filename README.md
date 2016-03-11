@@ -3,7 +3,7 @@ SAFE
 
 ### Qickstart
 
-Building SAFE:  
+Building and testing SAFE (in sbt):  
 ```bash
 # launch SBT with Java 7 runtime
 sbt -java-home /usr/lib/jvm/java-7-oracle
@@ -11,13 +11,15 @@ sbt -java-home /usr/lib/jvm/java-7-oracle
  # set proxy for SBT to download software packages
 -Dhttps.proxyHost=your.https.proxy.com -Dhttps.proxyPort=80
  
-# compile (in sbt), 1st antRun will end in an error
-> antRun clean compile
-> antRun compile
+# compiling in sbt should work by just using:
 > compile
  
-# to build and run tests (in sbt)
-> antRun test
+# if there are problems with the ant compile task that this depends on, try:
+> antRun clean compile
+> antRun compile
+ 
+# to run nightly tests in sbt (this runs the ant nightly and all scala tests):
+> nightly
 ```
 
 Running SAFE:  

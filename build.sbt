@@ -14,7 +14,7 @@ parallelExecution in Test := false
 antSettings
 
 // import ant tasks
-addAntTasks("compile", "clean", "testTyping")
+addAntTasks("compile", "clean", "testTyping", "testNightly")
 
 // add ant's compile as a dependency to sbt's compile task.
 // ie. 'sbt compile' should build the whole project
@@ -24,5 +24,5 @@ compile <<= (compile in Compile) dependsOn antTaskKey("compile")
 lazy val nightly = taskKey[Unit]("Runs assorted JUnit tests.")
 nightly := {
 	(test in Test).value
-	antTaskKey("testTyping").value
+	antTaskKey("testNightly").value
 }
