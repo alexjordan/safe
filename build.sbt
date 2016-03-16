@@ -7,6 +7,7 @@ version := "1.0"
 scalaVersion := "2.9.2"
 
 libraryDependencies += "junit" % "junit" % "4.11" % "test"
+
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
 parallelExecution in Test := false
@@ -22,6 +23,7 @@ compile <<= (compile in Compile) dependsOn antTaskKey("compile")
 
 // a nightly test task
 lazy val nightly = taskKey[Unit]("Runs assorted JUnit tests.")
+
 nightly := {
 	(test in Test).value
 	antTaskKey("testNightly").value
