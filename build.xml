@@ -869,7 +869,7 @@ This is the main Ant build file.
           <include name="**/CFGJUTest.class"/>
           <include name="**/AssertJUTest.class"/>
           <include name="**/TypingJUTest.class"/>
-          <include name="**/BugDetectorJUTest.class"/>
+          <!--include name="**/BugDetectorJUTest.class"/-->
           <include name="**/TSJUTest.class"/>
           <include name="**/TypingTizenTest.class"/>
           <!--include name="**/ConcolicJUTest.class"/-->
