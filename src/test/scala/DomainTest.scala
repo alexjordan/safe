@@ -4,7 +4,7 @@ import junit.framework.{TestSuite, Test}
 import junit.framework.Assert._
 import junit.framework.TestCase
 import kr.ac.kaist.jsaf.Shell
-import kr.ac.kaist.jsaf.analysis.typing.{AddressManager, Helper, domain}
+import kr.ac.kaist.jsaf.analysis.typing.{Operator, AddressManager, Helper, domain}
 import scala.collection.immutable.{HashSet => IHashSet}
 
 import kr.ac.kaist.jsaf.analysis.typing.domain._
@@ -97,6 +97,18 @@ class DomainTest extends TestCase("DomainTest") {
     assertEquals(size + 1, o.size)  // object map size increased by 1
     o = o.update("bar", PropValue(toValue(42)))  // strong update with concrete string
     assertEquals(BoolTrue, o.domIn("bar"))  // after the strong update, 'bar' can no longer be absent
+  }
+
+  def testStringConcat = {
+    Shell.params.opt_MaxStrSetSize = 2
+    val a = toValue("foo")
+    val b = Value(strsAlpha("bar", "baz"))
+    val result = Operator.bopPlus(a,b)
+    println(DomainPrinter.printValue(result))
+
+    var o = Obj.empty
+    o = o.update(strsAlpha("foo", "bar"), PropValue(toValue(42))) // update with abstract string set
+    println(DomainPrinter.printObj(2, o))
   }
 }
 
