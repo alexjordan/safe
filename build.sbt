@@ -4,7 +4,7 @@ name := "JSAF"
 
 version := "1.0"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.6"
 
 libraryDependencies += "junit" % "junit" % "4.11" % "test"
 

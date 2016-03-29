@@ -31,7 +31,7 @@ This is the main Ant build file.
   <property name="scalaNodes" location="${scalaPackagePrefix}/scala_src/nodes"/>
   <property name="nodes" value="${javaPackagePrefix}/nodes"/>
   <property name="parser" location="${javaPackagePrefix}/parser"/>
-  <property name="scala-version" value="scala-2.9.2"/>
+  <property name="scala-version" value="scala-2.10.6"/>
   <property name="javaSourceVersion" value="1.6"/>
   <property name="junitMem" value="768m"/>
   <property name="junit.dir" value="junit-results"/>
@@ -76,8 +76,6 @@ This is the main Ant build file.
     <pathelement location="${lib}/nekohtml.jar"/>
     <pathelement location="${lib}/plt.jar"/>
     <pathelement location="${lib}/rats-runtime.jar"/>
-    <pathelement location="${lib}/scala-compiler-2.9.2.jar"/>
-    <pathelement location="${lib}/scala-library-2.9.2.jar"/>
     <pathelement location="${lib}/urihandler.jar"/>
     <pathelement location="${lib}/wala.cast.jar"/>
     <pathelement location="${lib}/wala.cast.js.jar"/>
