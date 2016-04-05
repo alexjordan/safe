@@ -60,14 +60,13 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
   def E(cp1: ControlPoint, cp2: ControlPoint, ctx: Context, obj: Obj, s: State): State = {
     cp2 match {
       case ((_, LEntry),_) =>
-        /*
-        if(s._1 <= HeapBot) {
+        // call edge
+        if(Config.traceAI) {
          System.out.println("== "+cp1 +" -> "+cp2+" ==")
-         System.out.println(DomainPrinter.printHeap(4, s._1, cfg))
+         //System.out.println(DomainPrinter.printHeap(4, s._1, cfg))
          System.out.println("== Object ==")
          System.out.println(DomainPrinter.printObj(4, obj))
-        }*/
-        // call edge
+        }
         if (s._1 == HeapBot) {
           StateBot
         } else {

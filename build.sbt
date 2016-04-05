@@ -10,6 +10,8 @@ libraryDependencies += "junit" % "junit" % "4.11" % "test"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
+libraryDependencies += "org.rogach" %% "scallop" % "1.0.0"
+
 parallelExecution in Test := false
 
 antSettings

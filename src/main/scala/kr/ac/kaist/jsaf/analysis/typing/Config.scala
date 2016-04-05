@@ -52,6 +52,11 @@ object Config {
   val globalVerboseProp: MSet[String] = MHashSet()
 
   /**
+    * AI trace output
+    */
+  var traceAI = false
+
+  /**
    * Test mode.
    * If turned on, special values, such as value bottom and top, will be provided as
    * predefined global variables.
