@@ -84,7 +84,31 @@ abstract class Worklist {
   def getOrder(): OrderMap = order
   def getHead(): ControlPoint = removeHead
 
-  def dump() = if (!quiet) System.out.print("next: " + head + "                ")
+  class PrettyPrinter {
+    var Seen = Set[FunctionId]()
+    def apply(cp: ControlPoint): String = {
+      val (funId, funName) = (cp._1._1, cfg.getFuncName(cp._1._1))
+      val funPretty = if (funName.length < 15) {
+        "%d:'%s'".format(funId, funName)
+      } else {
+        if (!Seen.contains(funId)) {
+          System.out.println("Hint: function ID %d -> %s".format(funId, funName))
+          Seen += funId
+        }
+        funId.toString
+      }
+      val labelName = cp._1._2 match {
+        case LBlock(id) => id.toString
+        case LEntry => "Entry"
+        case LExit => "Exit"
+        case LExitExc => "Exc"
+      }
+      "%s()::%s".format(funPretty, labelName) + " ctxt=[" + cp._2.toString + "]"
+    }
+  }
+  val prettyPrint = new PrettyPrinter
+
+  def debugNext: String = prettyPrint(head)
 
   ////////////////////////////////////////////////////////////////////////////////
   // For WorkManager (Thread library)

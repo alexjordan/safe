@@ -154,6 +154,7 @@ class JSFromHTML(filename: String) {
                       case srcname if (srcname.startsWith("http")) => srcname
                       case _ => if (domain.startsWith("http")) domain + "/" + srcname else domain.substring(0, domain.lastIndexOf('/')+1) + srcname
                     }
+                    System.out.println("Downloading URL: %s -> %s".format(url, external))
                     FileUtils.copyURLToFile(new URL(url), external)
                   } catch {
                     case e: Exception =>

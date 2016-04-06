@@ -112,8 +112,8 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
 
       // Worklist.head print
       if(!quiet) {
-        System.out.print("\n  Dense Iteration: " + count + "(" + worklist.getSize + ")   ")
-        worklist.dump()
+        System.out.println("  Dense Iteration: " + count + "(" + worklist.getSize + ")   " +
+        "next: " + worklist.debugNext + "                ")
       }
 
       // Debugger is used for only single-thread mode

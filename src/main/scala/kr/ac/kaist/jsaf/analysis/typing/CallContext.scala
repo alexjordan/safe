@@ -11,12 +11,16 @@ package kr.ac.kaist.jsaf.analysis.typing
 
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
+
 import scala.collection.immutable.HashSet
 import scala.collection.immutable.HashMap
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
+
 import scala.collection.mutable.{HashMap => MHashMap}
 import kr.ac.kaist.jsaf.analysis.typing.domain.Obj
 import kr.ac.kaist.jsaf.analysis.typing.domain.Heap
+
+import scala.collection.IterableLike
 
 /* Interface */
 object CallContext {
@@ -62,6 +66,13 @@ object CallContext {
   val _1_OBJECT:                                SensitivityFlagType = 0x00000002
   val _IDENTITY:                                SensitivityFlagType = 0x00000004
   val _MOST_SENSITIVE:                          SensitivityFlagType = 0xFFFFFFFF
+
+  def listToString(list: Traversable[Address]) = {
+    if (list.isEmpty)
+      "0"
+    else
+      list map { addr => "#" + addr}
+  }
 }
 
 abstract class CallContext {
@@ -694,7 +705,7 @@ private case class Loop(loopList : List[(List[Address], Node, Int)], callsiteLis
   // TODO: apply appropriate filtering if necessary
   def filterSensitivity(flag: CallContext.SensitivityFlagType): CallContext = new KCallsite(this.callsiteList)
 
-  override def toString = "Loop : " + loopList.toString + ", Call: " + callsiteList.toString
+  override def toString = "Loop: " + loopList.toString + ", Call: " + CallContext.listToString(callsiteList)
 }
 
 
