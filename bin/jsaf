@@ -13,6 +13,12 @@
 #export JS_HOME="$(dirname $0)/.."
 export JS_HOME="`$(dirname $0)/js_home`"
 
+# set proxy from environment variable (http_proxy)
+if [[ $http_proxy =~ [htps]+://(.*):([[:digit:]]+) ]]; then
+  echo "Setting JVM proxy: host=${BASH_REMATCH[1]} port=${BASH_REMATCH[2]}"
+  PROXY_FLAGS="-Dhttp.proxyHost=${BASH_REMATCH[1]} -Dhttp.proxyPort=${BASH_REMATCH[2]} -Dhttps.proxyHost=${BASH_REMATCH[1]} -Dhttps.proxyPort=${BASH_REMATCH[2]}"
+fi
+
 if (uname | egrep CYGWIN > /dev/null) ; then
   SEP=";"
 else
@@ -38,9 +44,9 @@ fi
 
 if [ -z "$JAVA_FLAGS" ] ; then
   if (uname | egrep Darwin > /dev/null) ; then
-    JAVA_FLAGS="-Xmx2048m -Xss32m -Dfile.encoding=utf8"
+    JAVA_FLAGS="-Xmx2048m -Xss32m -Dfile.encoding=utf8 $PROXY_FLAGS"
   else
-    JAVA_FLAGS="-Xmx2048m -Xss32m -Dfile.encoding=utf8 -Djava.library.path=${TP}"
+    JAVA_FLAGS="-Xmx2048m -Xss32m -Dfile.encoding=utf8 -Djava.library.path=${TP} $PROXY_FLAGS"
   fi
 fi
 
