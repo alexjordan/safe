@@ -111,11 +111,7 @@ object ModelManager {
         // async after call -> exc-exit 
         cfg.addExcEdge(ns_calls._2,(cfg.getGlobalFId,LExitExc))
         // loop end -> exit
-        if(Config.loopSensitive) {
-         cfg.addLoopOutEdge(n_end, ((cfg.getGlobalFId, LExit)))
-       }
-       else  
-          cfg.addEdge(n_end, ((cfg.getGlobalFId, LExit)))
+        cfg.addEdge(n_end, ((cfg.getGlobalFId, LExit)))
         
         /*
         // loop head -> exit
