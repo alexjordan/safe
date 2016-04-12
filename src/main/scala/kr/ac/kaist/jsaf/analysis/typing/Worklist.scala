@@ -88,8 +88,9 @@ abstract class Worklist {
     var Seen = Set[FunctionId]()
     def apply(cp: ControlPoint): String = {
       val (funId, funName) = (cp._1._1, cfg.getFuncName(cp._1._1))
-      val funPretty = if (funName.length < 15) {
-        "%d:'%s'".format(funId, funName)
+      val funPretty = cfg.getFuncDisplayName(funId).getOrElse(funName)
+      val funShort = if (funPretty.length < 15) {
+        "%d:'%s'".format(funId, funPretty)
       } else {
         if (!Seen.contains(funId)) {
           System.out.println("Hint: function ID %d -> %s".format(funId, funName))
@@ -103,7 +104,7 @@ abstract class Worklist {
         case LExit => "Exit"
         case LExitExc => "Exc"
       }
-      "%s()::%s".format(funPretty, labelName) + " ctxt=[" + cp._2.toString + "]"
+      "%s()::%s".format(funShort, labelName) + " ctxt=[" + cp._2.toString + "]"
     }
   }
   val prettyPrint = new PrettyPrinter

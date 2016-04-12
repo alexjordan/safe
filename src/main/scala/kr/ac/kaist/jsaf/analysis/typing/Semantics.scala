@@ -888,6 +888,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           lset_f.foreach {l_f => {
             val o_f = h_1(l_f)
             val fids = o_f("@function")._3
+            if (o_f.dom("displayName")) {
+              cfg.setFuncDisplayName(fids, o_f.concretePropAs[String]("displayName").get)
+            }
             fids.foreach {fid => {
               if (Config.typingInterface != null && !cfg.isUserFunction(fid))
                 Config.typingInterface.setSpan(info.getSpan)

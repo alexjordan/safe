@@ -71,6 +71,18 @@ class CFG {
   def getFuncInfo(fid: FunctionId) = funcMap(fid)._6
   def getFunctionIds = funcMap.keySet
 
+  // (optional) function display name (updates dynamically, will thus set once)
+  private var funcDisplayName: Map[FunctionId, String] = HashMap()
+  def setFuncDisplayName(fid: FunctionId, name: String): Unit = {
+    if (!funcDisplayName.contains(fid))
+      funcDisplayName += (fid -> name)
+  }
+  def setFuncDisplayName(fids: FunSet, name: String): Unit = {
+    if (fids.size == 1)
+      setFuncDisplayName(fids.head, name)
+  }
+  def getFuncDisplayName(fid: FunctionId) = funcDisplayName.get(fid)
+
 // map from fids to captured variables
   private var fid2captMap: Map[FunctionId, List[IRId]] = HashMap()
   def addCaptured(fid: FunctionId, captured: IRId) = fid2captMap.get(fid) match {
