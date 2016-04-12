@@ -31,7 +31,7 @@ This is the main Ant build file.
   <property name="scalaNodes" location="${scalaPackagePrefix}/scala_src/nodes"/>
   <property name="nodes" value="${javaPackagePrefix}/nodes"/>
   <property name="parser" location="${javaPackagePrefix}/parser"/>
-  <property name="scala-version" value="scala-2.10.6"/>
+  <property name="scala-version" value="scala-2.10"/>
   <property name="javaSourceVersion" value="1.6"/>
   <property name="junitMem" value="768m"/>
   <property name="junit.dir" value="junit-results"/>
