@@ -12,6 +12,11 @@ libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
 libraryDependencies += "org.rogach" %% "scallop" % "1.0.0"
 
+libraryDependencies += "org.scalactic" %% "scalactic" % "2.2.6"
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+
+
 parallelExecution in Test := false
 
 antSettings
