@@ -76,6 +76,9 @@ This is the main Ant build file.
     <pathelement location="${lib}/nekohtml.jar"/>
     <pathelement location="${lib}/plt.jar"/>
     <pathelement location="${lib}/rats-runtime.jar"/>
+    <pathelement location="${lib}/scala-compiler-2.10.6.jar"/>
+    <pathelement location="${lib}/scala-library-2.10.6.jar"/>
+    <pathelement location="${lib}/scala-reflect-2.10.6.jar"/>
     <pathelement location="${lib}/urihandler.jar"/>
     <pathelement location="${lib}/wala.cast.jar"/>
     <pathelement location="${lib}/wala.cast.js.jar"/>
