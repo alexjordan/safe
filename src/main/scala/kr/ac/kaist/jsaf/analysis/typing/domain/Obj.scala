@@ -13,6 +13,7 @@ import kr.ac.kaist.jsaf.analysis.cfg.InternalError
 import kr.ac.kaist.jsaf.analysis.lib.ObjTreeMap
 import kr.ac.kaist.jsaf.analysis.typing.{NotYetImplemented, Config}
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
+import scala.reflect.runtime.universe._
 
 import scala.collection.mutable
 
@@ -566,6 +567,20 @@ class Obj(_map: ObjMap) {
   def asMap = map.toMap
 
   def size: Int = this.map.size
+
+  def concretePropAs[T: TypeTag](propName: String): Option[T] = {
+    def primitiveToConcrete(pv: PValue): Option[T] = {
+      typeOf[T] match {
+        case t if t =:= typeOf[String] => pv._5.getSingle.asInstanceOf[Option[T]]
+        case t if t =:= typeOf[Int] => pv._4.getSingle.asInstanceOf[Option[T]]
+        case _ => throw new NotImplementedError()
+      }
+    }
+    map.get(propName) match {
+      case Some(pva) => primitiveToConcrete(pva._1._2._1)
+      case None => None
+    }
+  }
 }
 
 object Obj {
