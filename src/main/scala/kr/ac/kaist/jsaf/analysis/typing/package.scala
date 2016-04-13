@@ -24,8 +24,6 @@ package object typing {
   type OrderEntry = (Int, ControlPoint)
   type OrderMap = TreeMap[Node, Int]
 
-  implicit def CFGId2String(v: CFGId): String = v.toString
-
   def readTable(inTable: Table, cp: ControlPoint): State = {
     inTable.get(cp._1) match {
       case None => StateBot

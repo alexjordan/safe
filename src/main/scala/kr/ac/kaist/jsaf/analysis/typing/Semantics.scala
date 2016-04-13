@@ -697,7 +697,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val fvalue = Value(PValueBot, LocSet(l_r1))
           val h_4 = h_3.update(l_r1, Helper.NewFunctionObject(fid, Value(l_r3), l_r2, n))
           val h_5 = h_4.update(l_r2, o_new.update("constructor", PropValue(ObjectValue(fvalue, BTrue, BFalse, BTrue)), exist = true))
-          val h_6 = h_5.update(l_r3, o_env.update(name, PropValue(ObjectValue(fvalue, BFalse, BoolBot, BFalse))))
+          val h_6 = h_5.update(l_r3, o_env.update(name.toString, PropValue(ObjectValue(fvalue, BFalse, BoolBot, BFalse))))
           val h_7 = Helper.VarStore(h_6, lhs, fvalue)
           (noStop(h_7, ctx_3), (he, ctxe))
         }

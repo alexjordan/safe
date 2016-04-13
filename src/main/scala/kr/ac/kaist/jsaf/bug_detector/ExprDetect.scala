@@ -105,7 +105,7 @@ class ExprDetect(bugDetector: BugDetector) {
       if(!bugOption.AbsentReadProperty_Check) return
 
       // Don't check if this instruction is "LHS = <>fun<>["prototype"]".
-      if (obj.isInstanceOf[CFGVarRef] && obj.asInstanceOf[CFGVarRef].id.contains("<>fun<>") &&
+      if (obj.isInstanceOf[CFGVarRef] && obj.asInstanceOf[CFGVarRef].id.toString.contains("<>fun<>") &&
         index.isInstanceOf[CFGString] && index.asInstanceOf[CFGString].str == "prototype") return
 
       // Get the object name and property name
