@@ -15,17 +15,16 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.{Map => MMap}
 import kr.ac.kaist.jsaf.analysis.visualization.Visualization
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
-
 import kr.ac.kaist.jsaf.analysis.asserts._
 import kr.ac.kaist.jsaf.analysis.asserts.{ASSERTHelper => AH}
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.bug_detector.Range15_4_5_1
-import kr.ac.kaist.jsaf.nodes_util.{EJSOp, IRFactory, NodeUtil => NU, DOMStatistics}
+import kr.ac.kaist.jsaf.nodes_util.{DOMStatistics, EJSOp, IRFactory, NodeUtil => NU}
 import kr.ac.kaist.jsaf.nodes.IROp
 import kr.ac.kaist.jsaf.analysis.typing.{SemanticsExpr => SE}
-import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolTrue => BTrue, BoolFalse => BFalse}
-import kr.ac.kaist.jsaf.analysis.typing.models.{DOMHelper, ModelManager, JQueryModel}
+import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => BFalse, BoolTrue => BTrue}
+import kr.ac.kaist.jsaf.analysis.typing.models.{DOMHelper, JQueryModel, ModelManager}
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.HTMLTopElement
 import kr.ac.kaist.jsaf.analysis.typing.models.jquery.JQuery
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
@@ -62,7 +61,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
       case ((_, LEntry),_) =>
         // call edge
         if(Config.traceAI) {
-         System.out.println("== "+cp1 +" -> "+cp2+" ==")
+         System.out.println("== "+cp1.show +" -> "+cp2.show+" ==")
          //System.out.println(DomainPrinter.printHeap(4, s._1, cfg))
          System.out.println("== Object ==")
          System.out.println(DomainPrinter.printObj(4, obj))

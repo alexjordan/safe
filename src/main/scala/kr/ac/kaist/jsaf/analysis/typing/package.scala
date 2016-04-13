@@ -33,4 +33,8 @@ package object typing {
       }
     }
   }
+
+  implicit class CPWrapper(val cp: ControlPoint) extends AnyVal {
+    def show: String = s"node=[${cp._1}] ctxt=[${cp._2}]"
+  }
 }
