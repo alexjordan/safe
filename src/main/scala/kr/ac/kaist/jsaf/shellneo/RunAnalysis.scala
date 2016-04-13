@@ -28,6 +28,7 @@ private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val cfgDump = opt[Boolean]("cfgdump")
   val heapVerbose = opt[Int]("heap-verbose", validate = (0 until 4) contains _ )
   val trace = opt[Boolean]("trace", descr = "trace output for AI semantics")
+  val test = opt[Boolean]("test", descr = "expose abstract types for testing")
   requireOne(inputFiles, htmlFile)
 }
 
@@ -78,6 +79,7 @@ object RunAnalysis {
     if (conf.heapVerbose.isDefined)
       Config.setVerbose(conf.heapVerbose())
     Config.traceAI = conf.trace()
+    Config.testMode = conf.test()
   }
 
   def parseJS(files: Seq[String]) = {
