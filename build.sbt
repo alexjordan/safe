@@ -35,3 +35,11 @@ nightly := {
 	(test in Test).value
 	antTaskKey("testNightly").value
 }
+
+// quick test task
+lazy val quick = taskKey[Unit]("Runs quick test.")
+
+quick := {
+	(test in Test).value
+	antTaskKey("testTyping").value
+}
