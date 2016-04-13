@@ -58,6 +58,7 @@ import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.HTMLTopElement
 import kr.ac.kaist.jsaf.analysis.typing.models.jquery.JQuery
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
   // Inter-procedural edge set.
@@ -552,6 +553,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                 val lset = SE.V(obj, h, ctx)._1.locs
                 // iterate over set of strings for index
                 val sset = Helper.toStringSet(Helper.toPrimitive_better(h, v_index))
+                ImprecisionTracker.propStore(sset, v_index, info)
                 val (h_2, ctx_2, es_2) = sset.foldLeft((HeapBot, ctx, es_index ++ es_rhs))((res, s) => {
                 //if(s.gamma.isEmpty) {
                 //  println("StrTopCase : " + s)
@@ -906,11 +908,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               }}
             }}
           }}
-           
-          //if(lset_f.size > 20) {
-          //  println("lset_size " + lset_f.size + " more than 20!! at node : " + cfg.findEnclosingNode(i))
-          //  throw new RuntimeException("*** lset_size!!!")
-          //}
+
+          // check number of possible functions to be called
+          ImprecisionTracker.callViaLocations(lset_f, info)
 
           // for actual call
           lset_f.foreach {l_f => {

@@ -39,11 +39,13 @@
 package kr.ac.kaist.jsaf.analysis.typing
 
 import kr.ac.kaist.jsaf.analysis.typing
+
 import scala.collection.immutable.HashMap
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.debug.DebugConsole
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 import kr.ac.kaist.jsaf.scala_src.useful.WorkTrait
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 
@@ -145,6 +147,8 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
         "next: " + worklist.debugNext + "                ")
       }
 
+      ImprecisionTracker.updateWorklistSize(worklist.getSize)
+
       // Debugger is used for only single-thread mode
       if (Config.debugger)
         DebugConsole.runFixpoint(count)
@@ -170,6 +174,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
 
       // Execute
       val (outS, outES) = try {
+        ImprecisionTracker.updateBlock(count - 1, cfg.getCmd(cp._1))
         sem.C(cp, cfg.getCmd(cp._1), inS)
       }
       catch {

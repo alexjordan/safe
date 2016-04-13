@@ -9,12 +9,13 @@
 
 package kr.ac.kaist.jsaf.analysis.typing.models.builtin
 
-import kr.ac.kaist.jsaf.analysis.cfg.{CFGExpr, CFG, InternalError, FunctionId}
+import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGExpr, FunctionId, InternalError}
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => F, BoolTrue => T}
 import kr.ac.kaist.jsaf.analysis.typing.models._
 import kr.ac.kaist.jsaf.analysis.typing._
-import kr.ac.kaist.jsaf.analysis.typing.{AccessHelper=>AH}
+import kr.ac.kaist.jsaf.analysis.typing.{AccessHelper => AH}
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 
 object BuiltinMath extends ModelData {
@@ -428,10 +429,11 @@ object BuiltinMath extends ModelData {
           }
           ((Helper.ReturnStore(h, rtn), ctx), (he, ctxe))
         })),
-      ("Math.random" -> (
+      "Math.random" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          ImprecisionTracker.random(fun)
           ((Helper.ReturnStore(h, Value(NumTop)), ctx), (he, ctxe))
-        })),
+        }),
       ("Math.round" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_1 = getArgValue(h, ctx, args, "0") /* Value */

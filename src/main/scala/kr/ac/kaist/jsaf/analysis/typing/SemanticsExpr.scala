@@ -13,10 +13,10 @@ import scala.collection.immutable.HashSet
 import scala.collection.mutable.{HashMap => MHashMap}
 import scala.collection.mutable.{Map => MMap}
 import scala.runtime.RichDouble
-
 import kr.ac.kaist.jsaf.analysis.asserts._
 import kr.ac.kaist.jsaf.analysis.asserts.{ASSERTHelper => AH}
 import kr.ac.kaist.jsaf.analysis.cfg._
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 import kr.ac.kaist.jsaf.analysis.typing.Operator._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.nodes_util.EJSOp
@@ -121,6 +121,7 @@ object SemanticsExpr {
           val lset = V(obj,h,ctx)._1.locs
           
           val sset = Helper.toStringSet(Helper.toPrimitive_better(h, v))
+          ImprecisionTracker.propLoad(sset, v, info)
           val v_1 = lset.foldLeft(ValueBot)((vv_1, l) => {
             sset.foldLeft(vv_1)((vv_2, s) => {
               /* DOM property load such as 'innerHTML' */
