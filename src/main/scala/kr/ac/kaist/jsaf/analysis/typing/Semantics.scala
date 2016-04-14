@@ -29,7 +29,6 @@ import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.HTMLTopElement
 import kr.ac.kaist.jsaf.analysis.typing.models.jquery.JQuery
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.Shell
-import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
   // Inter-procedural edge set.
