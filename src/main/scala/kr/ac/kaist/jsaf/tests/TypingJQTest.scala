@@ -9,14 +9,15 @@
 
 package kr.ac.kaist.jsaf.tests
 
-import kr.ac.kaist.jsaf.{ShellParameters, Shell}
+import kr.ac.kaist.jsaf.{Shell, ShellParameters}
 import kr.ac.kaist.jsaf.compiler.Predefined
-import junit.framework.{TestSuite, Test}
+import junit.framework.{Test, TestSuite}
+import kr.ac.kaist.jsaf.analysis.typing.Config
+
+class TypingJQTest
 
 object TypingJQTest {
   val TESTS_DIR = "tests/typing_tests/jquery"
-  //Shell.pred = new Predefined(new ShellParameters())
-  Shell.params.Set(Array[String]("html", "-context-1-callsite", "-test", "-jq"))
 
   val EXCLUDE = Set(
     "XXX",
@@ -30,7 +31,19 @@ object TypingJQTest {
     val testcases = collectTestcase(TESTS_DIR)
     for (tc <- testcases) {
       //$JUnit-BEGIN$
-      suite.addTest(new SemanticsDOMTest(TESTS_DIR, tc, "dense"))
+      val jqtest = new SemanticsDOMTest(TESTS_DIR, tc, "dense")
+      jqtest.configureFunc = () => {
+        // legacy shell param
+        Shell.params.Set(Array[String]("html", "-context-1-callsite", "-test", "-jq"))
+        // setup testing options
+        Config.setTestMode(true)
+        Config.setAssertMode(true)
+        // enable DOM
+        Config.setDomMode
+        // enable jQuery
+        Config.setJQueryMode
+      }
+      suite.addTest(jqtest)
       //$JUnit-END$
     }
     suite

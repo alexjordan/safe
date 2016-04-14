@@ -30,16 +30,27 @@ import kr.ac.kaist.jsaf.scala_src.useful.Options._
 import kr.ac.kaist.jsaf.nodes_util.JSFromHTML
 
 class SemanticsDOMTest(dir: String, tc: String, typing_mode: String) extends SemanticsTest(dir, tc, typing_mode) {
-  override def analyze(file: File): TypingInterface = {
-    Shell.params.Set(Array[String]("html", "-context-1-callsite", "-test"))
 
-    // Initialize AddressManager
-    AddressManager.reset()
+
+  var configureFunc: () => Unit = defaultConfig
+
+  def defaultConfig(): Unit = {
+    // legacy shell param
+    Shell.params.Set(Array[String]("html", "-context-1-callsite", "-test"))
     // setup testing options
     Config.setTestMode(true)
     Config.setAssertMode(true)
     // enable DOM
     Config.setDomMode
+  }
+
+  override def analyze(file: File): TypingInterface = {
+
+
+    // Initialize AddressManager
+    AddressManager.reset()
+
+    configureFunc()
 
     // html preprocess, parse
     //val jshtml = new JSFromHTML(file.getPath)

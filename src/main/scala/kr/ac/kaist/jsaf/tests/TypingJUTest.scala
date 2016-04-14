@@ -23,6 +23,7 @@ object TypingJUTest {
     suite.addTest(TypingSemanticsJUTest.suite)
     suite.addTest(TypingOperatorJUTest.suite)
     suite.addTest(TypingTAJSMicroJUTest.suite)
+    suite.addTest(TypingJQTest.suite)
     //$JUnit-END$
     suite
   }
