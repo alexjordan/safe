@@ -118,8 +118,7 @@ object JQueryEvent extends ModelData {
             lset ++ h(l)(NumStr)._1._1._2
           )
           if (!lset_handler.isEmpty) {
-            val h1 = if(!lset_target.isEmpty) JQueryHelper.addJQueryEvent(h, Value(lset_target), AbsString.alpha("DOMContentLoaded"), Value(lset_handler), ValueBot, ValueBot)
-                     else JQueryHelper.addJQueryEvent(h, Value(lset_target), AbsString.alpha("DOMContentLoaded"), Value(HTMLDocument.GlobalDocumentLoc), ValueBot, ValueBot)
+            val h1 = JQueryHelper.addJQueryEvent(h, if (lset_target.isEmpty) Value(HTMLDocument.GlobalDocumentLoc) else Value(lset_target), AbsString.alpha("DOMContentLoaded"), Value(lset_handler), ValueBot, ValueBot)
             ((Helper.ReturnStore(h1, Value(lset_this)), ctx), (he, ctxe))
           }
           else
