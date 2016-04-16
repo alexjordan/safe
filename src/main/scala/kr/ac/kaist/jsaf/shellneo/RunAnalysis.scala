@@ -12,7 +12,9 @@ import kr.ac.kaist.jsaf.nodes.{IRRoot, Program}
 import kr.ac.kaist.jsaf.nodes_util.{JSFromHTML, NodeUtil}
 import kr.ac.kaist.jsaf.scala_src.nodes.{SProgram, STopLevel}
 import edu.rice.cs.plt.tuple.{Option => JOption}
+import kr.ac.kaist.jsaf.analysis.typing.domain.Obj
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMBuilder
+import kr.ac.kaist.jsaf.tests.TestHelper
 import kr.ac.kaist.jsaf.useful.{MemoryMeasurer, Pair, Useful}
 import org.cyberneko.html.parsers.DOMParser
 import org.w3c.dom.Document
@@ -161,5 +163,8 @@ object RunAnalysis {
     println("\n* Statistics *")
     println("# Total state count: " + typingInterface.getStateCount)
 
+    if (Config.testMode) {
+      TestHelper.printTestObjects(typingInterface)
+    }
   }
 }
