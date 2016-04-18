@@ -29,6 +29,7 @@ private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val heapVerbose = opt[Int]("heap-verbose", validate = (0 until 4) contains _ )
   val trace = opt[Boolean]("trace", descr = "trace output for AI semantics")
   val test = opt[Boolean]("test", descr = "expose abstract types for testing")
+  val jquery = opt[Boolean]("jquery", descr = "enable jQuery model")
   requireOne(inputFiles, htmlFile)
 }
 
@@ -80,6 +81,7 @@ object RunAnalysis {
       Config.setVerbose(conf.heapVerbose())
     Config.traceAI = conf.trace()
     Config.testMode = conf.test()
+    Config.jqMode = conf.jquery()
   }
 
   def parseJS(files: Seq[String]) = {
