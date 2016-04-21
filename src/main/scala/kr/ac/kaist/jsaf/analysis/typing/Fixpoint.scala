@@ -45,7 +45,7 @@ import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.debug.DebugConsole
 import kr.ac.kaist.jsaf.Shell
-import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
+import kr.ac.kaist.jsaf.analysis.imprecision.{ImprecisionStop, ImprecisionTracker}
 import kr.ac.kaist.jsaf.scala_src.useful.WorkTrait
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 
@@ -54,9 +54,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
   def getSemantics = sem
   var count = 0
   val countRef = new AnyRef
-  var isLocCountExceeded = false
-  var locCountExceededMessage = ""
-  var isTimeout = false
+  var abnormalTermination: Option[String] = None
   var startTime: Long = 0
 
   var loopInTable: Table = inTable.map(x=>x)
@@ -117,11 +115,8 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       Shell.workManager.deinitialize()
     }
 
-    if(isLocCountExceeded) {
-      System.out.println("*** Max location count(" + Shell.params.opt_MaxLocCount + ") is exceeded!")
-      System.out.println("  " + locCountExceededMessage)
-    }
-    if(isTimeout) System.out.println("*** Analysis time out! (" + Shell.params.opt_Timeout + " sec)")
+    if (abnormalTermination.isDefined)
+      System.out.println(abnormalTermination.get)
 
     if (Shell.params.opt_ExitDump) {
       System.out.println("** Dump Exit Heap **\n=========================================================================")
@@ -160,9 +155,12 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       val cp = worklist.getHead()
 
       // Analysis termination check
-      if(isLocCountExceeded || isTimeout) return
+      if(abnormalTermination.isDefined) return
       if(Shell.params.opt_Timeout > 0) {
-        if((System.nanoTime() - startTime) / 1000000000 > Shell.params.opt_Timeout) {isTimeout = true; return}
+        if((System.nanoTime() - startTime) / 1000000000 > Shell.params.opt_Timeout) {
+          abnormalTermination = Some("*** Analysis time out! (" + Shell.params.opt_Timeout + " sec)")
+          return
+        }
       }
       if (Config.maxIterations > 0 && count >= Config.maxIterations) {
         isTimeout = true
@@ -179,8 +177,13 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       }
       catch {
         case e: MaxLocCountError =>
-          if(locCountExceededMessage == "") locCountExceededMessage = e.getMessage
-          isLocCountExceeded = true
+          if (abnormalTermination.isEmpty) {
+            val msg = "*** Max location count(" + Shell.params.opt_MaxLocCount + ") is exceeded!"
+            abnormalTermination = Some(msg + "\n  " + e.getMessage)
+          }
+          return
+        case e: ImprecisionStop =>
+          abnormalTermination = Some("** " + e.getMessage)
           return
       }
 

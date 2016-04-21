@@ -5,6 +5,7 @@ import kr.ac.kaist.jsaf.analysis.typing.domain._
 
 import scala.collection.mutable.Queue
 
+class ImprecisionStop(msg: String) extends RuntimeException(msg)
 
 object ImprecisionTracker {
   private val stopEnabled = true
@@ -15,7 +16,7 @@ object ImprecisionTracker {
   private def stopFixpoint(msg: String) = {
     // XXX uses an existing exception to bail out of fixpoint analysis
     if (stopEnabled)
-      throw new MaxLocCountError(s"Imprecision: $msg")
+      throw new ImprecisionStop(s"Imprecision: $msg")
   }
 
   private object BackBuffer {
@@ -24,13 +25,14 @@ object ImprecisionTracker {
     private var ringbuffer = Queue[BufferContents]()
 
     def trim = {
+      // enforce max ring buffer size
       ringbuffer = ringbuffer.takeRight(5)
     }
 
     def enqueue(i: Int, b: Block) = ringbuffer.enqueue(Payload(i, b))
 
     def dump: Unit = {
-      println("AI back-buffer")
+      println("AI back-buffer:")
       for (x <- ringbuffer) {
         val insts = x.block.insts
         log(s"${x.index}: block[${insts.size}]=${insts.toString}")
