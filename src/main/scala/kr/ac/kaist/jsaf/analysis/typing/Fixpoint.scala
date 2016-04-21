@@ -409,6 +409,8 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
   private def loop(): Unit = {
     val work = new FixpointWork
     while(!worklist.isEmpty) work.doit()
+    if (!quiet)
+      worklist.prettyPrint.dumpFuns
     //if(Config.loopSensitive){
     //  println()
     //  println("Total time for loop : " + timeSum/1000000000.0 + "(s)")

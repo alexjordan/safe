@@ -86,11 +86,14 @@ abstract class Worklist {
 
   class PrettyPrinter {
     var Seen = Set[FunctionId]()
+
+    private def funPretty(funId: FunctionId): String = cfg.getFuncDisplayName(funId).getOrElse(cfg.getFuncName(funId))
+    private def isShort(s: String) = s.length < 15
+
     def apply(cp: ControlPoint): String = {
-      val (funId, funName) = (cp._1._1, cfg.getFuncName(cp._1._1))
-      val funPretty = cfg.getFuncDisplayName(funId).getOrElse(funName)
-      val funShort = if (funPretty.length < 15) {
-        "%d:'%s'".format(funId, funPretty)
+      val (funId, funName) = (cp._1._1, funPretty(cp._1._1))
+      val funShort = if (isShort(funName)) {
+        "%d:'%s'".format(funId, funName)
       } else {
         if (!Seen.contains(funId)) {
           System.out.println("Hint: function ID %d -> %s".format(funId, funName))
@@ -105,6 +108,11 @@ abstract class Worklist {
         case LExitExc => "Exc"
       }
       "%s()::%s".format(funShort, labelName) + " ctxt=[" + cp._2.toString + "]"
+    }
+    def dumpFuns = {
+      for ((fid, name) <- Seen.map(fid => (fid, funPretty(fid))).filter(pair => !isShort(pair._2)).toSeq.sorted) {
+        System.out.println("Hint: function ID %d -> %s".format(fid, name))
+      }
     }
   }
   val prettyPrint = new PrettyPrinter

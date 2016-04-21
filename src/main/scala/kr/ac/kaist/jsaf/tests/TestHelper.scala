@@ -113,9 +113,9 @@ object TestHelper {
       if (resultMap.nonEmpty)
         println(s"- ${header}:")
       for ((index, result) <- resultMap.toSeq.sortBy(_._1)) {
+        println("    result%d: %s".format(index, DomainPrinter.printValue(result)))
         expectMap.get(index) match {
           case Some(expect) =>
-            println("    result%d: %s".format(index, DomainPrinter.printValue(result)))
             println("    expect%d: %s".format(index, DomainPrinter.printValue(expect)))
           case None =>
             println("No corresponding expect variable is detected for " + RESULT + index.toString)
