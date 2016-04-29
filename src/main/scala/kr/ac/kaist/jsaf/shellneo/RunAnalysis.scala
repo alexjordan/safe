@@ -4,7 +4,7 @@ import java.io.{BufferedWriter, File, FileWriter, IOException}
 
 import kr.ac.kaist.jsaf.analysis.cfg.CFGBuilder
 import org.rogach.scallop._
-import kr.ac.kaist.jsaf.analysis.typing.{AddressManager, Config, InitHeap, Typing}
+import kr.ac.kaist.jsaf.analysis.typing.{AddressManager, Config, InitHeap, Typing, domain}
 import kr.ac.kaist.jsaf.{ProjectProperties, Shell}
 import kr.ac.kaist.jsaf.exceptions.UserError
 import kr.ac.kaist.jsaf.compiler.Parser
@@ -71,6 +71,9 @@ object RunAnalysis {
     Config.setContextSensitivityMode(Config.Context_Loop)
     Config.setContextSensitivityDepth(10)
     //Shell.params.opt_MaxStrSetSize = 32
+
+    // Initialize AbsString cache
+    domain.AbsString.initCache
 
     if (conf.domMode() || conf.htmlFile.isSupplied) {
       System.out.println("DOM mode enabled.")
