@@ -7,12 +7,35 @@ import scala.collection.mutable.Queue
 
 class ImprecisionStop(msg: String) extends RuntimeException(msg)
 
+abstract class DOMLookup
+object EmptyDOMLookup extends DOMLookup
+class DOMLookupByKey(val key: AbsString) extends DOMLookup
+
 object ImprecisionTracker {
+
   private val stopEnabled = true
   private var wlSize = 0
+  private var domTracking: DOMLookup = EmptyDOMLookup
+
+  abstract class DOMLookup {
+    def handleReturn(ret: PropValue) {}
+  }
+  object EmptyDOMLookup extends DOMLookup
+  class DOMLookupByKey(val key: AbsString) extends DOMLookup {
+    override def handleReturn(ret: PropValue) {
+      if (ret._1._1.locset.isEmpty) {
+        log(s"DOM lookup loss: ${key}")
+      }
+    }
+  }
+
+
+  var Iteration: Int = -1
+  var Instruction: Option[CFGInst] = None
 
   // Helpers
   private def log(x: Any) = System.out.println(x)
+  private def prefix(kind: String): String = s"lossy-$kind[i=$Iteration]"
   private def stopFixpoint(msg: String) = {
     // XXX uses an existing exception to bail out of fixpoint analysis
     if (stopEnabled)
@@ -20,7 +43,9 @@ object ImprecisionTracker {
   }
 
   private object BackBuffer {
+
     case class Payload(index: Int, block: Block)
+
     type BufferContents = Payload
     private var ringbuffer = Queue[BufferContents]()
 
@@ -50,11 +75,11 @@ object ImprecisionTracker {
   }
 
   def propStore(propSet: Set[AbsString], propVal: Value, info: Info) = {
-    handleLoadStoreProp(propSet, s"lossy store[%s] @ ${info.getSpan}", "non-concrete store")
+    handleLoadStoreProp(propSet, s"${prefix("propaccess")} store[%s] @ ${info.getSpan}", "non-concrete store")
   }
 
   def propLoad(propSet: Set[AbsString], v: Value, info: Info) = {
-    handleLoadStoreProp(propSet, s"lossy load[%s] @ ${info.getSpan}", "non-concrete load")
+    handleLoadStoreProp(propSet, s"${prefix("propaccess")} load[%s] @ ${info.getSpan}", "non-concrete load")
   }
 
   def callViaLocations(funLocs: LocSet, info: Info) = {
@@ -78,6 +103,7 @@ object ImprecisionTracker {
     wlSize = size
   }
 
+  @deprecated
   def updateBlock(iteration: Int, cmd: Cmd): Unit = {
     cmd match {
       case b: Block => BackBuffer.enqueue(iteration, b)
@@ -85,4 +111,36 @@ object ImprecisionTracker {
     }
     BackBuffer.trim
   }
+
+  def joinLoss(lhs: AbsString, rhs: AbsString, res: AbsString) = {
+    val span = Instruction.get.getInfo match {
+      case Some(info) => info.getSpan
+      case None => "unknown"
+    }
+
+    log(s"${prefix("join")}: $lhs + $rhs -> $res @ $span")
+  }
+  
+  def trackDOMLookup(id: AbsString, result: LocSet) = {
+    if (id.isConcrete)
+      domTracking = new DOMLookupByKey(id)
+    (id.isConcrete, result.isEmpty) match {
+      case (true, true) => log(s"DOM lookup loss: ${id}")
+      case _ =>
+    }
+  }
+
+  def DOMReturn(ret: PropValue): Unit = {
+    domTracking.handleReturn(ret)
+  }
+
+  def nextIteration(i: Int): Unit = {
+    Iteration = i
+  }
+
+  def nextInstruction(inst: CFGInst) = {
+    Instruction = Some(inst)
+    domTracking = EmptyDOMLookup
+  }
+
 }

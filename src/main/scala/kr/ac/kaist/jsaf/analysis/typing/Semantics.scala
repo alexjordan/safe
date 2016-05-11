@@ -280,6 +280,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
         case Block(insts) => {
           insts.foldLeft(((h, ctx), (HeapBot, ContextBot)))(
             (states, inst) => {
+              ImprecisionTracker.nextInstruction(inst)
               val ((h_new, ctx_new), (he_new, ctxe_new)) = I(cp, inst, states._1._1, states._1._2, states._2._1, states._2._2, inTable)
               // System.out.println("##### Instruction : " + inst)
               // System.out.println("in heap#####\n" + DomainPrinter.printHeap(4, states._1._1, cfg))
@@ -1351,6 +1352,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           semantics.get(fun) match {
             case Some(f) =>
               val ((h2, ctx2), (he2, ctxe2)) = f(this, h, ctx, he, ctxe, cp, cfg, fun, args)
+              if (model == "DOM") {
+                ImprecisionTracker.DOMReturn(h2(SinglePureLocalLoc)("@return"))
+              }
               (noStop(h2, ctx2), (he2, ctxe2))
             case None =>
               if (!Config.quietMode)

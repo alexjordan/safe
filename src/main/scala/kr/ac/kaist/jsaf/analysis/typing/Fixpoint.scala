@@ -172,7 +172,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
 
       // Execute
       val (outS, outES) = try {
-        ImprecisionTracker.updateBlock(count - 1, cfg.getCmd(cp._1))
+        ImprecisionTracker.nextIteration(count - 1)
         sem.C(cp, cfg.getCmd(cp._1), inS)
       }
       catch {

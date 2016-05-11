@@ -9,19 +9,20 @@
 
 package kr.ac.kaist.jsaf.analysis.typing.models.DOMCore
 
-import scala.collection.mutable.{Map=>MMap, HashMap=>MHashMap}
+import scala.collection.mutable.{HashMap => MHashMap, Map => MMap}
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => F, BoolTrue => T}
 import kr.ac.kaist.jsaf.analysis.typing.models._
-import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGExpr, InternalError, FunctionId}
+import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGExpr, FunctionId, InternalError}
 import org.w3c.dom.Document
 import org.w3c.dom.Node
 import kr.ac.kaist.jsaf.analysis.typing._
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml5.DOMLocation
-import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.{HTMLTopElement, HTMLElement, HTMLCollection, HTMLDocument}
+import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.{HTMLCollection, HTMLDocument, HTMLElement, HTMLTopElement}
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMObject.{CSSStyleDeclaration, StyleSheetList}
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 object DOMDocument extends DOM {
   private val name = "Document"
@@ -580,30 +581,32 @@ object DOMDocument extends DOM {
           else
             ((HeapBot, ContextBot), (he, ctxe))
         }),
-      ("DOMDocument.getElementById" -> (
+      "DOMDocument.getElementById" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* arguments */
           val s_id = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           if (s_id </ StrBot) {
-            if(Shell.params.opt_Dommodel2){
-               val lset = Helper.Proto(h, IdTableLoc, s_id).locs
-               val ret_val = if(lset.size > 0) Value(lset)
-                             else Value(NullTop)
-               ((Helper.ReturnStore(h,  ret_val), ctx), (he, ctxe))
-                
-            }
-            else {
-            val lset_find = DOMHelper.findById(h, s_id)
-            val v_null = if(!s_id.isConcrete || !lset_find.exists(l => {h(l)(AbsString.alpha("id")).objval.value.pv.strval.isConcrete}))
-                            Value(NullTop) 
-                         else ValueBot
-            /* imprecise semantic */
-            ((Helper.ReturnStore(h, Value(lset_find) + v_null), ctx), (he, ctxe))
+            if (Shell.params.opt_Dommodel2) {
+              val lset = Helper.Proto(h, IdTableLoc, s_id).locs
+              ImprecisionTracker.trackDOMLookup(s_id, lset)
+              val ret_val = if (lset.size > 0) Value(lset)
+              else Value(NullTop)
+              ((Helper.ReturnStore(h, ret_val), ctx), (he, ctxe))
+            } else {
+              val lset_find = DOMHelper.findById(h, s_id)
+              ImprecisionTracker.trackDOMLookup(s_id, lset_find)
+              val v_null = if (!s_id.isConcrete || !lset_find.exists(l => {
+                h(l)(AbsString.alpha("id")).objval.value.pvalue.strval.isConcrete}))
+                Value(NullTop)
+              else
+                ValueBot
+              /* imprecise semantic */
+              ((Helper.ReturnStore(h, Value(lset_find) + v_null), ctx), (he, ctxe))
             }
           }
           else
             ((HeapBot, ContextBot), (he, ctxe))
-        })),
+        }),
       "DOMDocument.getElementsByClassName" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val lset_this = h(SinglePureLocalLoc)("@this")._2.locs

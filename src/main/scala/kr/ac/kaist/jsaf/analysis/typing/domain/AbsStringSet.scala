@@ -11,6 +11,7 @@ package kr.ac.kaist.jsaf.analysis.typing.domain
 
 import scala.collection.immutable.{HashSet => IHashSet}
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 object AbsStringSet {
   case object NumStrCase extends AbsString.AbsStringCase
@@ -87,22 +88,23 @@ class AbsStringSet(_kind: AbsString.AbsStringCase) extends AbsString(_kind) {
     }
 
   /* join */
-  override def + (that: AbsString) =
-    (this.kind, that.kind) match {
+  override def + (that: AbsString) = {
+    // perform join
+    val result = (this.kind, that.kind) match {
       case (a: AbsStringSet.StrSetCase, b: AbsStringSet.StrSetCase) =>
         if (a.values == b.values) this
         else {
           val union = a.values ++ b.values
-          if(Shell.params.opt_MaxStrSetSize == 0 || union.size <= Shell.params.opt_MaxStrSetSize)
+          if (Shell.params.opt_MaxStrSetSize == 0 || union.size <= Shell.params.opt_MaxStrSetSize)
             AbsStringSet.StrSet(union)
           else {
-            if(a.hasNum && a.hasOther || b.hasNum && b.hasOther) StrTop
-            else if(a.hasNum && !a.hasOther) {
-              if(b.hasNum && !b.hasOther) NumStr
+            if (a.hasNum && a.hasOther || b.hasNum && b.hasOther) StrTop
+            else if (a.hasNum && !a.hasOther) {
+              if (b.hasNum && !b.hasOther) NumStr
               else StrTop
             }
             else {
-              if(b.hasNum && !b.hasOther) StrTop
+              if (b.hasNum && !b.hasOther) StrTop
               else OtherStr
             }
           }
@@ -110,6 +112,14 @@ class AbsStringSet(_kind: AbsString.AbsStringCase) extends AbsString(_kind) {
       case _ =>
         super.+(that)
     }
+
+    // track string precision loss
+    if (this.isConcrete && that.isConcrete && !result.isConcrete) {
+      ImprecisionTracker.joinLoss(this, that, result)
+    }
+
+    result
+  }
 
   /* meet */
   override def <> (that: AbsString) = (this, that) match {
