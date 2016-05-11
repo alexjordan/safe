@@ -111,7 +111,7 @@ abstract class Worklist {
     }
     def dumpFuns = {
       for ((fid, name) <- Seen.map(fid => (fid, funPretty(fid))).filter(pair => !isShort(pair._2)).toSeq.sorted) {
-        System.out.println("Hint: function ID %d -> %s".format(fid, name))
+        System.out.println("Hint: function ID %d -> %s (%s)".format(fid, name, cfg.getFuncInfo(fid).getSpan))
       }
     }
   }
@@ -142,7 +142,7 @@ object Worklist {
   ////////////////////////////////////////////////////////////////////////////////
   // Worklist Computes
   ////////////////////////////////////////////////////////////////////////////////
-  def computes(cfg: CFG) : Worklist = 
+  def computes(cfg: CFG) : Worklist =
     if(Shell.params.command == ShellParameters.CMD_WEBAPP_BUG_DETECTOR)
       computes(Shell.params.opt_WorklistOrder, cfg, true)
     else

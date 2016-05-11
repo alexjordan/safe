@@ -1300,6 +1300,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val filename = info.getSpan.getFileNameOnly
           // jQuery modeling : add an heap information for jQuery
           if(Config.jqMode && NU.isModeledLibrary(filename)){
+            println(s"** File '${filename}' is assumed to be modeled and will not be loaded")
             val globalObj = h(GlobalLoc)
             val env_obj = Obj.empty.update("_$", globalObj("$")).update("_jQuery", globalObj("jQuery"))
             val newGlobalObj = globalObj.update("$", PropValue(ObjectValue(Value(JQuery.ConstLoc), BFalse, BFalse, BFalse))).update(

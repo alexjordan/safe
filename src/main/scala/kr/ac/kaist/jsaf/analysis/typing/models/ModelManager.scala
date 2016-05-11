@@ -37,8 +37,10 @@ object ModelManager {
     }
 
     /* jQuery model */
-    if (Config.jqMode)
+    if (Config.jqMode) {
+      println("jQuery model enabled.")
       model_map = model_map + ("jQuery" -> new JQueryModel(cfg))
+    }
 
     /* TS model */
     if (Config.tsMode)
