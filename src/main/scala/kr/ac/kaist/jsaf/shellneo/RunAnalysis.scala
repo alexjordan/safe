@@ -79,6 +79,7 @@ object RunAnalysis {
       System.out.println("DOM mode enabled.")
       Config.setDomMode
       Shell.params.opt_LocClone = true
+      Config.setDOMPropMode
     }
 
     Shell.params.opt_ExitDump = conf.exitDump()
