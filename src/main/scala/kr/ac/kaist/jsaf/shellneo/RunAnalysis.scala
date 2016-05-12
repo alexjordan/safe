@@ -25,6 +25,7 @@ import scala.collection.JavaConverters._
 private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val inputFiles = trailArg[List[String]](required = false, descr = ".js file(s) for analysis")
   val htmlFile = opt[String]("html", descr = "html file for analysis")
+  val quiet = opt[Boolean]("quiet", descr = "less debug output")
   val domMode = opt[Boolean]("dom", descr = "dom mode")
   val exitDump = opt[Boolean]("exitdump")
   val cfgDump = opt[Boolean]("cfgdump")
@@ -159,22 +160,27 @@ object RunAnalysis {
     }
 
     // Create Typing
-    val typingInterface = new Typing(cfg, false, Shell.params.opt_LocClone)
-    Config.setTypingInterface(typingInterface)
+    val typing = new Typing(cfg, conf.quiet(), Shell.params.opt_LocClone)
+    Config.setTypingInterface(typing)
 
     // Check global variables in initial heap against list of predefined variables.
     init.checkPredefined
 
     // Analyze
-    typingInterface.analyze(init)
+    typing.analyze(init)
+
+    // In quiet mode, the analysis does not print the iteration count, do it here
+    if (conf.quiet()) {
+      println("# Fixpoint iteration(#): " + typing.numIter)
+    }
 
     printf("# Peak memory(mb): %.2f\n", MemoryMeasurer.peakMemory)
     printf("# Result heap memory(mb): %.2f\n", MemoryMeasurer.measureHeap)
     println("\n* Statistics *")
-    println("# Total state count: " + typingInterface.getStateCount)
+    println("# Total state count: " + typing.getStateCount)
 
     if (Config.testMode) {
-      TestHelper.printTestObjects(typingInterface)
+      TestHelper.printTestObjects(typing)
     }
   }
 }
