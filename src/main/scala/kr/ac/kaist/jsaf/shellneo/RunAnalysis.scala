@@ -32,6 +32,8 @@ private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val trace = opt[Boolean]("trace", descr = "trace output for AI semantics")
   val test = opt[Boolean]("test", descr = "expose abstract types for testing")
   val jquery = opt[Boolean]("jquery", descr = "enable jQuery model")
+  val maxStrSet = opt[Int]("max-strset-size", descr = "max string set size", validate = _ > 0, default = Some(1))
+  val timeout = opt[Int]("timeout", descr = "timeout in seconds", validate = _ > 0)
   requireOne(inputFiles, htmlFile)
 }
 
@@ -70,7 +72,8 @@ object RunAnalysis {
     Config.setLoopSensitiveMode(true)
     Config.setContextSensitivityMode(Config.Context_Loop)
     Config.setContextSensitivityDepth(10)
-    //Shell.params.opt_MaxStrSetSize = 32
+
+    Shell.params.opt_MaxStrSetSize = conf.maxStrSet()
 
     // Initialize AbsString cache
     domain.AbsString.initCache
@@ -88,6 +91,9 @@ object RunAnalysis {
     Config.traceAI = conf.trace()
     Config.testMode = conf.test()
     Config.jqMode = conf.jquery()
+
+    if (conf.timeout.isSupplied)
+      Shell.params.opt_Timeout = conf.timeout()
   }
 
   def parseJS(files: Seq[String]) = {
