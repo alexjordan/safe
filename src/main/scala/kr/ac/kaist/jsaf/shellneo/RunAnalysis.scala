@@ -110,6 +110,8 @@ object RunAnalysis {
 
   def analyze(_prog: Program, html: Document, conf: ShellConf) = {
 
+    println("Context-sensitivity mode is \"" + kr.ac.kaist.jsaf.analysis.typing.CallContext.getModeName + "\".")
+
     var program = _prog
 
     // concatenate modeled ASTs
