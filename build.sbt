@@ -36,10 +36,8 @@ nightly := {
 	antTaskKey("testNightly").value
 }
 
-// quick test task
-lazy val quick = taskKey[Unit]("Runs quick test.")
+nightly <<= nightly dependsOn compile
 
-quick := {
-	(test in Test).value
-	antTaskKey("testTyping").value
-}
+// quick test task
+addCommandAlias("quick", ";compile;test;antRun testTyping")
+
