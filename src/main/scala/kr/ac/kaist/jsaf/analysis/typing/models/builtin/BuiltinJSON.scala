@@ -257,7 +257,7 @@ object BuiltinJSON extends ModelData {
        }
       }
       catch {
-        case _ => None
+        case _: Throwable => None
       }
     }
     else
@@ -318,7 +318,7 @@ object BuiltinJSON extends ModelData {
                   ((Helper.ReturnStore(newh, retval), newctx), (he, ctxe))
                 }
                 catch {
-                  case _ => 
+                  case _: Throwable =>
                     ((Helper.ReturnStore(h, JSONValueTop), ctx), (he, ctxe))
 
                 }
@@ -371,7 +371,7 @@ object BuiltinJSON extends ModelData {
                 }
               }
               catch{
-                case _ => value
+                case _: Throwable => value
               }
           }
 
