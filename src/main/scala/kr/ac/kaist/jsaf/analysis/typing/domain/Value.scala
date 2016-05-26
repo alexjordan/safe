@@ -10,25 +10,32 @@
 package kr.ac.kaist.jsaf.analysis.typing.domain
 
 import scala.runtime.ScalaRunTime._hashCode
+import kr.ac.kaist.jsaf.analysis.imprecision.{ImprecisionHint, ImprecisionTracker, NoHint}
+
 
 object Value {
   /* convenience constructors */
-  def apply(v: Loc): Value = new Value(PValueBot, LocSet(v))
-  def apply(v: LocSet): Value = new Value(PValueBot, v)
-  def apply(v: PValue): Value = new Value(v, LocSetBot)
-  def apply(v: AbsUndef): Value = new Value(PValue(v), LocSetBot)
-  def apply(v: AbsNumber): Value = new Value(PValue(v), LocSetBot)
-  def apply(v: AbsBool): Value = new Value(PValue(v), LocSetBot)
-  def apply(v: AbsNull): Value = new Value(PValue(v), LocSetBot)
-  def apply(v: AbsString): Value = new Value(PValue(v), LocSetBot)
-  def apply(pv: PValue, locs: LocSet) = new Value(pv, locs)
+  def apply(v: Loc): Value =  Value(PValueBot, LocSet(v))
+  def apply(v: LocSet): Value =  Value(PValueBot, v)
+  def apply(v: PValue): Value =  Value(v, LocSetBot)
+  def apply(v: AbsUndef): Value =  Value(PValue(v), LocSetBot)
+  def apply(v: AbsNumber): Value =  Value(PValue(v), LocSetBot)
+  def apply(v: AbsBool): Value =  Value(PValue(v), LocSetBot)
+  def apply(v: AbsNull): Value =  Value(PValue(v), LocSetBot)
+  def apply(v: AbsString): Value =  Value(PValue(v), LocSetBot)
+
+  // external use, imprecision is being passed on
+  def apply(pv: PValue, locs: LocSet) = new Value(pv, locs, ImprecisionTracker.InstHint)
+
+  def hint(v: Value, hint: ImprecisionHint) { v.imphint = v.imphint + hint }
 }
 
-final class Value(val pv: PValue, val locs: LocSet) extends Product2[PValue,LocSet] {
+final class Value(private val _pv: PValue, private val _locs: LocSet, var imphint: ImprecisionHint = NoHint)
+  extends Product2[PValue,LocSet] {
 
   // Value is now a Product
-  override def _1 = pv
-  override def _2 = locs
+  override def _1 = _pv
+  override def _2 = _locs
   override def hashCode() = _hashCode(this)
   override def canEqual(that: Any) = that.isInstanceOf[Value]
   override def equals(that: Any) = that match {
@@ -41,12 +48,24 @@ final class Value(val pv: PValue, val locs: LocSet) extends Product2[PValue,LocS
 //    case _ => false
 //  }
 
+  def locs: LocSet = {
+    if (imphint != NoHint)
+      ImprecisionTracker.valueLocsAccess(imphint)
+    _locs
+  }
+
+  def pv: PValue = {
+    if (imphint != NoHint)
+      ImprecisionTracker.valuePVAccess(imphint)
+    _pv
+  }
+
   /* partial order */
   def <= (that : Value): Boolean = {
     if (this eq that) true
     else {
-      this.pv <= that.pv &&
-      this.locs.subsetOf(that.locs)
+      this._pv <= that._pv &&
+      this._locs.subsetOf(that._locs)
     }
   }
 
@@ -54,8 +73,8 @@ final class Value(val pv: PValue, val locs: LocSet) extends Product2[PValue,LocS
   def </ (that: Value): Boolean = {
     if (this eq that) false
     else {
-      !(this.pv <= that.pv) ||
-      !(this.locs.subsetOf(that.locs))
+      !(this._pv <= that._pv) ||
+      !(this._locs.subsetOf(that._locs))
     }
   }
 
@@ -83,27 +102,27 @@ final class Value(val pv: PValue, val locs: LocSet) extends Product2[PValue,LocS
 
   /* substitute l_r by l_o */
   def subsLoc(l_r: Loc, l_o: Loc): Value = {
-    if (locs(l_r)) Value(pv, (locs - l_r) + l_o)
+    if (_locs(l_r)) new Value(_pv, (_locs - l_r) + l_o, imphint)
     else this
   }
 
   /* weakly substitute l_r by l_o, that is keep l_r together */
   def weakSubsLoc(l_r: Loc, l_o: Loc): Value = {
-    if (locs(l_r)) Value(pv, locs + l_o)
+    if (_locs(l_r)) new Value(pv, locs + l_o, imphint)
     else this
   }
 
   def typeCount = {
-    if (locs.isEmpty)
-      pv.typeCount
+    if (_locs.isEmpty)
+      _pv.typeCount
     else
-      pv.typeCount + 1
+      _pv.typeCount + 1
   }
 
   def typeKinds: String = {
     val sb = new StringBuilder()
     sb.append(pv.typeKinds)
-    if(!locs.isEmpty) sb.append((if(sb.length > 0) ", " else "") + "Object")
+    if(!_locs.isEmpty) sb.append((if(sb.length > 0) ", " else "") + "Object")
     sb.toString
   }
 }

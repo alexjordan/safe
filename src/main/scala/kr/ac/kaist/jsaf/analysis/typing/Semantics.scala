@@ -220,6 +220,8 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
     val h = s._1
     val ctx = s._2
 
+    ImprecisionTracker.nextBlock(c)
+
     if (h <= HeapBot) {
       (StateBot, StateBot)
     } else {
@@ -911,7 +913,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           }}
 
           // check number of possible functions to be called
-          ImprecisionTracker.callViaLocations(lset_f, info)
+          ImprecisionTracker.callViaLocations(v_1, lset_f, info)
 
           // for actual call
           lset_f.foreach {l_f => {
@@ -1352,10 +1354,11 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           semantics.get(fun) match {
             case Some(f) =>
               val ((h2, ctx2), (he2, ctxe2)) = f(this, h, ctx, he, ctxe, cp, cfg, fun, args)
-              if (model == "DOM") {
-                ImprecisionTracker.DOMReturn(h2(SinglePureLocalLoc)("@return"))
-              }
-              (noStop(h2, ctx2), (he2, ctxe2))
+              val h3 = if (model == "DOM")
+                ImprecisionTracker.DOMReturn(h2)
+              else
+                h2
+              (noStop(h3, ctx2), (he2, ctxe2))
             case None =>
               if (!Config.quietMode)
                 System.err.println("* Warning: Semantics of the API function '"+fun+"' are not defined.")

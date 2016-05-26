@@ -57,6 +57,7 @@ import kr.ac.kaist.jsaf.analysis.typing.domain.Context
 import kr.ac.kaist.jsaf.analysis.typing.models.AbsBuiltinFunc
 
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 object HTMLDocument extends DOM {
   private val name = "HTMLDocument"
@@ -150,6 +151,7 @@ object HTMLDocument extends DOM {
           /* arguments */
           val arg0_str = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           System.err.println("Bad HTMLDocument.writeln(%s)".format(if (arg0_str.isConcrete) "<concrete>" else arg0_str.toString))
+          ImprecisionTracker.report("HTMLDocument.writeln", getArgValue(h, ctx, args, "0").imphint)
           ((h, ctx), (he, ctxe))
         }),
       "HTMLDocument.getElementsByName" -> (

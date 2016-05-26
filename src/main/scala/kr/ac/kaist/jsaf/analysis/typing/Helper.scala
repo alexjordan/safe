@@ -11,8 +11,9 @@ package kr.ac.kaist.jsaf.analysis.typing
 
 import scala.collection.immutable.HashSet
 import kr.ac.kaist.jsaf.analysis.cfg._
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 import kr.ac.kaist.jsaf.analysis.typing.domain._
-import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolTrue => BT, BoolFalse => BF}
+import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => BF, BoolTrue => BT}
 import kr.ac.kaist.jsaf.analysis.typing.models.builtin._
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
@@ -1018,8 +1019,9 @@ object Helper {
       PreHelper.toObject(h, ctx, v, a_new)
     } else {
       // 9.9 ToObject
-      val lset = v.locs
+      ImprecisionTracker.report("toObject", v.imphint)
 
+      val lset = v.locs
       val o_1 =
         if (!(v.pv._5 <= StrBot)) Helper.NewString(v.pv._5)
         else Obj.bottom

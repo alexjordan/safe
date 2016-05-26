@@ -596,7 +596,7 @@ object DOMDocument extends DOM {
               val lset_find = DOMHelper.findById(h, s_id)
               ImprecisionTracker.trackDOMLookup(s_id, lset_find)
               val v_null = if (!s_id.isConcrete || !lset_find.exists(l => {
-                h(l)(AbsString.alpha("id")).objval.value.pvalue.strval.isConcrete}))
+                h(l)(AbsString.alpha("id")).objval.value.pv.strval.isConcrete}))
                 Value(NullTop)
               else
                 ValueBot
