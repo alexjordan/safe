@@ -72,7 +72,7 @@ trait ObjPropBehaviors {
   def concatenation: Unit = {
     it should "concat concrete" in {
       val s = Operator.bopPlus(toValue("foo"), toValue("bar"))
-      s._1._5.gamma.value should contain only "foobar"
+      s.pv._5.gamma.value should contain only "foobar"
     }
   }
 }

@@ -124,7 +124,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
       "jQuery.each" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -139,9 +139,9 @@ private val prop_const: List[(String, AbsProperty)] = List(
           val (h_3, ctx_3) = Helper.Oldify(h_2, ctx_2, addr3)
 
           /* target */
-          val lset_target = getArgValue(h_3, ctx_3, args, "0")._2
+          val lset_target = getArgValue(h_3, ctx_3, args, "0").locs
           /* fun */
-          val lset_fun = getArgValue(h_3, ctx_3, args, "1")._2.filter((l) => BoolTrue <= Helper.IsCallable(h, l))
+          val lset_fun = getArgValue(h_3, ctx_3, args, "1").locs.filter((l) => BoolTrue <= Helper.IsCallable(h, l))
 
           val b_isarr = lset_target.foldLeft[AbsBool](BoolBot)((b, l) => b + JQueryHelper.isArraylike(h_3, l))
           // arg1
@@ -152,7 +152,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
               case (AbsBot, _) => ValueBot
               case _ => throw new InternalError("AbsBool does not have an abstract value for multiple values.")
             }
-          val s_index = Helper.toString(v_index._1)
+          val s_index = Helper.toString(v_index.pv)
           // arg2
           val v_elem = lset_target.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h_3, l, s_index))
 
@@ -164,7 +164,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
           val v_arg = Value(l_arg)
 
           val lset_argthis = Helper.getThis(h_4, v_elem)
-          val v_this2 = Value(PValue(UndefBot, NullBot, v_elem._1._3, v_elem._1._4, v_elem._1._5), lset_argthis)
+          val v_this2 = Value(PValue(UndefBot, NullBot, v_elem.pv._3, v_elem.pv._4, v_elem.pv._5), lset_argthis)
           val (callee_this, h_5, ctx_5, es3) = Helper.toObject(h_4, ctx_3, v_this2, addr3)
 
 
@@ -177,7 +177,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
           lset_fun.foreach((l_f) => {
             val o_f = h_5(l_f)
             o_f("@function")._3.foreach((fid) => {
-              cc_caller.NewCallContext(h, cfg, fid, l_cc, callee_this._2).foreach((pair) => {
+              cc_caller.NewCallContext(h, cfg, fid, l_cc, callee_this.locs).foreach((pair) => {
                 val (cc_new, o_new) = pair
                 val o_new2 = o_new.
                   update(cfg.getArgumentsName(fid),
@@ -189,7 +189,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
               })
             })
           })
-          val h_6 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+          val h_6 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
             hh + h_5.update(l, h_5(l).update("callee",
               PropValue(ObjectValue(Value(lset_fun), BoolTrue, BoolFalse, BoolTrue))))
           })
@@ -200,17 +200,17 @@ private val prop_const: List[(String, AbsProperty)] = List(
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v = getArgValue(h, ctx, args, "0")
           val b_1 =
-            if (v._1 </ PValueBot) BoolFalse
+            if (v.pv </ PValueBot) BoolFalse
             else BoolBot
-          val b_2 = v._2.foldLeft[AbsBool](BoolBot)((_b, l) => {
+          val b_2 = v.locs.foldLeft[AbsBool](BoolBot)((_b, l) => {
             // XXX : Check whether it is correct or not
             if (!h.domIn(l)) BoolBot
             else  {
               val _b1 =
-                if (AbsString.alpha("Array") <= h(l)("@class")._2._1._5) BoolTrue
+                if (AbsString.alpha("Array") <= h(l)("@class")._2.pv._5) BoolTrue
                 else BoolBot
               val _b2 =
-                if (AbsString.alpha("Array") </ h(l)("@class")._2._1._5) BoolFalse
+                if (AbsString.alpha("Array") </ h(l)("@class")._2.pv._5) BoolFalse
                 else BoolBot
               _b + _b1 + _b2}})
           val b = b_1 + b_2
@@ -222,7 +222,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
       ("jQuery.map.init" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -230,7 +230,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
           val l_r = addrToLoc(addr1, Recent)
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
           
-          val v_elems = getArgValue(h, ctx, args, "0")._2
+          val v_elems = getArgValue(h, ctx, args, "0").locs
           val v_callbackfn = getArgValue(h, ctx, args, "1")
 
 
@@ -260,7 +260,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_this = h(SinglePureLocalLoc)("@this")._2
 
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -269,7 +269,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
           val v_callbackfn = getArgValue(h, ctx, args, "1")
           val v_args = getArgValue(h, ctx, args, "2")
 
-          val b_isArray = h(SinglePureLocalLoc)("isArray")._1._1._1._3
+          val b_isArray = h(SinglePureLocalLoc)("isArray")._1._1.pv._3
 
           val addr1 = cfg.getAPIAddress(addr_env, 1)
           val addr2 = cfg.getAPIAddress(addr_env, 2)
@@ -279,14 +279,14 @@ private val prop_const: List[(String, AbsProperty)] = List(
           val (h_2, ctx_2) = Helper.Oldify(h_1, ctx_1, addr2)
 
 
-          val cond = v_callbackfn._2.exists((l) => BoolFalse <= Helper.IsCallable(h_2, l))
+          val cond = v_callbackfn.locs.exists((l) => BoolFalse <= Helper.IsCallable(h_2, l))
           val es =
             if (cond) Set[Exception](TypeError)
             else Set[Exception]()
           val (h_e, ctx_e) = Helper.RaiseException(h_2, ctx_2, es)
-          val lset_f = v_callbackfn._2.filter((l) => BoolTrue <= Helper.IsCallable(h_2, l))
+          val lset_f = v_callbackfn.locs.filter((l) => BoolTrue <= Helper.IsCallable(h_2, l))
            
-          val lset_elems = v_elems._2
+          val lset_elems = v_elems.locs
           val (value, index) = b_isArray.getAbsCase match {
             case AbsBot => (ValueBot, ValueBot)
             case AbsSingle if BoolTrue <= b_isArray =>
@@ -318,7 +318,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
             lset_f.foreach((l_f) => {
               val o_f = h_3(l_f)
               o_f("@function")._3.foreach((fid) => {
-                cc_caller.NewCallContext(h, cfg, fid, l_r2, callee_this._2).foreach((pair) => {
+                cc_caller.NewCallContext(h, cfg, fid, l_r2, callee_this.locs).foreach((pair) => {
                   val (cc_new, o_new) = pair
                   val o_new2 = o_new.
                     update(cfg.getArgumentsName(fid),
@@ -330,7 +330,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
                 })
               })
             })
-            val h_4 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+            val h_4 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
               hh + h_3.update(l, h_3(l).update("callee",
                 PropValue(ObjectValue(Value(lset_f), BoolTrue, BoolFalse, BoolTrue))))
             })
@@ -344,7 +344,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
 
       ("jQuery.map.ret" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val b_isArray = h(SinglePureLocalLoc)("isArray")._1._1._1._3
+          val b_isArray = h(SinglePureLocalLoc)("isArray")._1._1.pv._3
           val index = b_isArray.getAbsCase match {
             case AbsBot => StrBot
             case AbsSingle if BoolTrue <= b_isArray =>
@@ -356,7 +356,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
             val v_return = Helper.Proto(h, SinglePureLocalLoc, AbsString.alpha("temp"))
             val v_ret = Helper.Proto(h, SinglePureLocalLoc, AbsString.alpha("ret"))
 
-            val h_1 = v_ret._2.foldLeft(h)((_h, l) => {
+            val h_1 = v_ret.locs.foldLeft(h)((_h, l) => {
               var _h1 = Helper.PropStore(_h, l, index, v_return)
               Helper.PropStore(_h1, l, AbsString.alpha("length"), Value(AbsNumber.naturalNumbers))
             })
@@ -372,7 +372,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
         })),
       ("jQuery.extend" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val n_len = getArgValue(h, ctx, args, "length")._1._4
+          val n_len = getArgValue(h, ctx, args, "length").pv._4
           val (h_ret, v_ret) =
             n_len.getSingle match {
               case Some(n) =>
@@ -381,7 +381,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
               case None =>
                 if (n_len </ NumBot)
                 // giveup, unsound
-                  (h, Value(h(SinglePureLocalLoc)("@this")._2._2))
+                  (h, Value(h(SinglePureLocalLoc)("@this")._2.locs))
                 else
                   (HeapBot, ValueBot)
             }
@@ -392,7 +392,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
         })),
       ("jQuery.prototype.extend" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val n_len = getArgValue(h, ctx, args, "length")._1._4
+          val n_len = getArgValue(h, ctx, args, "length").pv._4
           val (h_ret, v_ret) =
             n_len.getSingle match {
               case Some(n) =>
@@ -401,7 +401,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
               case None =>
                 if (n_len </ NumBot)
                 // giveup, unsound
-                  (h, Value(h(SinglePureLocalLoc)("@this")._2._2))
+                  (h, Value(h(SinglePureLocalLoc)("@this")._2.locs))
                 else
                   (HeapBot, ValueBot)
             }
@@ -412,7 +412,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
         })),
       ("jQuery.trim" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val s_arg = getArgValue(h, ctx, args, "0")._1._5
+          val s_arg = getArgValue(h, ctx, args, "0").pv._5
           val v_ret = s_arg.getSingle match {
             case Some(_) =>
               Value(s_arg.trim)
@@ -430,7 +430,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
       ("jQuery.type" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_arg = getArgValue(h, ctx, args, "0")
-          val pv_arg = v_arg._1
+          val pv_arg = v_arg.pv
           val s_1 =
             if (pv_arg._1 </ UndefBot)
               AbsString.alpha("undefined")
@@ -457,8 +457,8 @@ private val prop_const: List[(String, AbsProperty)] = List(
             else
               StrBot
           // [[class]] ?
-          val s_6 = v_arg._2.foldLeft[AbsString](StrBot)((s, l) => {
-            val s_class = h(l)("@class")._2._1._5
+          val s_6 = v_arg.locs.foldLeft[AbsString](StrBot)((s, l) => {
+            val s_class = h(l)("@class")._2.pv._5
             s_class.getSingle match {
               case Some(name) =>
                 if (name.contains("Error"))
@@ -483,15 +483,15 @@ private val prop_const: List[(String, AbsProperty)] = List(
       ("jQuery.isFunction" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_arg = getArgValue(h, ctx, args, "0")
-          val b1 = if(v_arg._1._1 </ UndefBot || v_arg._1._2 </ NullBot || v_arg._1._3 </ BoolBot || 
-                      v_arg._1._4 </ NumBot || v_arg._1._5 </ StrBot) F else T
+          val b1 = if(v_arg.pv._1 </ UndefBot || v_arg.pv._2 </ NullBot || v_arg.pv._3 </ BoolBot ||
+                      v_arg.pv._4 </ NumBot || v_arg.pv._5 </ StrBot) F else T
           //val b2 = if(v_arg._1._2 </ NullBot) F else T
           //val b3 = if(v_arg._1._3 </ BoolBot) F else T
           //val b4 = if(v_arg._1._4 </ NumBot) F else T
           //val b5 = if(v_arg._1._5 </ StrBot) F else T
-          val b2 = v_arg._2.foldLeft(BoolBot:AbsBool)((b,l) => {
-            if(AbsString.alpha("Function") <= h(l)("@class")._2._1._5 &&
-               T <= h(l).domIn("@function") && h(l)("@function")._1._1._2.isEmpty) b + T
+          val b2 = v_arg.locs.foldLeft(BoolBot:AbsBool)((b, l) => {
+            if(AbsString.alpha("Function") <= h(l)("@class")._2.pv._5 &&
+               T <= h(l).domIn("@function") && h(l)("@function")._1._1.locs.isEmpty) b + T
                else b + F
           })
             ((Helper.ReturnStore(h, Value(b1+b2)), ctx), (he, ctxe))

@@ -143,7 +143,7 @@ class Coverage() {
     var cstate = stateManager.getOutputCState(cfgNode, inst.getInstId, _MOST_SENSITIVE)
     var thisNames = List[String]()
     for ((callContext, state) <- cstate) {
-      var lset = state._1(SinglePureLocalLoc)(thisArg.toString)._1._1._2.toSet
+      var lset = state._1(SinglePureLocalLoc)(thisArg.toString)._1._1.locs.toSet
       // Compute this object
       val thisObj = computeObject(state._1, lset)
       val temp = thisNames:::computeConstructorName(state._1, thisObj)
@@ -165,7 +165,7 @@ class Coverage() {
             val argvars = cfg.getArgVars(fid)
 
             for ((callContext, state) <- stateManager.getOutputCState(succCP._1, inst.getInstId, _MOST_SENSITIVE)) {
-              val arglset = state._1(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1._2
+              val arglset = state._1(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1.locs
               // Number of an argument
               var i = 0
               val h_n = argvars.foldLeft(state._1)((hh, x) => {
@@ -179,7 +179,7 @@ class Coverage() {
                   if (t == "Object") { 
                     if (state </ StateBot) {
                       // Compute object 
-                      var lset = v_i._2.toSet 
+                      var lset = v_i.locs.toSet
                       val obj = computeObject(hh, lset) 
                         
                       // TODO: WARNING, just use one location in location set.
@@ -195,7 +195,7 @@ class Coverage() {
                       if (isArray) {
                         tinfo.addConstructors(List("Array"))
                         val arrayObj = computeObject(hh, lset) 
-                        var length = arrayObj("length")._1._1._1.toString
+                        var length = arrayObj("length")._1._1.pv.toString
                         if (length == "UInt")
                           length = "0"
                         tinfo.setProperties(List(length))
@@ -222,7 +222,7 @@ class Coverage() {
               if (cfg.isUserFunction(fid))
                 finfo.setCandidate
               if (functionName.contains(".")) {
-                val thislset = state._1(SinglePureLocalLoc)("@this")._2._2.toSet
+                val thislset = state._1(SinglePureLocalLoc)("@this")._2.locs.toSet
                 val thisObj = computeObject(h_n, thislset) 
 
                 var properties = computePropertyList(thisObj, true)
@@ -247,7 +247,7 @@ class Coverage() {
 
   def computePropertyList(obj: Obj, onlyPrimitive: Boolean): List[String]  = {
     var properties = obj.getProps.foldLeft[List[String]](List())((list, prop) => { 
-        val p = obj(prop)._1._1._1
+        val p = obj(prop)._1._1.pv
         if (!onlyPrimitive || !p.typeKinds.contains("Object"))
           prop::list
         else
@@ -267,11 +267,11 @@ class Coverage() {
 
   def computeConstructorName(heap: Heap, obj: Obj): List[String] = {
     // Compute prototype object
-    var lset = obj("@proto")._1._1._2.toSet
+    var lset = obj("@proto")._1._1.locs.toSet
     val proto = computeObject(heap, lset) 
 
     // Compute constructor object
-    lset = proto("constructor")._1._1._2.toSet
+    lset = proto("constructor")._1._1.locs.toSet
     val constructor = computeObject(heap, lset) 
 
     // Get constructor names 

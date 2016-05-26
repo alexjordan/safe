@@ -155,23 +155,23 @@ class TSChecker(bugDetector: BugDetector)  extends Walker {
   }
 
   def isAbsent(value: Value): Boolean = {
-    ((value.pvalue.undefval.isBottom)
-    && (value.pvalue.nullval.isBottom)
-    && (value.pvalue.boolval.isBottom)
-    && (value.pvalue.strval.isBottom)
-    && (value.pvalue.numval.isBottom)
-    && (value.locset.size==0))
+    ((value.pv.undefval.isBottom)
+    && (value.pv.nullval.isBottom)
+    && (value.pv.boolval.isBottom)
+    && (value.pv.strval.isBottom)
+    && (value.pv.numval.isBottom)
+    && (value.locs.size==0))
   }
 
   def checkType(given: Value, expected: Type): Boolean = { 
     val state = typing.mergeState(cstate)
 
-    val undefval = given.pvalue.undefval
-    val nullval = given.pvalue.nullval
-    val boolval = given.pvalue.boolval
-    val strval = given.pvalue.strval
-    val numval = given.pvalue.numval
-    val locset = given.locset
+    val undefval = given.pv.undefval
+    val nullval = given.pv.nullval
+    val boolval = given.pv.boolval
+    val strval = given.pv.strval
+    val numval = given.pv.numval
+    val locset = given.locs
 
     expected match {
       case SAnyT(info) => true
@@ -185,7 +185,7 @@ class TSChecker(bugDetector: BugDetector)  extends Walker {
           if (propertyName != null) {
             for (fid <- state.heap(funLoc)(propertyName).funid) {
               val plen = params.length
-              val alen = state.heap(funLoc)("length").objval.value.pvalue.numval.getSingle match {
+              val alen = state.heap(funLoc)("length").objval.value.pv.numval.getSingle match {
                 case Some(v) => v
                 case None => -1
               }
@@ -203,7 +203,7 @@ class TSChecker(bugDetector: BugDetector)  extends Walker {
             case Some(b) => {
               if (b) {
                 val arr = state.heap(arrLoc)
-                val length = arr("length").objval.value.pvalue.numval.getSingle match {
+                val length = arr("length").objval.value.pv.numval.getSingle match {
                   case Some(v) => v.toInt
                   case None => -1
                 }
@@ -273,7 +273,7 @@ class TSChecker(bugDetector: BugDetector)  extends Walker {
           if (propertyName != null) {
             for (fid <- state.heap(funLoc)(propertyName).funid) {
               val plen = params.length
-              val alen = state.heap(funLoc)("length").objval.value.pvalue.numval.getSingle match {
+              val alen = state.heap(funLoc)("length").objval.value.pv.numval.getSingle match {
                 case Some(v) => v
                 case None => -1
               }

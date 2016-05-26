@@ -604,7 +604,7 @@ class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterfa
                     (m, kv) => {
                       val h = kv._2._1
                       val ctx = kv._2._2
-                      val lset = SE.V(fun, h, ctx)._1._2
+                      val lset = SE.V(fun, h, ctx)._1.locs
                       lset.foldLeft(m)(
                         (_m, l) =>
                           if (BoolTrue <= Helper.IsCallable(h,l)) {
@@ -621,7 +621,7 @@ class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterfa
                     (m, kv) => {
                       val h = kv._2._1
                       val ctx = kv._2._2
-                      val lset = SE.V(cons, h, ctx)._1._2
+                      val lset = SE.V(cons, h, ctx)._1.locs
                       lset.foldLeft(m)(
                         (_m, l) =>
                           if (BoolTrue <= Helper.HasConstruct(h,l)) {
@@ -652,7 +652,7 @@ class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterfa
     state._1.map.foldLeft[Map[Loc, Set[Loc]]](Map())(
       (map, kv) =>
         if (BoolTrue <= kv._2.domIn("@proto"))
-          map + (kv._1 -> kv._2("@proto")._1._1._2.toSet)
+          map + (kv._1 -> kv._2("@proto")._1._1.locs.toSet)
         else
           map)
             
@@ -668,7 +668,7 @@ class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterfa
    */
   override def getFuncNameByLoc(state:State, loc: Loc): Set[String] = {
     val h = state._1
-    h(loc)("@class")._2._1._5.getSingle match {
+    h(loc)("@class")._2.pv._5.getSingle match {
       case Some(str) if str =="Function" =>
         if (BoolTrue <= h(loc).domIn("@function")) {
 	      val fset = h(loc)("@function")._3
@@ -681,7 +681,8 @@ class Typing(_cfg: CFG, quiet: Boolean, locclone: Boolean) extends TypingInterfa
   }
   /**
    * Integrate old location and recent location
-   * @param s input state
+    *
+    * @param s input state
    * @returns state
    */
   override def integrateRecentState(s:State) : State = {

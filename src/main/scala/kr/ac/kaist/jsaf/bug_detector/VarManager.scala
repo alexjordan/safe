@@ -57,7 +57,7 @@ class VarManager(bugDetector: BugDetector) {
         insertLocInfo(addr, inst, inst, lhs)
         insertVarInfo(BugVar0(lhs, null), null)
       case CFGExprStmt(_, _, lhs, right) =>
-        val objLocSet = SemanticsExpr.V(right, state.heap, state.context)._1.locset
+        val objLocSet = SemanticsExpr.V(right, state.heap, state.context)._1.locs
         objLocSet.foreach(objLoc => {
           insertLocInfo(locToAddr(objLoc), null, inst, lhs)
         })

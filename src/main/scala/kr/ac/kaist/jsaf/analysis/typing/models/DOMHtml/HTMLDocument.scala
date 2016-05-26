@@ -154,7 +154,7 @@ object HTMLDocument extends DOM {
         }),
       "HTMLDocument.getElementsByName" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -164,10 +164,10 @@ object HTMLDocument extends DOM {
           if (s_name </ StrBot) {
  
             if(Shell.params.opt_Dommodel2){
-              val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+              val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
               val l_r = addrToLoc(addr1, Recent)
               val (h_1, ctx_1)  = Helper.Oldify(h, ctx, addr1)
-              val lset = Helper.Proto(h, NameTableLoc, s_name)._2
+              val lset = Helper.Proto(h, NameTableLoc, s_name).locs
               val proplist = HTMLCollection.getInsList(0) 
               val obj = proplist.foldLeft(Obj.empty)((o, p) => o.update(p._1, p._2))
               val new_obj = if(lset.size > 0) 

@@ -53,7 +53,7 @@ trait ModelData {
     SE.V(CFGLoad(dummyInfo, args, CFGString(x)), h, ctx)._1
   }
   protected def getArgValueAbs(h : Heap, ctx: Context, args: CFGExpr, s : AbsString):Value = {
-    val lset = SE.V(args,h,ctx)._1._2
+    val lset = SE.V(args,h,ctx)._1.locs
     val v = lset.foldLeft(ValueBot)((v_1, l) => v_1 + Helper.Proto(h,l,s))
     v
   }
@@ -65,7 +65,7 @@ trait ModelData {
     * @param args
     */
   protected def getConcreteArgsObj(h : Heap, ctx: Context, args: CFGExpr): Obj = {
-    val l_args = SE.V(args,h,ctx)._1.locset
+    val l_args = SE.V(args,h,ctx)._1.locs
     if (l_args.size != 1)
       throw new NonConcreteException("Concrete arguments object expected")
     h(l_args.head)

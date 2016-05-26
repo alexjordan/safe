@@ -60,21 +60,21 @@ object SemanticsExpr {
             case "<=" => (bopLessEq(v_1,v_2), es_1 ++ es_2)
             case ">=" => (bopGreaterEq(v_1,v_2), es_1 ++ es_2)
             case "instanceof" =>
-              val lset_1 = v_1._2
-              val lset_2 = v_2._2
+              val lset_1 = v_1.locs
+              val lset_2 = v_2.locs
               val lset_3 = lset_2.filter((l) => BoolTrue <= Helper.HasInstance(h, l))
               val v_proto = lset_3.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h,l,AbsString.alpha("prototype")))
-              val lset_4 = v_proto._2
+              val lset_4 = v_proto.locs
               val lset_5 = lset_2.filter((l) => BoolFalse <= Helper.HasInstance(h, l))
               val b_1 = lset_1.foldLeft[Value](ValueBot)((v_1, l_1) =>
                 lset_4.foldLeft[Value](v_1)((v_2, l_2) => v_2 + Helper.inherit(h, l_1, l_2)))
               val b_2 =
-                if ((v_1._1 </ PValueBot) && !(lset_4.isEmpty))
+                if ((v_1.pv </ PValueBot) && !(lset_4.isEmpty))
                   Value(BoolFalse)
                 else
                   Value(BoolBot)
               val es_3 =
-                if ((v_2._1 </ PValueBot) || !(lset_5.isEmpty) || (v_proto._1 </ PValueBot))
+                if ((v_2.pv </ PValueBot) || !(lset_5.isEmpty) || (v_proto.pv </ PValueBot))
                   Set[Exception](TypeError)
                 else
                   Set[Exception]()
@@ -82,11 +82,11 @@ object SemanticsExpr {
               val es = es_1 ++ es_2 ++ es_3
               (b, es)
             case "in" =>
-              val lset = v_2._2
+              val lset = v_2.locs
               val s = Helper.toString(Helper.toPrimitive_better(h, v_1))
               val b = lset.foldLeft[AbsBool](BoolBot)((v, l) => v + Helper.HasProperty(h, l, s))
               val es_3 =
-                if (v_2._1 </ PValueBot)
+                if (v_2.pv </ PValueBot)
                   Set[Exception](TypeError)
                 else
                   Set[Exception]()
@@ -118,7 +118,7 @@ object SemanticsExpr {
         if (v <= ValueBot) (ValueBot, es)
         else {
           // lset must not be empty because obj is coming through <>toObject.
-          val lset = V(obj,h,ctx)._1._2
+          val lset = V(obj,h,ctx)._1.locs
           
           val sset = Helper.toStringSet(Helper.toPrimitive_better(h, v))
           val v_1 = lset.foldLeft(ValueBot)((vv_1, l) => {
@@ -146,7 +146,7 @@ object SemanticsExpr {
       case CFGString(str) => (Value(PValue(AbsString.alpha(str))),ExceptionBot)
       case CFGBool(bool) => (Value(PValue(AbsBool.alpha(bool))),ExceptionBot)
       case CFGNull() => (Value(PValue(AbsNull.alpha)),ExceptionBot)
-      case CFGThis(info) => (Value(PValueBot, h(SinglePureLocalLoc)("@this")._2._2), ExceptionBot)
+      case CFGThis(info) => (Value(PValueBot, h(SinglePureLocalLoc)("@this")._2.locs), ExceptionBot)
     }
   }
 }

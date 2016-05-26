@@ -424,7 +424,7 @@ class FinalDetect(bugDetector: BugDetector) {
       val argObjLengthMap = new MHashMap[Obj, Int]()
       for (argObj <- argObjSet) {
         val propValue = argObj("length")
-        propValue.objval.value.pvalue.numval.getSingle match {
+        propValue.objval.value.pv.numval.getSingle match {
           case Some(lengthPropDouble) =>
             val lengthPropInt = lengthPropDouble.toInt
             if (maxArgObjLength < lengthPropInt) maxArgObjLength = lengthPropInt
@@ -447,9 +447,9 @@ class FinalDetect(bugDetector: BugDetector) {
             //println("  argObj[" + i + "] = " + propValue.objval.value)
           }
         }
-        var joinedValueTypeCount = joinedValue.pvalue.typeCount
-        if (!bugOption.VaryingTypeArguments_CheckUndefined && joinedValueTypeCount > 1 && joinedValue.pvalue.undefval != UndefBot) joinedValueTypeCount-= 1
-        val isBug: Boolean = (joinedValueTypeCount > 1 || joinedValueTypeCount == 1 && joinedValue.locset.size > 0)
+        var joinedValueTypeCount = joinedValue.pv.typeCount
+        if (!bugOption.VaryingTypeArguments_CheckUndefined && joinedValueTypeCount > 1 && joinedValue.pv.undefval != UndefBot) joinedValueTypeCount-= 1
+        val isBug: Boolean = (joinedValueTypeCount > 1 || joinedValueTypeCount == 1 && joinedValue.locs.size > 0)
         if (isBug) {
           var typeKinds: String = joinedValue.typeKinds
           if (isBuiltinFunc || i >= funcArgList.length) {

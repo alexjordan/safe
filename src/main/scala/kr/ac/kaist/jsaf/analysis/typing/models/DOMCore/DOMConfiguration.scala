@@ -63,7 +63,7 @@ object DOMConfiguration extends DOM {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* arguments */
           val s_name = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
-          val lset_value  = getArgValue(h, ctx, args, "1")._2
+          val lset_value  = getArgValue(h, ctx, args, "1").locs
           if (s_name </ StrBot || !lset_value.isEmpty)
           /* imprecise semantic */
           // do nothing???
@@ -76,7 +76,7 @@ object DOMConfiguration extends DOM {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* arguments */
           val s_name = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
-          val lset_value  = getArgValue(h, ctx, args, "1")._2
+          val lset_value  = getArgValue(h, ctx, args, "1").locs
           if (s_name </ StrBot || !lset_value.isEmpty)
           /* imprecise semantic */
             ((Helper.ReturnStore(h, Value(BoolTop)), ctx), (he, ctxe))

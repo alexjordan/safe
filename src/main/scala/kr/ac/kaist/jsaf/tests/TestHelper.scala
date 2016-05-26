@@ -91,13 +91,13 @@ object TestHelper {
       }
     }
 
-    val lazyStream: Stream[Boolean] = (v1.locset.isEmpty) #::
-      (v2.locset.isEmpty) #::
-      absEq(v1.pvalue._1, v2.pvalue._1) #::
-      absEq(v1.pvalue._2, v2.pvalue._2) #::
-      absEq(v1.pvalue._3, v2.pvalue._3) #::
-      absEq(v1.pvalue._4, v2.pvalue._4) #::
-      absEq(v1.pvalue._5, v2.pvalue._5) #::
+    val lazyStream: Stream[Boolean] = (v1.locs.isEmpty) #::
+      (v2.locs.isEmpty) #::
+      absEq(v1.pv._1, v2.pv._1) #::
+      absEq(v1.pv._2, v2.pv._2) #::
+      absEq(v1.pv._3, v2.pv._3) #::
+      absEq(v1.pv._4, v2.pv._4) #::
+      absEq(v1.pv._5, v2.pv._5) #::
       Stream.empty
 
     !lazyStream.contains(false)
@@ -133,7 +133,7 @@ object TestHelper {
       val obj: Obj = v
       if (obj.dom("type")) {
         val objmap = obj.asMap
-        if (objmap("type")._1.objval._1._1._5 <= AbsString.alpha(typeString)) {
+        if (objmap("type")._1.objval._1.pv._5 <= AbsString.alpha(typeString)) {
           ret :+= obj
         }
       }

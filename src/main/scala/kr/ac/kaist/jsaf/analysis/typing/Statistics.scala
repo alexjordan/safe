@@ -767,10 +767,10 @@ class Stat(sem: Semantics) {
       if (kv._2._1 <= HeapBot) curr 
       else {
         val v = SE.V(expr, kv._2._1, kv._2._2)._1
-        (v + curr._1, chooseMax(locSize(kv._2._1, v._2), curr._2))
+        (v + curr._1, chooseMax(locSize(kv._2._1, v.locs), curr._2))
       }
     })
-    val mcount = locSize(cstate.foldLeft(StateBot)((s, kv)=> s + kv._2)._1, v_join._2)
+    val mcount = locSize(cstate.foldLeft(StateBot)((s, kv)=> s + kv._2)._1, v_join.locs)
 
     /* total deref */
     val maxGlobal = chooseMax(count, deref._3)
@@ -816,13 +816,13 @@ class Stat(sem: Semantics) {
     val mcount = v_join.typeCount
 
     /* type total */
-    val undefTotal = if (mcount > 1 && UndefTop <= v_join._1._1) typ._2 + 1 else typ._2
+    val undefTotal = if (mcount > 1 && UndefTop <= v_join.pv._1) typ._2 + 1 else typ._2
     val maxTotal = chooseMax(count, typ._4) 
     val definiteTotal = if (count <= 1) typ._5 + 1 else typ._5
     typ = (typ._1 + mcount, undefTotal, typ._3 + 1, maxTotal, definiteTotal)
     
     /* selected type */
-    val undef = if (mcount > 1 && UndefTop <= v_join._1._1) ttyp._2 + 1 else ttyp._2
+    val undef = if (mcount > 1 && UndefTop <= v_join.pv._1) ttyp._2 + 1 else ttyp._2
     val max = chooseMax(count, ttyp._4)
     val definite = if (count <= 1) ttyp._5 + 1 else ttyp._5
     val new_ttyp = (ttyp._1 + mcount, undef, ttyp._3 + 1, max, definite)
@@ -904,7 +904,7 @@ class Stat(sem: Semantics) {
       val s = kv._2
       if (s._1 <= HeapBot) false 
       else {
-        val lset_obj = SE.V(obj, s._1, s._2)._1._2
+        val lset_obj = SE.V(obj, s._1, s._2)._1.locs
         locSize(s._1, lset_obj) match {
           case 0 => false
           case 1 => if (isOldLoc(lset_obj.head)) true else false
@@ -921,7 +921,7 @@ class Stat(sem: Semantics) {
       val s = kv._2
       if (s._1 <= HeapBot) false 
       else {
-        val lset = SE.V(expr, s._1, s._2)._1._2
+        val lset = SE.V(expr, s._1, s._2)._1.locs
         lset.exists(l => BoolFalse <= Helper.IsCallable(s._1, l))
       }      
     })
@@ -934,7 +934,7 @@ class Stat(sem: Semantics) {
       val s = kv._2
       if (s._1 <= HeapBot) false 
       else {
-        val lset = SE.V(expr, s._1, s._2)._1._2
+        val lset = SE.V(expr, s._1, s._2)._1.locs
         lset.exists(l => BoolFalse <= Helper.HasConstruct(s._1, l))
       }      
     })
@@ -943,7 +943,7 @@ class Stat(sem: Semantics) {
   
   def countException(v_ex :Value) = {
     var exist = false
-    v_ex._2.foreach((l) => {
+    v_ex.locs.foreach((l) => {
       l match {
         case BuiltinError.ErrLoc => errEx = errEx+ 1; exist = true
         case BuiltinError.EvalErrLoc => evalEx = evalEx+ 1; exist = true

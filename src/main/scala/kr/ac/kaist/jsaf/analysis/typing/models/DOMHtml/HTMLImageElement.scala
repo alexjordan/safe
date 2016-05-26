@@ -97,7 +97,7 @@ object HTMLImageElement extends DOM {
             ((Helper.ReturnStore(h, Value(loc_ins)), ctx), (he, ctxe)) 
           }
           else {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -105,7 +105,7 @@ object HTMLImageElement extends DOM {
           val addr2 = cfg.getAPIAddress(addr_env, 1)
           val addr3 = cfg.getAPIAddress(addr_env, 2)
 
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           
           // locations for 'childNodes', 'attributes', and 'style' property of a new created element
           val l_childNodes = addrToLoc(addr1, Recent)

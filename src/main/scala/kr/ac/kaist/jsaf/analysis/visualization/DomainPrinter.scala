@@ -140,14 +140,14 @@ private class DomainPrinter(verbose_lv: Int) {
   def toJValue(v: Value): JValue = {
     var valueMap:MHashMap[String, JValue] = MHashMap()
     
-    if (v._1 != PValueBot) {
-      valueMap.update("pvalue", v._1.toString)
+    if (v.pv != PValueBot) {
+      valueMap.update("pvalue", v.pv.toString)
     } else {
       valueMap.update("pvalue", "Bot")
     }
     
-    if (v._2 != LocSetBot) {
-      valueMap.update("locs", toJLocSet(v._2))
+    if (v.locs != LocSetBot) {
+      valueMap.update("locs", toJLocSet(v.locs))
     } else {
       valueMap.update("locs", "Bot")
     }

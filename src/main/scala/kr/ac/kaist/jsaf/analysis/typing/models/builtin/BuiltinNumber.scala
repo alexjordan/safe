@@ -63,7 +63,7 @@ object BuiltinNumber extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // 15.7.1.1 Number( [value] )
           val v_1 = getArgValue(h, ctx, args, "0")
-          val arg_length = getArgValue(h, ctx, args, "length")._1._4
+          val arg_length = getArgValue(h, ctx, args, "length").pv._4
 
           // If value is not supplied, +0 is returned.
           val value_1 =
@@ -79,10 +79,10 @@ object BuiltinNumber extends ModelData {
         }),
       "Number.constructor" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // 15.7.2.1 new Number( [value] )
           val v_1 = getArgValue(h, ctx, args, "0")
-          val arg_length = getArgValue(h, ctx, args, "length")._1._4
+          val arg_length = getArgValue(h, ctx, args, "length").pv._4
 
           // [[PrimitiveValue]]
           val value_1 =
@@ -102,9 +102,9 @@ object BuiltinNumber extends ModelData {
         }),
       "Number.prototype.toString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
-          val lset_num = lset_this.filter((l) => AbsString.alpha("Number") <= h(l)("@class")._2._1._5)
+          val lset_num = lset_this.filter((l) => AbsString.alpha("Number") <= h(l)("@class")._2.pv._5)
 
           val es = notGenericMethod(h, lset_this, "Number")
           val (v, es2) =
@@ -115,9 +115,9 @@ object BuiltinNumber extends ModelData {
                   (Value(Helper.defaultToString(h, lset_num)), ExceptionBot)
                 case Some(n_arglen) if n_arglen > 0 => {
                   val es =
-                    if (BoolTrue <= Operator.bopGreater(getArgValue(h, ctx, args, "0"), Value(AbsNumber.alpha(36)))._1._3)
+                    if (BoolTrue <= Operator.bopGreater(getArgValue(h, ctx, args, "0"), Value(AbsNumber.alpha(36))).pv._3)
                       Set[Exception](RangeError)
-                    else if (BoolTrue <= Operator.bopLess(getArgValue(h, ctx, args, "0"), Value(AbsNumber.alpha(2)))._1._3)
+                    else if (BoolTrue <= Operator.bopLess(getArgValue(h, ctx, args, "0"), Value(AbsNumber.alpha(2))).pv._3)
                       Set[Exception](RangeError)
                     else
                       ExceptionBot
@@ -136,9 +136,9 @@ object BuiltinNumber extends ModelData {
         }),
       "Number.prototype.toLocaleString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v_prim = lset_this.foldLeft(ValueBot)((_v, _l) => _v + h(_l)("@primitive")._2)
-          val v = Value(Helper.toString(v_prim._1))
+          val v = Value(Helper.toString(v_prim.pv))
           if (v </ ValueBot)
             ((Helper.ReturnStore(h, v), ctx), (he, ctxe))
           else
@@ -146,10 +146,10 @@ object BuiltinNumber extends ModelData {
         }),
       "Number.prototype.valueOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val es = notGenericMethod(h, lset_this, "Number")
-          val lset_num = lset_this.filter((l) => AbsString.alpha("Number") <= h(l)("@class")._2._1._5)
-          val n = lset_num.foldLeft[AbsNumber](NumBot)((_b, l) => _b + h(l)("@primitive")._2._1._4)
+          val lset_num = lset_this.filter((l) => AbsString.alpha("Number") <= h(l)("@class")._2.pv._5)
+          val n = lset_num.foldLeft[AbsNumber](NumBot)((_b, l) => _b + h(l)("@primitive")._2.pv._4)
           val (h_1, c_1) =
             if (n == NumBot)
               (HeapBot, ContextBot)
@@ -162,14 +162,14 @@ object BuiltinNumber extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_1 = getArgValue(h, ctx, args, "0")
           val v_2 =
-            if (UndefTop <= v_1._1._1)
-              Value(PValue(UndefBot, v_1._1._2, v_1._1._3, AbsNumber.alpha(0) + v_1._1._4, v_1._1._5), v_1._2)
+            if (UndefTop <= v_1.pv._1)
+              Value(PValue(UndefBot, v_1.pv._2, v_1.pv._3, AbsNumber.alpha(0) + v_1.pv._4, v_1.pv._5), v_1.locs)
             else
               v_1
           val es =
-            if (BoolTrue <= Operator.bopGreater(v_2, Value(AbsNumber.alpha(20)))._1._3)
+            if (BoolTrue <= Operator.bopGreater(v_2, Value(AbsNumber.alpha(20))).pv._3)
               Set[Exception](RangeError)
-            else if (BoolTrue <= Operator.bopLess(v_2, Value(AbsNumber.alpha(0)))._1._3)
+            else if (BoolTrue <= Operator.bopLess(v_2, Value(AbsNumber.alpha(0))).pv._3)
               Set[Exception](RangeError)
             else
               ExceptionBot
@@ -180,14 +180,14 @@ object BuiltinNumber extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_1 = getArgValue(h, ctx, args, "0")
           val v_2 =
-            if (UndefTop <= v_1._1._1)
-              Value(PValue(UndefBot, v_1._1._2, v_1._1._3, v_1._1._4, v_1._1._5), v_1._2)
+            if (UndefTop <= v_1.pv._1)
+              Value(PValue(UndefBot, v_1.pv._2, v_1.pv._3, v_1.pv._4, v_1.pv._5), v_1.locs)
             else
               v_1
           val es =
-            if (BoolTrue <= Operator.bopGreater(v_2, Value(AbsNumber.alpha(20)))._1._3)
+            if (BoolTrue <= Operator.bopGreater(v_2, Value(AbsNumber.alpha(20))).pv._3)
               Set[Exception](RangeError)
-            else if (BoolTrue <= Operator.bopLess(v_2, Value(AbsNumber.alpha(0)))._1._3)
+            else if (BoolTrue <= Operator.bopLess(v_2, Value(AbsNumber.alpha(0))).pv._3)
               Set[Exception](RangeError)
             else
               ExceptionBot
@@ -198,14 +198,14 @@ object BuiltinNumber extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_1 = getArgValue(h, ctx, args, "0")
           val v_2 =
-            if (UndefTop <= v_1._1._1)
-              Value(PValue(UndefBot, v_1._1._2, v_1._1._3, v_1._1._4, v_1._1._5), v_1._2)
+            if (UndefTop <= v_1.pv._1)
+              Value(PValue(UndefBot, v_1.pv._2, v_1.pv._3, v_1.pv._4, v_1.pv._5), v_1.locs)
             else
               v_1
           val es =
-            if (BoolTrue <= Operator.bopGreater(v_2, Value(AbsNumber.alpha(21)))._1._3)
+            if (BoolTrue <= Operator.bopGreater(v_2, Value(AbsNumber.alpha(21))).pv._3)
               Set[Exception](RangeError)
-            else if (BoolTrue <= Operator.bopLess(v_2, Value(AbsNumber.alpha(1)))._1._3)
+            else if (BoolTrue <= Operator.bopLess(v_2, Value(AbsNumber.alpha(1))).pv._3)
               Set[Exception](RangeError)
             else
               ExceptionBot

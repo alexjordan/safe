@@ -103,7 +103,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val h1 = s._1
           val h2 = h1.remove(SinglePureLocalLoc)
           val h3 = h2.update(SinglePureLocalLoc, obj2)
-          val h4 = obj2("@env")._2._2.foldLeft(HeapBot)((hh, l_env) => {
+          val h4 = obj2("@env")._2.locs.foldLeft(HeapBot)((hh, l_env) => {
             hh + h3.update(l_env, env_obj)
           })
           State(h4, ctx)
@@ -227,7 +227,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val (fid, _) = cp._1
           val x_argvars = cfg.getArgVars(fid)
           val x_localvars = cfg.getLocalVars(fid)
-          val lset_arg = h(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1._2
+          val lset_arg = h(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1.locs
           var i = 0
           val h_n = x_argvars.foldLeft(h)((hh, x) => {
             val v_i = lset_arg.foldLeft(ValueBot)((vv, l_arg) => {
@@ -246,9 +246,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             // restore the 'arguments' property of the function object
             if(Config.domMode) {
               val (fid, _) = cp._1
-              val arguments_loc = h(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1._2
+              val arguments_loc = h(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1.locs
               val fun_loc = arguments_loc.foldLeft(LocSetBot)((lset, l) =>
-                lset ++ Helper.Proto(h, l, AbsString.alpha("callee"))._2
+                lset ++ Helper.Proto(h, l, AbsString.alpha("callee")).locs
               )
               fun_loc.foldLeft(h)((hh, l) => {
                 val obj = hh(l).update("arguments", PropValue(ObjectValue(Value(NullTop), BFalse, BFalse, BFalse)))
@@ -263,9 +263,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             // restore the 'arguments' property of the function object
             if(Config.domMode) {
               val (fid, _) = cp._1
-              val arguments_loc = h(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1._2
+              val arguments_loc = h(SinglePureLocalLoc)(cfg.getArgumentsName(fid))._1._1.locs
               val fun_loc = arguments_loc.foldLeft(LocSetBot)((lset, l) =>
-                lset ++ Helper.Proto(h, l, AbsString.alpha("callee"))._2
+                lset ++ Helper.Proto(h, l, AbsString.alpha("callee")).locs
               )
               fun_loc.foldLeft(h)((hh, l) => {
                 val obj = hh(l).update("arguments", PropValue(ObjectValue(Value(NullTop), BFalse, BFalse, BFalse)))
@@ -442,10 +442,10 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             case None => (ObjProtoSingleton, ExceptionBot)
             case Some(proto) => {
               val (v,es_) = SE.V(proto, h_1, ctx_1)
-              if (v._1 </ PValueBot)
-                (v._2 ++ ObjProtoSingleton, es_)
+              if (v.pv </ PValueBot)
+                (v.locs ++ ObjProtoSingleton, es_)
               else
-                (v._2, es_)
+                (v.locs, es_)
             }
           }
           val h_2 = Helper.allocObject(h_1, ls_v, l_r)
@@ -521,7 +521,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             if (v_index <= ValueBot) (HeapBot, ContextBot)
             else {
               // lset must not be empty because obj is coming through <>toObject.
-              val lset = SE.V(obj, h, ctx)._1._2
+              val lset = SE.V(obj, h, ctx)._1.locs
 
               val sset = Helper.toStringSet(Helper.toPrimitive_better(h, v_index))
               val (h_1, b) = lset.foldLeft[(Heap, AbsBool)](HeapBot, BoolBot)((res1, l) => {
@@ -549,7 +549,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               if (v_rhs <= ValueBot) (HeapBot, ContextBot, es_index ++ es_rhs)
               else {
                 // lset must not be empty because obj is coming through <>toObject.
-                val lset = SE.V(obj, h, ctx)._1._2
+                val lset = SE.V(obj, h, ctx)._1.locs
                 // iterate over set of strings for index
                 val sset = Helper.toStringSet(Helper.toPrimitive_better(h, v_index))
                 val (h_2, ctx_2, es_2) = sset.foldLeft((HeapBot, ctx, es_index ++ es_rhs))((res, s) => {
@@ -595,23 +595,23 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                     val (h_length, ex_len) =
                       if (AbsString.alpha("length") <= s) {
                         val v_newLen = Value(Operator.ToUInt32(v_rhs))
-                        val n_oldLen = h(l)("length")._1._1._1._4 // number
-                        val b_g = n_oldLen < v_newLen._1._4
-                        val b_eq = n_oldLen === v_newLen._1._4
+                        val n_oldLen = h(l)("length")._1._1.pv._4 // number
+                        val b_g = n_oldLen < v_newLen.pv._4
+                        val b_eq = n_oldLen === v_newLen.pv._4
                         val b_canputLen = Helper.CanPut(h, l, AbsString.alpha("length"))
                         // 3.d
-                        val n_value = Helper.toNumber(v_rhs._1) + Helper.toNumber(Helper.objToPrimitive(v_rhs._2, "Number"))
+                        val n_value = Helper.toNumber(v_rhs.pv) + Helper.toNumber(Helper.objToPrimitive(v_rhs.locs, "Number"))
                         val ex_len =
-                          { val eq = (n_value === v_newLen._1._4)
+                          { val eq = (n_value === v_newLen.pv._4)
                           if (BFalse <= eq) {
                             if (Config.typingInterface != null)
                               if(Shell.params.opt_DeveloperMode || eq <= BFalse)
-                                Config.typingInterface.signal(info.getSpan, Range15_4_5_1, v_newLen._1._4.toString, n_value.toString)
+                                Config.typingInterface.signal(info.getSpan, Range15_4_5_1, v_newLen.pv._4.toString, n_value.toString)
                             Set[Exception](RangeError)
                           } else Set[Exception]()
                           }
                         val h_normal =
-                          if (BTrue <= (n_value === v_newLen._1._4)) {
+                          if (BTrue <= (n_value === v_newLen.pv._4)) {
                             // 3.f
                           val h1 =
                             if ((BTrue <= b_g || BTrue <= b_eq) && BTrue <= b_canputLen)
@@ -625,12 +625,12 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                           val h3 =
                             if (BFalse <= b_g && BTrue <= b_canputLen) {
                               val _h1 = Helper.PropStore(h, l, AbsString.alpha("length"), v_rhs)
-                              (v_newLen._1._4.getSingle, n_oldLen.getSingle) match {
+                              (v_newLen.pv._4.getSingle, n_oldLen.getSingle) match {
                                 case (Some(n1), Some(n2)) =>
                                   (n1.toInt until n2.toInt).foldLeft(_h1)((__h, i) =>
                                     Helper.Delete(__h, l, AbsString.alpha(i.toString))._1)
                                 case _ =>
-                                  if (v_newLen._1._4 <= NumBot || n_oldLen <= NumBot)
+                                  if (v_newLen.pv._4 <= NumBot || n_oldLen <= NumBot)
                                     HeapBot
                                   else
                                     Helper.Delete(_h1, l, NumStr)._1
@@ -648,7 +648,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                     // 4. s is array index
                     val h_index =
                       if (BTrue <= Helper.IsArrayIndex(s)) {
-                      val n_oldLen = h(l)("length")._1._1._1._4 // number
+                      val n_oldLen = h(l)("length")._1._1.pv._4 // number
                       val n_index = Operator.ToUInt32(Value(Helper.toNumber(PValue(s))))
                       val b_g = n_oldLen < n_index
                       val b_eq = n_oldLen === n_index
@@ -736,7 +736,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val l_r = addrToLoc(a_new2, Recent)
           val (h_1_, ctx_1_) = Helper.Oldify(h, ctx, a_new2)
           val (v_1, es_1) = SE.V(cons, h_1_, ctx_1_)
-          val lset = v_1._2
+          val lset = v_1.locs
           val lset_f = lset.filter(l => BTrue <= Helper.HasConstruct(h_1_,l))
           val lset_tarf = lset.filter(l => BTrue <= Helper.IsBound(h_1_,l))
           val lset_this = Helper.getThis(h_1_, SE.V(thisArg, h_1_, ctx_1_)._1)
@@ -759,9 +759,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             } else {
               val (h_, ctx_) = Helper.Oldify(h_1_, ctx_1_, b_new)
               // merge all arguments in lset_target_function
-              val origin_args = v_arg._2.foldLeft(Obj.bottom)((obj, o_l) => obj + h_(o_l))
+              val origin_args = v_arg.locs.foldLeft(Obj.bottom)((obj, o_l) => obj + h_(o_l))
               val lset_target_args = lset_tarf.foldLeft(LBot)((lset, l_tf) => {
-                h_(l_tf)("@bound_args")._2._2 ++ lset
+                h_(l_tf)("@bound_args")._2.locs ++ lset
               })
               val target_args = lset_target_args.foldLeft(Obj.bottom)((obj, l_ta) => obj + h_(l_ta))
               val new_args = Helper.concat(target_args, origin_args)
@@ -771,7 +771,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           lset_tarf.foreach {l_f => {
             val o_f = h_1(l_f)
 //            val fids = o_f("@target_function")._1._3
-            val (fids, scope_locs) = o_f("@target_function")._2._2.foldLeft((FunSetBot, LocSetBot))((fidslocs, l) => ((fidslocs._1 ++ h_1(l)("@function")._3, fidslocs._2 ++ h_1(l)("@scope")._2._2)))
+            val (fids, scope_locs) = o_f("@target_function")._2.locs.foldLeft((FunSetBot, LocSetBot))((fidslocs, l) => ((fidslocs._1 ++ h_1(l)("@function")._3, fidslocs._2 ++ h_1(l)("@scope")._2.locs)))
             fids.foreach {fid => {
               if (Config.typingInterface != null && !cfg.isUserFunction(fid))
                 Config.typingInterface.setSpan(info.getSpan)
@@ -811,7 +811,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               }}
             }}
           }}
-          val h_2 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+          val h_2 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
             val pv = PropValue(ObjectValue(Value(lset_f ++ lset_tarf), BTrue, BFalse, BTrue))
             hh + h_1.update(l, h_1(l).update("callee", pv))
           })
@@ -824,7 +824,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             if (cond) Set(TypeError)
             else ExceptionBot
           val es_3 =
-            if (v_1._1 </ PValueBot) Set(TypeError)
+            if (v_1.pv </ PValueBot) Set(TypeError)
             else ExceptionBot
           
           val es = es_1 ++ es_2 ++ es_3
@@ -853,7 +853,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val l_r = addrToLoc(a_new2, Recent)
           val (h_1_, ctx_1_) = Helper.Oldify(h, ctx, a_new2)
           val (v_1, es_1) = SE.V(fun, h_1_, ctx_1_)
-          val lset = v_1._2
+          val lset = v_1.locs
           val lset_f = lset.filter(l => BTrue <= Helper.IsCallable(h_1_,l))
           val lset_tarf = lset.filter(l => BTrue <= Helper.IsBound(h_1_,l))
           val lset_this = Helper.getThis(h_1_, SE.V(thisArg, h_1_, ctx_1_)._1)
@@ -876,9 +876,9 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             } else {
               val (h_, ctx_) = Helper.Oldify(h_1_, ctx_1_, b_new)
               // merge all arguments in lset_target_function
-              val origin_args = v_arg._2.foldLeft(Obj.bottom)((obj, o_l) => obj + h_(o_l))
+              val origin_args = v_arg.locs.foldLeft(Obj.bottom)((obj, o_l) => obj + h_(o_l))
               val lset_target_args = lset_tarf.foldLeft(LBot)((lset, l_tf) => {
-                h_(l_tf)("@bound_args")._2._2 ++ lset
+                h_(l_tf)("@bound_args")._2.locs ++ lset
               })
               val target_args = lset_target_args.foldLeft(Obj.bottom)((obj, l_ta) => obj + h_(l_ta))
               val new_args = Helper.concat(target_args, origin_args)
@@ -887,8 +887,8 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
 
           lset_tarf.foreach {l_f => {
             val o_f = h_1(l_f)
-            val (fids, scope_locs) = o_f("@target_function")._2._2.foldLeft((FunSetBot, LocSetBot))((fidslocs, l) => ((fidslocs._1 ++ h_1(l)("@function")._3, fidslocs._2 ++ h_1(l)("@scope")._2._2)))
-            val l_this = o_f("@bound_this")._2._2
+            val (fids, scope_locs) = o_f("@target_function")._2.locs.foldLeft((FunSetBot, LocSetBot))((fidslocs, l) => ((fidslocs._1 ++ h_1(l)("@function")._3, fidslocs._2 ++ h_1(l)("@scope")._2.locs)))
+            val l_this = o_f("@bound_this")._2.locs
             fids.foreach {fid => {
               if (Config.typingInterface != null && !cfg.isUserFunction(fid))
                 Config.typingInterface.setSpan(info.getSpan)
@@ -935,7 +935,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               }}
             }}
           }}
-          val h_2 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+          val h_2 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
             val pv = PropValue(ObjectValue(Value(lset_f ++ lset_tarf), BTrue, BFalse, BTrue))
             hh + h_1.update(l, h_1(l).update("callee", pv))
           })
@@ -953,7 +953,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               ExceptionBot
             }
           val es_3 =
-            if (v_1._1 </ PValueBot) {
+            if (v_1.pv </ PValueBot) {
               Set(TypeError)
             } else {
               ExceptionBot
@@ -1138,10 +1138,10 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               val (h_1, ctx_1) =
                 if (v </ ValueBot) {
                   val b_1 =
-                    if (!v._2.isEmpty) BoolTrue
+                    if (!v.locs.isEmpty) BoolTrue
                     else BoolBot
                   val b_2 =
-                    if (v._1 </ PValueBot) BoolFalse
+                    if (v.pv </ PValueBot) BoolFalse
                     else BoolBot
                   val b = b_1 + b_2
                   (Helper.VarStore(h, lhs, Value(b)), ctx)
@@ -1186,10 +1186,10 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               } else {
                 // Works only if for-in loops are unrolled.
                 val (v,_) = SE.V(expr, h, ctx)
-                val v_obj = Value(PValue(UndefBot, NullBot, v._1._3, v._1._4, v._1._5), v._2)
+                val v_obj = Value(PValue(UndefBot, NullBot, v.pv._3, v.pv._4, v.pv._5), v.locs)
                 val (v_1, h_1, ctx_1, _) = Helper.toObject(h, ctx, v_obj, a_new2)
                 if (!(h_1 <= HeapBot)) {
-                  val lset = v_1._2
+                  val lset = v_1.locs
                   val init_obj = Obj.empty.update("index", PropValue(AbsNumber.alpha(0)))
 
                   val list_obj: Obj =
@@ -1212,7 +1212,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                       init_obj.update(AbsString.NumTop, PropValue(StrTop))
                     }
 
-                  val list_obj_2 = if (v._1._1 </ UndefBot || v._1._2 </ NullBot) {
+                  val list_obj_2 = if (v.pv._1 </ UndefBot || v.pv._2 </ NullBot) {
                     // if a given object is nullable, the first iteration can be canceled.
                     val ov = list_obj("0")
                     list_obj.update("0", ov).absentTop("0")
@@ -1225,7 +1225,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                   val h_2 = h.update(l_new, list_obj_2)
                   val h_3 = Helper.VarStore(h_2, lhs, Value(l_new))
                   ((h_3, ctx), (he, ctxe))
-                } else if (v._1._1 </ UndefBot || v._1._2 </ NullBot) {
+                } else if (v.pv._1 </ UndefBot || v.pv._2 </ NullBot) {
                   val init_obj = Obj.empty.update("index", PropValue(AbsNumber.alpha(0)))
 
                   val l_new = addrToLoc(a_new, Recent)
@@ -1243,7 +1243,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               } else {
                 // exception can be ignored since expr_3 is a temporal variable.
                 val (v_iter, _) = SE.V(expr_3, h, ctx)
-                val lset = v_iter._2
+                val lset = v_iter.locs
 
                 if (lset.size > 0) {
                   if(lset.size != 1)
@@ -1255,10 +1255,10 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                   val l_obj = lset.head
                   val o = h(l_obj)
 
-                  val idx = o("index")._2._1._4
+                  val idx = o("index")._2.pv._4
                   val s_idx: AbsString = Helper.toString(PValue(idx))
                   val pv = o(s_idx)
-                  val name = pv._2._1._5
+                  val name = pv._2.pv._5
                   val absent = o.domIn(s_idx)
 
                   val b_1 =
@@ -1287,7 +1287,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                 (noStop(Helper.VarStore(h, lhs, Value(PValue(StrTop))), ctx), (he, ctxe))
               } else {
                 val (v_iter, _) = SE.V(expr_3, h, ctx)
-                val lset = v_iter._2
+                val lset = v_iter.locs
 
                 if (lset.size > 0) {
                   if(lset.size != 1)
@@ -1300,7 +1300,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                   val o = h(l_obj)
 
                   // increasing iterator index
-                  val idx = o("index")._2._1._4
+                  val idx = o("index")._2.pv._4
                   val s_idx: AbsString = Helper.toString(PValue(idx))
                   val next_idx = idx.getSingle match {
                     case Some(n) => AbsNumber.alpha(n + 1)
@@ -1309,7 +1309,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                   // index strong update
                   val h_1 = h.update(l_obj, h(l_obj).update("index", PropValue(next_idx)))
 
-                  val name = o(s_idx)._2._1._5
+                  val name = o(s_idx)._2.pv._5
                   val h_2 = Helper.VarStore(h_1, lhs, Value(name))
 
                   (noStop(h_2, ctx), (he, ctxe))
@@ -1343,7 +1343,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
         case CFGAPICall(info, model, fun, args) => {
           val semantics = ModelManager.getModel(model).getSemanticMap()
           if(Shell.params.opt_Domstat && model == "DOM") { 
-            val lset_callee = getArgValue(h, ctx, args, "callee")._2
+            val lset_callee = getArgValue(h, ctx, args, "callee").locs
             val abstraction = lset_callee.size > 1
             if(!abstraction)
               DOMStatistics.addAPI(fun)
@@ -1525,7 +1525,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
         val lset = Helper.LookupBase(h, id.id)
         (lset, s_)
       case Prop(CFGLoad(_, obj: CFGExpr, index: CFGExpr)) =>
-        val l_loc = SE.V(obj, h, ctx)._1._2
+        val l_loc = SE.V(obj, h, ctx)._1.locs
         val s_ = Helper.toString(Helper.toPrimitive_better(h, SE.V(index, h, ctx)._1))
         // optimization.
 //        val lset = l_loc.foldLeft(LocSetBot)((lset, l) => lset ++ Helper.ProtoBase(h, l, s))
@@ -1544,10 +1544,10 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
         val pv = op.getKind match {
           // in constant null and undefined for != operator, undefined and null are bottom for the lvalue
           case EJSOp.BIN_COMP_EQ_NEQUAL =>
-            val pv = ov._1._1
+            val pv = ov._1.pv
             PValue(pv._3) + PValue(pv._4) + PValue(pv._5)
           case EJSOp.BIN_COMP_EQ_SNEQUAL =>
-            val pv = ov._1._1
+            val pv = ov._1.pv
             const match {
               // for null, null is bottom
               case CFGNull() => PValue(pv._1) + PValue(pv._3) + PValue(pv._4) + PValue(pv._5)
@@ -1556,7 +1556,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
             }
           case _ => throw new InternalError("It is not possible constant pruning.")
         }
-        val propv = PropValue(ObjectValue(Value(pv, ov._1._2), ov._2, ov._3, ov._4), pva._3)
+        val propv = PropValue(ObjectValue(Value(pv, ov._1.locs), ov._2, ov._3, ov._4), pva._3)
         val h_new = h.update(l, h(l).update(v, propv))
         (h_new, ctx)
       case _ => (h, ctx)
@@ -1573,15 +1573,15 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
       case EJSOp.BIN_COMP_REL_IN =>
         // optimization
         // v2._2.foldLeft(LocSetBot)((l_set, l) => l_set ++ Helper.ProtoBase(h, l, s))
-        if (v2._2.size > 1) v2._2
-        else if (v2._2.size == 1) Helper.ProtoBase(h, v2._2.head, s)
+        if (v2.locs.size > 1) v2.locs
+        else if (v2.locs.size == 1) Helper.ProtoBase(h, v2.locs.head, s)
         else LocSetBot
       case EJSOp.BIN_COMP_REL_NOTIN =>
-        v2._2
+        v2.locs
       case EJSOp.BIN_COMP_REL_INSTANCEOF =>
-        v2._2
+        v2.locs
       case EJSOp.BIN_COMP_REL_NOTINSTANCEOF =>
-        v2._2
+        v2.locs
       case _ => throw new InternalError("Pruning2 function receives only object operators")
     }
 
@@ -1600,10 +1600,10 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               AH.DeleteAll(h, L_base.head, s)
           case _ => h
         }
-        case EJSOp.BIN_COMP_REL_INSTANCEOF if v1._2.size == 1 =>
-          AH.PruneInstanceof(v1._2.head, L_base.head, BoolTrue, h)
-        case EJSOp.BIN_COMP_REL_NOTINSTANCEOF if v1._2.size == 1 =>
-          AH.PruneInstanceof(v1._2.head, L_base.head, BoolFalse, h)
+        case EJSOp.BIN_COMP_REL_INSTANCEOF if v1.locs.size == 1 =>
+          AH.PruneInstanceof(v1.locs.head, L_base.head, BoolTrue, h)
+        case EJSOp.BIN_COMP_REL_NOTINSTANCEOF if v1.locs.size == 1 =>
+          AH.PruneInstanceof(v1.locs.head, L_base.head, BoolFalse, h)
         case _ => h
       }, ctx)
       case _ => (h, ctx)
@@ -1618,7 +1618,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
         (lset, s)
       case Prop(CFGLoad(_, obj: CFGExpr, index: CFGExpr)) =>
         val s = Helper.toString(Helper.toPrimitive_better(h, SE.V(index, h, ctx)._1))
-        val l_loc = SE.V(obj, h, ctx)._1._2
+        val l_loc = SE.V(obj, h, ctx)._1.locs
         val lset = l_loc.foldLeft(LocSetBot)((lset, l) => lset ++ Helper.ProtoBase(h, l, s))
         (lset, s)
     }
@@ -1626,7 +1626,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
     (lset_base.size, s.getSingle) match {
       case (1, Some(x)) =>
         val l = lset_base.head
-        val o = AH.K(op, h(l), s, v2, v1._2)
+        val o = AH.K(op, h(l), s, v2, v1.locs)
         (h.update(l, o), ctx)
       case _ => (h, ctx)
     }
@@ -1672,8 +1672,8 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
   def validity(expr: CFGExpr, s:State):Boolean = {
     val (h, ctx) = (s._1, s._2)
     val v = SE.V(expr, h, ctx)._1
-    if (v._1._1 <= UndefBot && v._1._2 <= NullBot && (v._1._4 <= UInt || v._1._4 <= NUInt) &&
-        v._1._5 <= StrBot && v._2.isEmpty)
+    if (v.pv._1 <= UndefBot && v.pv._2 <= NullBot && (v.pv._4 <= UInt || v.pv._4 <= NUInt) &&
+        v.pv._5 <= StrBot && v.locs.isEmpty)
       true
     else
       false
@@ -1687,8 +1687,8 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
 
   private def locCountCheck(i: CFGInst, v: Value): Unit = {
     if(Shell.params.opt_MaxLocCount == 0) return
-    if(v.locset.size >= Shell.params.opt_MaxLocCount) {
-      throw new MaxLocCountError("[" + i.getInstId + "] " + i + " => " + DomainPrinter.printLocSet(v.locset))
+    if(v.locs.size >= Shell.params.opt_MaxLocCount) {
+      throw new MaxLocCountError("[" + i.getInstId + "] " + i + " => " + DomainPrinter.printLocSet(v.locs))
     }
   }
 

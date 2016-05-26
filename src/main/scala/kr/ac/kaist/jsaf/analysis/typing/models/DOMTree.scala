@@ -44,13 +44,13 @@ object DOMTree {
     if (!lset_new.isEmpty && !lset_ref.isEmpty) {
       /* location for clone node */
       val h_1 = lset_this.foldLeft(HeapBot)((hh, l_node) => {
-        val lset_ns = Helper.Proto(h, l_node, AbsString.alpha("childNodes"))._2
+        val lset_ns = Helper.Proto(h, l_node, AbsString.alpha("childNodes")).locs
         val hh2 = lset_ns.foldLeft(HeapBot)((hhh, l_ns) => {
           val n_len = Operator.ToUInt32(Helper.Proto(h, l_ns, AbsString.alpha("length")))
           val hhh3 = AbsNumber.getUIntSingle(n_len) match {
             case Some(n_length) =>
               val n_index = (0 until n_length.toInt).indexWhere((i) => {
-                BoolTrue <= Operator.bopSEq(Helper.Proto(h, l_ns, AbsString.alpha(i.toString)), Value(lset_ref))._1._3
+                BoolTrue <= Operator.bopSEq(Helper.Proto(h, l_ns, AbsString.alpha(i.toString)), Value(lset_ref)).pv._3
               })
               if (n_index < 0)
                 h
@@ -66,7 +66,7 @@ object DOMTree {
                 Helper.PropStore(_hhh_1, l_ns, AbsString.alpha("length"), Value(AbsNumber.alpha(n_length.toInt + 1)))
               }
             case _ if AbsNumber.isUIntAll(n_len) =>
-              val b_eq = Operator.bopSEq(Helper.Proto(h, l_ns, NumStr), Value(lset_ref))._1._3
+              val b_eq = Operator.bopSEq(Helper.Proto(h, l_ns, NumStr), Value(lset_ref)).pv._3
               val hhh_1 =
                 if (BoolTrue <= b_eq) Helper.PropStore(h, l_ns, NumStr, Value(lset_new))
                 else HeapBot
@@ -93,9 +93,9 @@ object DOMTree {
         _h + Helper.PropStore(h_3_2, l, AbsString.alpha("previousSibling"), oldpresibling)
       })
       /* 'nextSibling' update of the old previousSibling of the reference child */
-      val h_4 = if(oldpresibling._2.isEmpty) h_3
+      val h_4 = if(oldpresibling.locs.isEmpty) h_3
         else 
-          oldpresibling._2.foldLeft(HeapBot)((_h, l) =>
+          oldpresibling.locs.foldLeft(HeapBot)((_h, l) =>
             _h + Helper.PropStore(h_3, l, AbsString.alpha("nextSibling"), Value(lset_new))
           )
       h_4
@@ -112,11 +112,11 @@ object DOMTree {
       )
       val (h_1, lastC_lset) = lset_target.foldLeft((h, LocSetBot))((d, l_node) => {
         /* lastChild */
-        val l_childlset = Helper.Proto(d._1, l_node, AbsString.alpha("lastChild"))._2
+        val l_childlset = Helper.Proto(d._1, l_node, AbsString.alpha("lastChild")).locs
         /* current childNodes */
-        val lset_ns = Helper.Proto(d._1, l_node, AbsString.alpha("childNodes"))._2
+        val lset_ns = Helper.Proto(d._1, l_node, AbsString.alpha("childNodes")).locs
         /* children */
-        val lset_children = Helper.Proto(d._1, l_node, AbsString.alpha("children"))._2
+        val lset_children = Helper.Proto(d._1, l_node, AbsString.alpha("children")).locs
         val (h_append, f_childlset) = lset_ns.foldLeft((d._1, LocSetBot))((dd, l_ns) => {
           /* length of current childNodes */
           val n_len = Operator.ToUInt32(Helper.Proto(dd._1, l_ns, AbsString.alpha("length")))
@@ -130,7 +130,7 @@ object DOMTree {
               Helper.PropStore(dd._1, l_ns, NumStr, Value(lset_child))
             case _ => dd._1 /* exception ?? */
           }
-          val firstChild_lset =  Helper.Proto(hhh_2, l_ns, AbsString.alpha(0.toInt.toString))._2
+          val firstChild_lset =  Helper.Proto(hhh_2, l_ns, AbsString.alpha(0.toInt.toString)).locs
           (hhh_2, dd._2 ++ firstChild_lset)
         })
         val h_c = isElemNode.gamma match {
@@ -217,9 +217,9 @@ object DOMTree {
       )
       val h_1 = lset_target.foldLeft(h)((h1, l_node) => {
         /* current childNodes */
-        val lset_ns = Helper.Proto(h1, l_node, AbsString.alpha("childNodes"))._2
+        val lset_ns = Helper.Proto(h1, l_node, AbsString.alpha("childNodes")).locs
         /* children */
-        val lset_children = Helper.Proto(h1, l_node, AbsString.alpha("children"))._2
+        val lset_children = Helper.Proto(h1, l_node, AbsString.alpha("children")).locs
         val h_append = lset_ns.foldLeft(h1)((h2, l_ns) => {
           /* length of current childNodes */
           val n_len = Operator.ToUInt32(Helper.Proto(h2, l_ns, AbsString.alpha("length")))
@@ -309,14 +309,14 @@ object DOMTree {
     if (!lset_child.isEmpty) {
       /* location for clone node */
       val h_1 = lset_parent.foldLeft(h)((h1, l_node) => {
-        val lset_ns = Helper.Proto(h, l_node, AbsString.alpha("childNodes"))._2
-        val lset_children = Helper.Proto(h, l_node, AbsString.alpha("children"))._2
+        val lset_ns = Helper.Proto(h, l_node, AbsString.alpha("childNodes")).locs
+        val lset_children = Helper.Proto(h, l_node, AbsString.alpha("children")).locs
         val (h1_2, firstChild_lset, lastChild_lset) = lset_ns.foldLeft((h1, LocSetBot, LocSetBot))((hl, l_ns) => {
           val n_len = Operator.ToUInt32(Helper.Proto(h, l_ns, AbsString.alpha("length")))
           val (h_2, lchild_lset) = AbsNumber.getUIntSingle(n_len) match {
             case Some(n) =>
               val n_index = (0 until n.toInt).indexWhere((i) => {
-                BoolTrue <= Operator.bopSEq(Helper.Proto(hl._1, l_ns, AbsString.alpha(i.toString)), Value(lset_child))._1._3
+                BoolTrue <= Operator.bopSEq(Helper.Proto(hl._1, l_ns, AbsString.alpha(i.toString)), Value(lset_child)).pv._3
               })
               if (n_index < 0)
                 (hl._1, LocSetBot)
@@ -330,12 +330,12 @@ object DOMTree {
                 // decrease the length of childNodes by 1
                 val hhh_3 = Helper.PropStore(hhh_2, l_ns, AbsString.alpha("length"), Value(AbsNumber.alpha(n - 1)))
                 val lastC_lset = if(n-1==0) LocSetBot
-                                 else Helper.Proto(hhh_3, l_ns, AbsString.alpha((n-2).toString))._2
+                                 else Helper.Proto(hhh_3, l_ns, AbsString.alpha((n-2).toString)).locs
                 (hhh_3, lastC_lset)
               }
 
             case _ if AbsNumber.isUIntAll(n_len) =>
-              val b_eq = Operator.bopSEq(Helper.Proto(hl._1, l_ns, NumStr), Value(lset_child))._1._3
+              val b_eq = Operator.bopSEq(Helper.Proto(hl._1, l_ns, NumStr), Value(lset_child)).pv._3
               val h2_1 =
                 if (BoolTrue <= b_eq) Helper.Delete(hl._1, l_ns, NumStr)._1
                 else HeapBot
@@ -343,10 +343,10 @@ object DOMTree {
                 if (BoolFalse <= b_eq) hl._1
                 else HeapBot
               val h2_3 = h2_1 + h2_2
-              (h2_3, Helper.Proto(h2_3, l_ns, NumStr)._2)
+              (h2_3, Helper.Proto(h2_3, l_ns, NumStr).locs)
             case _ => (hl._1, LocSetBot) /* exception ?? */
           }
-          val fchild_lset = Helper.Proto(h_2, l_ns,  AbsString.alpha("0"))._2
+          val fchild_lset = Helper.Proto(h_2, l_ns,  AbsString.alpha("0")).locs
           (h_2, hl._2 ++ fchild_lset, hl._3 ++ lchild_lset)
 
         })
@@ -355,7 +355,7 @@ object DOMTree {
           val h_2 = AbsNumber.getUIntSingle(n_len) match {
             case Some(n) =>
               val n_index = (0 until n.toInt).indexWhere((i) => {
-                BoolTrue <= Operator.bopSEq(Helper.Proto(hl, l_ns, AbsString.alpha(i.toString)), Value(lset_child))._1._3
+                BoolTrue <= Operator.bopSEq(Helper.Proto(hl, l_ns, AbsString.alpha(i.toString)), Value(lset_child)).pv._3
               })
               if (n_index < 0)
                 hl
@@ -372,7 +372,7 @@ object DOMTree {
               }
 
             case _ if AbsNumber.isUIntAll(n_len) =>
-              val b_eq = Operator.bopSEq(Helper.Proto(hl, l_ns, NumStr), Value(lset_child))._1._3
+              val b_eq = Operator.bopSEq(Helper.Proto(hl, l_ns, NumStr), Value(lset_child)).pv._3
               val h2_1 =
                 if (BoolTrue <= b_eq) Helper.Delete(hl, l_ns, NumStr)._1
                 else HeapBot
@@ -403,12 +403,12 @@ object DOMTree {
       })
 
       /* 'nextSibling' update of the previous sibling of the removed child */
-      val h_3 = preSib._2.foldLeft(h_2)((_h, l) =>
+      val h_3 = preSib.locs.foldLeft(h_2)((_h, l) =>
         Helper.PropStore(_h, l, AbsString.alpha("nextSibling"), nextSib)
       )
       
       /* 'previousSibling' update of the next sibling of the removed child */
-      val h_4 = nextSib._2.foldLeft(h_3)((_h, l) =>
+      val h_4 = nextSib.locs.foldLeft(h_3)((_h, l) =>
         Helper.PropStore(_h, l, AbsString.alpha("previousSibling"), preSib)
       )
 
@@ -458,7 +458,7 @@ object DOMTree {
     if(!node_op.isEmpty) {
       val node = node_op.get
       newmap += (node -> l)
-      val children_set: LocSet = Helper.Proto(h, l, AbsString.alpha("childNodes"))._2
+      val children_set: LocSet = Helper.Proto(h, l, AbsString.alpha("childNodes")).locs
       if(children_set.size == 1) {
         val children_loc = children_set.head
         val a_num_children = Helper.toNumber(Helper.toPrimitive(Helper.Proto(h, children_loc, AbsString.alpha("length"))))
@@ -474,7 +474,7 @@ object DOMTree {
             Some(node, newmap)
           else {
             val (children_loc_list, isconcrete) = (0 until num_children).foldLeft[(List[Loc], Boolean)]((List(), true))((ll, i) => {
-                val lset = Helper.Proto(h, children_loc, AbsString.alpha(i.toString))._2
+                val lset = Helper.Proto(h, children_loc, AbsString.alpha(i.toString)).locs
                 if(lset.size != 1) {
                   if (!quiet) println("Imprecise DOM : multiple( " + lset.size + " ) children : " + DomainPrinter.printLoc(l))
                   (ll._1, false)
@@ -528,7 +528,7 @@ object DOMTree {
     else {
       val a_nodetype = Helper.toNumber(Helper.toPrimitive_better(h, Helper.Proto(h, l, AbsString.alpha("nodeType"))))
       val a_nodename = Helper.toString(Helper.toPrimitive_better(h, Helper.Proto(h, l, AbsString.alpha("nodeName"))))
-      val a_attributes = Helper.Proto(h, l, AbsString.alpha("attributes"))._2
+      val a_attributes = Helper.Proto(h, l, AbsString.alpha("attributes")).locs
       val (nodetype_isconcrete, nodetype): (Boolean, Int) = a_nodetype.gamma match {
         case Some(n) if n.size == 1 => (true, n.head.toInt)
         case _ => 
@@ -763,7 +763,7 @@ object DOMTree {
                 }
                 if(len_isconcrete){
                   val (attr_list, attr_isconcrete) = (0 until len).foldLeft[(List[Attr], Boolean)]((List(), true))((aa, i) => {
-                    val attr_lset = Helper.Proto(h, attributes, AbsString.alpha(i.toString))._2
+                    val attr_lset = Helper.Proto(h, attributes, AbsString.alpha(i.toString)).locs
                     if(attr_lset.size == 1) {
                       val attr_l = attr_lset.head
                       val attr_op = toConcreteDOMTree(h, attr_l, doc)

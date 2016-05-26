@@ -87,7 +87,7 @@ object HTMLTableRowElement extends DOM {
       // HTMLElement insertCell(optional long index = -1)
       ("HTMLTableRowElement.insertCell" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-        val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+        val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
         val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
         if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
         val addr_env = (cp._1._1, set_addr.head)
@@ -100,7 +100,7 @@ object HTMLTableRowElement extends DOM {
         val l_attributes = addrToLoc(addr3, Recent)
         val l_style = addrToLoc(addr4, Recent)
 
-        val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+        val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
         
         // DOMException object with the IndexSizeError exception
         val es = Set(DOMException.INDEX_SIZE_ERR)
@@ -136,7 +136,7 @@ object HTMLTableRowElement extends DOM {
         /* argument */
         val arg_val = getArgValue(h_5, ctx_4, args, "0")
         val default_val = if(Value(UndefTop) <= arg_val) AbsNumber.alpha(-1) else NumBot
-        val new_argval = Value(PValue(UndefBot, arg_val._1._2, arg_val._1._3, arg_val._1._4, arg_val._1._5), arg_val._2)
+        val new_argval = Value(PValue(UndefBot, arg_val.pv._2, arg_val.pv._3, arg_val.pv._4, arg_val.pv._5), arg_val.locs)
         val index = Helper.toNumber(Helper.toPrimitive_better(h_5, new_argval)) + default_val
         
         
@@ -152,7 +152,7 @@ object HTMLTableRowElement extends DOM {
                 val h_6 = lset_this.foldLeft(h_5)((_h, l_this) => {
                   val _h_2 = DOMTree.appendChild(_h, LocSet(l_this), LocSet(l_r))
                   // cells collection
-                  val cells = Helper.Proto(_h_2, l_this, AbsString.alpha("cells"))._2
+                  val cells = Helper.Proto(_h_2, l_this, AbsString.alpha("cells")).locs
                   // the number of items in cells collection
                   val _h_3 = cells.foldLeft(_h_2)((hh, l) => {
                     val length = Helper.toNumber(Helper.toPrimitive_better(hh, Helper.Proto(hh, l, AbsString.alpha("length"))))
@@ -177,7 +177,7 @@ object HTMLTableRowElement extends DOM {
               else {
                 val (is_exception, h_2) = lset_this.foldLeft((BoolBot, h_5))((bh, l_this) => {
                   // cells collection
-                    val cells = Helper.Proto(bh._2, l_this, AbsString.alpha("cells"))._2
+                    val cells = Helper.Proto(bh._2, l_this, AbsString.alpha("cells")).locs
                     // the number of items in cells collection
                     cells.foldLeft(bh)((bbh, l) => {
                       val cells_len = Helper.toNumber(Helper.toPrimitive_better(bbh._2, Helper.Proto(bbh._2, l, AbsString.alpha("length")))) 
@@ -202,7 +202,7 @@ object HTMLTableRowElement extends DOM {
                              and finally must return the newly create td element. */
                           else {
                             // indexth element
-                            val elem = Helper.Proto(bbh._2, l, AbsString.alpha(in.toString))._2
+                            val elem = Helper.Proto(bbh._2, l, AbsString.alpha(in.toString)).locs
                             val _h_2 = DOMTree.insertBefore(bbh._2, LocSet(l_this), LocSet(l_r), elem)
                             val _h_3 = (in until len).foldLeft(_h_2)((__h, i) => {
                               val i_rev = len - i 
@@ -245,7 +245,7 @@ object HTMLTableRowElement extends DOM {
             case _ => /* AbsMulti, AbsTop */
               val h_2 = lset_this.foldLeft(h)((bh, l_this) => {
                 // cells collection
-                val cells = Helper.Proto(bh, l_this, AbsString.alpha("cells"))._2
+                val cells = Helper.Proto(bh, l_this, AbsString.alpha("cells")).locs
                 // the number of items in cells collection
                 cells.foldLeft(bh)((bbh, l) => {
                   val _h_2 = Helper.PropStore(bbh, l, AbsString.alpha("length"), Value(UInt))

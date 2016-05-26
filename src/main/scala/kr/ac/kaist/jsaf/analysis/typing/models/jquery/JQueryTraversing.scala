@@ -66,7 +66,7 @@ object JQueryTraversing extends ModelData {
       "jQuery.prototype.children" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -76,31 +76,31 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           // ignore filtering, val v_arg = getArgValue(h, ctx, args, "0")
 
           val lset_child = lset_this.foldLeft(LocSetBot)((ls1, l1) => {
-            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length"))._1._4
+            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length")).pv._4
             n_len.getSingle match {
               case Some(len) =>
                 val lset_elem = (0 until len.toInt).foldLeft(LocSetBot)((ls, i) =>
-                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString))._2
+                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString)).locs
                 )
                 val lset_children = lset_elem.foldLeft(LocSetBot)((ls2, l2) => {
-                  val lset_ns = Helper.Proto(h_1, l2, AbsString.alpha("childNodes"))._2
+                  val lset_ns = Helper.Proto(h_1, l2, AbsString.alpha("childNodes")).locs
                   ls2 ++ lset_ns.foldLeft(LocSetBot)((ls3, l3) => {
-                    ls3 ++ Helper.Proto(h_1, l3, NumStr)._2
+                    ls3 ++ Helper.Proto(h_1, l3, NumStr).locs
                   })
                 })
                 ls1 ++ lset_children
               case None =>
                 if (n_len </ NumBot) {
-                  val lset_elem = Helper.Proto(h_1, l1, NumStr)._2
+                  val lset_elem = Helper.Proto(h_1, l1, NumStr).locs
                   val lset_children = lset_elem.foldLeft(LocSetBot)((ls2, l2) => {
-                    val lset_ns = Helper.Proto(h, l2, AbsString.alpha("childNodes"))._2
+                    val lset_ns = Helper.Proto(h, l2, AbsString.alpha("childNodes")).locs
                     ls2 ++ lset_ns.foldLeft(LocSetBot)((ls3, l3) => {
-                      ls3 ++ Helper.Proto(h_1, l3, NumStr)._2
+                      ls3 ++ Helper.Proto(h_1, l3, NumStr).locs
                     })
                   })
                   ls1 ++ lset_children
@@ -122,7 +122,7 @@ object JQueryTraversing extends ModelData {
       ("jQuery.prototype.find" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -132,13 +132,13 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           // ignore HTMLelement, jQuery obejct
-          val s_selector = getArgValue(h, ctx, args, "0")._1._5
+          val s_selector = getArgValue(h, ctx, args, "0").pv._5
 
           /* imprecise semantic */
-          val lset_elems = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr)._2)
+          val lset_elems = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr).locs)
           val lset_find = lset_elems.foldLeft(LocSetBot)((ls, l) => ls ++ DOMHelper.querySelectorAll(h, l, s_selector))
 
 
@@ -158,7 +158,7 @@ object JQueryTraversing extends ModelData {
       ("jQuery.prototype.first" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -168,9 +168,9 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
-          val lset_elems = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, AbsString.alpha("0"))._2)
+          val lset_elems = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, AbsString.alpha("0")).locs)
 
           if (!lset_this.isEmpty) {
             val o_jq =
@@ -190,7 +190,7 @@ object JQueryTraversing extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // imprecise semantic
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* argument */
           val v_arg = getArgValue(h, ctx, args, "0")
           if (v_arg </ ValueBot)
@@ -201,7 +201,7 @@ object JQueryTraversing extends ModelData {
       "jQuery.prototype.next" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -211,16 +211,16 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           // ignore filtering, val v_arg = getArgValue(h, ctx, args, "0")
 
           val lset_next = lset_this.foldLeft(LocSetBot)((ls1, l1) => {
-            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length"))._1._4
+            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length")).pv._4
             n_len.getSingle match {
               case Some(len) =>
                 val lset_elem = (0 until len.toInt).foldLeft(LocSetBot)((ls, i) =>
-                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString))._2
+                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString)).locs
                 )
                 val lset_sibling = lset_elem.foldLeft(LocSetBot)((ls2, l2) =>
                   ls2 ++ DOMHelper.getNextElementSibling(h, l2)
@@ -228,7 +228,7 @@ object JQueryTraversing extends ModelData {
                 ls1 ++ lset_sibling
               case None =>
                 if (n_len </ NumBot) {
-                  val lset_elem = Helper.Proto(h_1, l1, NumStr)._2
+                  val lset_elem = Helper.Proto(h_1, l1, NumStr).locs
                   val lset_sibling = lset_elem.foldLeft(LocSetBot)((ls2, l2) =>
                     ls2 ++ DOMHelper.getNextElementSibling(h, l2)
                   )
@@ -251,7 +251,7 @@ object JQueryTraversing extends ModelData {
       "jQuery.prototype.parent" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -261,26 +261,26 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           // ignore filtering, val v_arg = getArgValue(h, ctx, args, "0")
 
           val lset_parent = lset_this.foldLeft(LocSetBot)((ls1, l1) => {
-            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length"))._1._4
+            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length")).pv._4
             n_len.getSingle match {
               case Some(len) =>
                 val lset_elem = (0 until len.toInt).foldLeft(LocSetBot)((ls, i) =>
-                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString))._2
+                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString)).locs
                 )
                 val lset_par = lset_elem.foldLeft(LocSetBot)((ls2, l2) =>
-                  ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode"))._2
+                  ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode")).locs
                 )
                 ls1 ++ lset_par
               case None =>
                 if (n_len </ NumBot) {
-                  val lset_elem = Helper.Proto(h_1, l1, NumStr)._2
+                  val lset_elem = Helper.Proto(h_1, l1, NumStr).locs
                   val lset_par = lset_elem.foldLeft(LocSetBot)((ls2, l2) =>
-                    ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode"))._2
+                    ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode")).locs
                   )
                   ls1 ++ lset_par
                 }
@@ -301,7 +301,7 @@ object JQueryTraversing extends ModelData {
       "jQuery.prototype.parents" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -311,28 +311,28 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           // ignore filtering, val v_arg = getArgValue(h, ctx, args, "0")
 
           val lset_parents = lset_this.foldLeft(LocSetBot)((ls1, l1) => {
-            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length"))._1._4
+            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length")).pv._4
             n_len.getSingle match {
               case Some(len) =>
                 val lset_elem = (0 until len.toInt).foldLeft(LocSetBot)((ls, i) =>
-                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString))._2
+                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString)).locs
                 )
                 val lset_par = lset_elem.foldLeft(LocSetBot)((ls2, l2) => {
-                  val lset_parent = Helper.Proto(h_1, l2, AbsString.alpha("parentNode"))._2
+                  val lset_parent = Helper.Proto(h_1, l2, AbsString.alpha("parentNode")).locs
                   val lset = lset_parent.foldLeft(LocSetBot)((ls3, l3) => ls3 ++ DOMHelper.getParents(h_1, l3))
                   ls2 ++ lset
                 })
                 ls1 ++ lset_par
               case None =>
                 if (n_len </ NumBot) {
-                  val lset_elem = Helper.Proto(h_1, l1, NumStr)._2
+                  val lset_elem = Helper.Proto(h_1, l1, NumStr).locs
                   val lset_par = lset_elem.foldLeft(LocSetBot)((ls2, l2) => {
-                    val lset_parent = Helper.Proto(h_1, l2, AbsString.alpha("parentNode"))._2
+                    val lset_parent = Helper.Proto(h_1, l2, AbsString.alpha("parentNode")).locs
                     val lset = lset_parent.foldLeft(LocSetBot)((ls3, l3) => ls3 ++ DOMHelper.getParents(h_1, l3))
                     ls2 ++ lset
                   })
@@ -355,7 +355,7 @@ object JQueryTraversing extends ModelData {
       "jQuery.prototype.siblings" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -365,37 +365,37 @@ object JQueryTraversing extends ModelData {
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           // ignore filtering, val v_arg = getArgValue(h, ctx, args, "0")
 
           val lset_siblings = lset_this.foldLeft(LocSetBot)((ls1, l1) => {
-            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length"))._1._4
+            val n_len = Helper.Proto(h_1, l1, AbsString.alpha("length")).pv._4
             n_len.getSingle match {
               case Some(len) =>
                 val lset_elem = (0 until len.toInt).foldLeft(LocSetBot)((ls, i) =>
-                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString))._2
+                  ls ++ Helper.Proto(h, l1, AbsString.alpha(i.toString)).locs
                 )
                 val lset_parent = lset_elem.foldLeft(LocSetBot)((ls2, l2) =>
-                  ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode"))._2
+                  ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode")).locs
                 )
                 val lset_children = lset_parent.foldLeft(LocSetBot)((ls2, l2) => {
-                  val lset_ns = Helper.Proto(h_1, l2, AbsString.alpha("childNodes"))._2
+                  val lset_ns = Helper.Proto(h_1, l2, AbsString.alpha("childNodes")).locs
                   ls2 ++ lset_ns.foldLeft(LocSetBot)((ls3, l3) => {
-                    ls3 ++ Helper.Proto(h_1, l3, NumStr)._2
+                    ls3 ++ Helper.Proto(h_1, l3, NumStr).locs
                   })
                 })
                 ls1 ++ lset_children
               case None =>
                 if (n_len </ NumBot) {
-                  val lset_elem = Helper.Proto(h_1, l1, NumStr)._2
+                  val lset_elem = Helper.Proto(h_1, l1, NumStr).locs
                   val lset_parent = lset_elem.foldLeft(LocSetBot)((ls2, l2) =>
-                    ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode"))._2
+                    ls2 ++ Helper.Proto(h_1, l2, AbsString.alpha("parentNode")).locs
                   )
                   val lset_children = lset_parent.foldLeft(LocSetBot)((ls2, l2) => {
-                    val lset_ns = Helper.Proto(h_1, l2, AbsString.alpha("childNodes"))._2
+                    val lset_ns = Helper.Proto(h_1, l2, AbsString.alpha("childNodes")).locs
                     ls2 ++ lset_ns.foldLeft(LocSetBot)((ls3, l3) => {
-                      ls3 ++ Helper.Proto(h_1, l3, NumStr)._2
+                      ls3 ++ Helper.Proto(h_1, l3, NumStr).locs
                     })
                   })
                   ls1 ++ lset_children

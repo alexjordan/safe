@@ -113,7 +113,7 @@ object BuiltinGlobal extends ModelData {
           if (!quiet) System.out.println("* Warning: the 'Global.eval' call is detected during analysis, analysis results may not be sound.")
           // arguments
           val argv = getArgValue(h, ctx, args, "0")
-          if(argv._1._5</StrBot){
+          if(argv.pv._5</StrBot){
             val s = Helper.toString(Helper.toPrimitive_better(h, argv))
             val message = s.gamma match {
               case Some(_) => s.toString
@@ -172,7 +172,7 @@ object BuiltinGlobal extends ModelData {
       "Global.decodeURI" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val s = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           val abstraction = (lset_callee.size > 1)
           val (value, es): (Value, Set[Exception]) = s.gamma match {
             case Some(vs) => {
@@ -209,7 +209,7 @@ object BuiltinGlobal extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val s = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
 
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           val abstraction = (lset_callee.size > 1)
           
           val (value, es): (Value, Set[Exception]) = s.gamma match {
@@ -246,7 +246,7 @@ object BuiltinGlobal extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val s = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           val abstraction = (lset_callee.size > 1)
 
           val (value, es): (Value, Set[Exception]) = s.gamma match {
@@ -282,7 +282,7 @@ object BuiltinGlobal extends ModelData {
       "Global.encodeURIComponent" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val s = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           val abstraction = (lset_callee.size > 1)
 
           val (value, es): (Value, Set[Exception]) = s.gamma match {

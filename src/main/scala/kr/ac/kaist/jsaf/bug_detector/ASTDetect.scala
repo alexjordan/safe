@@ -38,14 +38,14 @@ class ASTDetect(bugDetector: BugDetector) {
                       val cfgNode = cfg.findEnclosingNode(inst)
                       val cstate = stateManager.getInputCState(cfgNode, inst.getInstId, _MOST_SENSITIVE)
                       for ((callContext, state) <- cstate) {
-                        val argLocSet = SE.V(arguments, state.heap, state.context)._1.locset
+                        val argLocSet = SE.V(arguments, state.heap, state.context)._1.locs
                         for (argLoc <- argLocSet) {
                           val argObj = state.heap(argLoc)
                           if (argObj != null) {
                             // Check parsing the first argument of "JSON.parse"
                             val res = argObj("0")
                             if (res </ PropValueBot) {
-                              val absStr = res.objval.value.pvalue.strval
+                              val absStr = res.objval.value.pv.strval
                               absStr.gamma match {
                                 case Some(vs) if !absStr.isAllNums =>
                                   val isNotBug = vs.exists(s => Parser.parseJSON(s))
@@ -72,7 +72,7 @@ class ASTDetect(bugDetector: BugDetector) {
                       val cfgNode = cfg.findEnclosingNode(inst)
                       val cstate = stateManager.getInputCState(cfgNode, inst.getInstId, _MOST_SENSITIVE)
                       for ((callContext, state) <- cstate) {
-                        val argLocSet = SE.V(arguments, state.heap, state.context)._1.locset
+                        val argLocSet = SE.V(arguments, state.heap, state.context)._1.locs
                         for (argLoc <- argLocSet) {
                           val argObj = state.heap(argLoc)
                           if (argObj != null) {
@@ -80,7 +80,7 @@ class ASTDetect(bugDetector: BugDetector) {
                             args.zipWithIndex.dropRight(1).foreach(p => {
                               val res = argObj(p._2.toString)
                               if (res </ PropValueBot) {
-                                for(pvalue <- res.objval.value.pvalue) {
+                                for(pvalue <- res.objval.value.pv) {
                                   if(pvalue.isConcrete) {
                                     var str = pvalue.toString
                                     if(str.startsWith("\"") && str.endsWith("\"")) str = str.substring(1, str.length-1)
@@ -94,7 +94,7 @@ class ASTDetect(bugDetector: BugDetector) {
                             // Check parsing the last argument of "new Function"
                             val res = argObj((args.length-1).toString)
                             if (res </ PropValueBot) {
-                              for(pvalue <- res.objval.value.pvalue) {
+                              for(pvalue <- res.objval.value.pv) {
                                 if(pvalue.isConcrete) {
                                   var str = pvalue.toString
                                   if(str.startsWith("\"") && str.endsWith("\"")) str = str.substring(1, str.length - 1)

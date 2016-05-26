@@ -80,7 +80,7 @@ object HTMLCanvasElement extends DOM {
       //case "HTMLCanvasElement.toBlob"
       ("HTMLCanvasElement.getContext" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // argument
           val context = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           // CanvasRenderingContext2D object location

@@ -891,7 +891,7 @@ private object Identity {
     val newProps = currentProps -- visitedProps
     val newVisitedProps = visitedProps ++ currentProps.filter(p => BoolTrue == o.domIn(p))
 
-    val lset_proto = h(loc)("@proto")._1._1._2
+    val lset_proto = h(loc)("@proto")._1._1.locs
 
     val restSets = lset_proto.foldLeft(sets)((sset, l_proto) => {
       visibleProps(h, l_proto, cons("@", prefix), newVisitedProps, sset)

@@ -228,14 +228,14 @@ private class DomainPrinter(verbose_lv: Int) {
       }
     }
 
-    if (v._1 != PValueBot) {
-      appendPretty(sb, v._1.toString)
+    if (v.pv != PValueBot) {
+      appendPretty(sb, v.pv.toString)
       first = false
     }
     
-    if (v._2 != LocSetBot) {
+    if (v.locs != LocSetBot) {
       if (!first) sb.append(", ")
-      ppLocSet(v._2)
+      ppLocSet(v.locs)
       first = false
     }
     

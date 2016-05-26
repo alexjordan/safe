@@ -149,20 +149,20 @@ object DOMNode extends DOM {
           if(Shell.params.opt_Dommodel2) 
             ((Helper.ReturnStore(h, Value(HTMLTopElement.loc_ins_set)), ctx), (he, ctxe))
           else {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
-          val lset_new = getArgValue(h, ctx, args, "0")._2
+          val lset_new = getArgValue(h, ctx, args, "0").locs
           val ref = getArgValue(h, ctx, args, "1")
-          val lset_ref = ref._2
+          val lset_ref = ref.locs
           // If refChild is null, insert newChild at the end of the list of children.
-          val nullh = if(NullTop <= ref._1._2) {
+          val nullh = if(NullTop <= ref.pv._2) {
                DOMTree.appendChild(h, lset_this, lset_new)   
             } else h
           if (!lset_new.isEmpty && !lset_ref.isEmpty) {
             val h_1 = DOMTree.insertBefore(nullh, lset_this, lset_new, lset_ref)
             ((Helper.ReturnStore(h_1, Value(lset_new)), ctx), (he, ctxe))
           }
-          else if(NullTop <= ref._1._2)
+          else if(NullTop <= ref.pv._2)
             ((nullh, ctx), (he, ctxe))
           else 
             ((HeapBot, ContextBot), (he, ctxe))
@@ -173,20 +173,20 @@ object DOMNode extends DOM {
           if(Shell.params.opt_Dommodel2) 
             ((Helper.ReturnStore(h, Value(HTMLTopElement.loc_ins_set)), ctx), (he, ctxe))
           else {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
-          val lset_new = getArgValue(h, ctx, args, "0")._2
-          val lset_old = getArgValue(h, ctx, args, "1")._2
+          val lset_new = getArgValue(h, ctx, args, "0").locs
+          val lset_old = getArgValue(h, ctx, args, "1").locs
           if (!lset_new.isEmpty && !lset_old.isEmpty) {
             /* location for clone node */
             val h_1 = lset_this.foldLeft(h)((hh, l_node) => {
-              val lset_ns = Helper.Proto(h, l_node, AbsString.alpha("childNodes"))._2
+              val lset_ns = Helper.Proto(h, l_node, AbsString.alpha("childNodes")).locs
               lset_ns.foldLeft(hh)((hhh, l_ns) => {
                 val n_len = Operator.ToUInt32(Helper.Proto(h, l_ns, AbsString.alpha("length")))
                 n_len.getSingle match {
                   case Some(n) if AbsNumber.isNum(n_len) =>
                     val n_index = (0 until n.toInt).indexWhere((i) => {
-                      BoolTrue <= Operator.bopSEq(Helper.Proto(hhh, l_ns, AbsString.alpha(i.toString)), Value(lset_old))._1._3
+                      BoolTrue <= Operator.bopSEq(Helper.Proto(hhh, l_ns, AbsString.alpha(i.toString)), Value(lset_old)).pv._3
                     })
                     if (n_index < 0)
                       hhh
@@ -195,7 +195,7 @@ object DOMNode extends DOM {
                       Helper.PropStore(hhh_1, l_ns, AbsString.alpha(n_index.toString), Value(lset_new))
                     }
                   case _ if AbsNumber.isUIntAll(n_len) =>
-                    val b_eq = Operator.bopSEq(Helper.Proto(hhh, l_ns, NumStr), Value(lset_old))._1._3
+                    val b_eq = Operator.bopSEq(Helper.Proto(hhh, l_ns, NumStr), Value(lset_old)).pv._3
                     val hhh_1 =
                       if (BoolTrue <= b_eq) {
                         val _hhh = Helper.Delete(hhh, l_ns, NumStr)._1
@@ -228,12 +228,12 @@ object DOMNode extends DOM {
             })
 
             /* 'nextSibling' update of the previous sibling of the reference child */
-            val h_4 = preSib._2.foldLeft(h_3)((_h, l) =>
+            val h_4 = preSib.locs.foldLeft(h_3)((_h, l) =>
               Helper.PropStore(_h, l, AbsString.alpha("nextSibling"), Value(lset_new))
             )
             
             /* 'previousSibling' update of the next sibling of the reference child */
-            val h_5 = nextSib._2.foldLeft(h_4)((_h, l) =>
+            val h_5 = nextSib.locs.foldLeft(h_4)((_h, l) =>
               Helper.PropStore(_h, l, AbsString.alpha("previousSibling"), Value(lset_new))
             )
             
@@ -248,9 +248,9 @@ object DOMNode extends DOM {
           if(Shell.params.opt_Dommodel2) 
             ((Helper.ReturnStore(h, Value(HTMLTopElement.loc_ins_set)), ctx), (he, ctxe))
           else {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
-          val lset_child = getArgValue(h, ctx, args, "0")._2
+          val lset_child = getArgValue(h, ctx, args, "0").locs
           if (!lset_this.isEmpty && !lset_child.isEmpty) {
             val h_1 = DOMTree.removeChild(h, lset_this, lset_child)
             ((Helper.ReturnStore(h_1, Value(lset_child)), ctx), (he, ctxe))
@@ -261,8 +261,8 @@ object DOMNode extends DOM {
         })),
       ("DOMNode.appendChild" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
-          val lset_child = getArgValue(h, ctx, args, "0")._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
+          val lset_child = getArgValue(h, ctx, args, "0").locs
           if(Shell.params.opt_Dommodel2) 
             ((Helper.ReturnStore(h, Value(lset_child)), ctx), (he, ctxe))
          else {
@@ -278,11 +278,11 @@ object DOMNode extends DOM {
           if(Shell.params.opt_Dommodel2) 
             ((Helper.ReturnStore(h, Value(BoolTop)), ctx), (he, ctxe))
           else {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val b_return = lset_this.foldLeft[AbsBool](BoolBot)((b, l) => {
-            val lset_child = Helper.Proto(h, l, AbsString.alpha("childNodes"))._2
+            val lset_child = Helper.Proto(h, l, AbsString.alpha("childNodes")).locs
             lset_child.foldLeft(b)((bb, ll) => {
-              val absnum = Helper.Proto(h, ll, AbsString.alpha("length"))._1._4
+              val absnum = Helper.Proto(h, ll, AbsString.alpha("length")).pv._4
               bb + (absnum.getAbsCase match {
                 case AbsBot => BoolBot
                 case _ if AbsNumber.isUIntAll(absnum) => BoolTop
@@ -300,12 +300,12 @@ object DOMNode extends DOM {
         })),
       ("DOMNode.cloneNode" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val b_deep = Helper.toBoolean(getArgValue(h, ctx, args, "0"))
           if (b_deep </ BoolBot) {
@@ -364,11 +364,11 @@ object DOMNode extends DOM {
         })),
       ("DOMNode.isSameNode" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val v_other = getArgValue(h, ctx, args, "0")
           if (v_other </ ValueBot) {
-            val v_return = Operator.bopSEq(Value(lset_this), Value(v_other._2))
+            val v_return = Operator.bopSEq(Value(lset_this), Value(v_other.locs))
             ((Helper.ReturnStore(h, v_return), ctx), (he, ctxe))
           }
           else
@@ -452,12 +452,12 @@ object DOMNode extends DOM {
           if(Shell.params.opt_Dommodel2) 
             ((Helper.ReturnStore(h, Value(BoolTop)), ctx), (he, ctxe))
           else {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val other = getArgValue(h, ctx, args, "0") 
-          val nullargcheck = if(other._1._2 </ NullBot) Value(BoolFalse) else ValueBot
+          val nullargcheck = if(other.pv._2 </ NullBot) Value(BoolFalse) else ValueBot
 
-          val lset_other = getArgValue(h, ctx, args, "0")._2
+          val lset_other = getArgValue(h, ctx, args, "0").locs
           if(!lset_other.isEmpty){
             val returnval = lset_this.foldLeft(Value(BoolBot))((_val, l_this) => {
               lset_other.foldLeft(_val)((__val, l_other) => {

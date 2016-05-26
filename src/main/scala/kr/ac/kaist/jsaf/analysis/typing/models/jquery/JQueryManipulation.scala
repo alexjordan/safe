@@ -60,13 +60,13 @@ object JQueryManipulation extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
-          val lset_arg = v_arg1._2
+          val lset_arg = v_arg1.locs
 
           // ignore function, HTMLString, 2nd argument
-          if(v_arg1._1._5 </ StrBot){
+          if(v_arg1.pv._5 </ StrBot){
             System.err.println("* Warning: jQuery.prototype.after(HTMLString) has not been modeled yet")
           }
 
@@ -75,20 +75,20 @@ object JQueryManipulation extends ModelData {
           val h_1 =
             if (!lset_html.isEmpty)
               lset_this.foldLeft(h)((hh, ll) => {
-                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(hh)((hhh, i) => {
-                      val lset_current = Helper.Proto(hhh, ll, AbsString.alpha(i.toString))._2
+                      val lset_current = Helper.Proto(hhh, ll, AbsString.alpha(i.toString)).locs
                       val lset_target = lset_current.foldLeft(LocSetBot)((ls, l) =>
-                        ls ++ Helper.Proto(hhh, l, AbsString.alpha("parentNode"))._2)
+                        ls ++ Helper.Proto(hhh, l, AbsString.alpha("parentNode")).locs)
                       DOMTree.appendChild(hhh, lset_target, lset_html)
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_current = Helper.Proto(hh, ll, NumStr)._2
+                      val lset_current = Helper.Proto(hh, ll, NumStr).locs
                       val lset_target = lset_current.foldLeft(LocSetBot)((ls, l) =>
-                        ls ++ Helper.Proto(hh, l, AbsString.alpha("parentNode"))._2)
+                        ls ++ Helper.Proto(hh, l, AbsString.alpha("parentNode")).locs)
                       DOMTree.appendChild(hh, lset_target, lset_html)
                     }
                     else
@@ -103,24 +103,24 @@ object JQueryManipulation extends ModelData {
           val h_2 =
             if (!lset_jq.isEmpty)
               lset_this.foldLeft(h)((h1, l1) => {
-                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(h1)((h2, i) => {
-                      val lset_current = Helper.Proto(h2, l1, AbsString.alpha(i.toString))._2
+                      val lset_current = Helper.Proto(h2, l1, AbsString.alpha(i.toString)).locs
                       val lset_parent = lset_current.foldLeft(LocSetBot)((ls, l) =>
-                        ls ++ Helper.Proto(h2, l, AbsString.alpha("parentNode"))._2)
+                        ls ++ Helper.Proto(h2, l, AbsString.alpha("parentNode")).locs)
                       lset_jq.foldLeft(h2)((h3, l3) => {
-                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h3)((h4, j) => {
-                              val lset_child = Helper.Proto(h4, l3, AbsString.alpha(j.toString))._2
+                              val lset_child = Helper.Proto(h4, l3, AbsString.alpha(j.toString)).locs
                               DOMTree.appendChild(h4, lset_parent, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_child = Helper.Proto(h3, l3, NumStr)._2
+                              val lset_child = Helper.Proto(h3, l3, NumStr).locs
                               // now length is top
                               val h5 = lset_parent.foldLeft(h3)((h4, l4) => Helper.PropStore(h4, l4, AbsString.alpha("length"), Value(UInt)))
                               DOMTree.appendChild(h5, lset_parent, lset_child)
@@ -132,20 +132,20 @@ object JQueryManipulation extends ModelData {
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_current = Helper.Proto(h1, l1, NumStr)._2
+                      val lset_current = Helper.Proto(h1, l1, NumStr).locs
                       val lset_target = lset_current.foldLeft(LocSetBot)((ls, l) =>
-                        ls ++ Helper.Proto(h1, l, AbsString.alpha("parentNode"))._2)
+                        ls ++ Helper.Proto(h1, l, AbsString.alpha("parentNode")).locs)
                       lset_jq.foldLeft(h1)((h2, l2) => {
-                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h2)((h4, i) => {
-                              val lset_child = Helper.Proto(h4, l2, AbsString.alpha(i.toString))._2
+                              val lset_child = Helper.Proto(h4, l2, AbsString.alpha(i.toString)).locs
                               DOMTree.appendChild(h4, lset_target, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_child = Helper.Proto(h2, l2, NumStr)._2
+                              val lset_child = Helper.Proto(h2, l2, NumStr).locs
                               DOMTree.appendChild(h2, lset_target, lset_child)
                             }
                             else
@@ -164,7 +164,7 @@ object JQueryManipulation extends ModelData {
             val h_ret = h_1 + h_2
             ((Helper.ReturnStore(h_ret, Value(lset_this)), ctx), (he, ctxe))
           }
-          else if(v_arg1._1._5 </ StrBot){
+          else if(v_arg1.pv._5 </ StrBot){
             ((h, ctx), (he, ctxe))
           }
           else
@@ -174,13 +174,13 @@ object JQueryManipulation extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
-          val lset_arg = v_arg1._2
+          val lset_arg = v_arg1.locs
 
           // ignore function, HTMLString, 2nd argument
-          if(v_arg1._1._5 </ StrBot){
+          if(v_arg1.pv._5 </ StrBot){
             System.err.println("* Warning: jQuery.prototype.appendTo(Selector or HTMLString) has not been modeled yet")
           }
 
@@ -189,16 +189,16 @@ object JQueryManipulation extends ModelData {
           val h_1 =
             if (!lset_html.isEmpty)
               lset_this.foldLeft(h)((hh, ll) => {
-                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(hh)((hhh, i) => {
-                      val lset_target = Helper.Proto(hhh, ll, AbsString.alpha(i.toString))._2
+                      val lset_target = Helper.Proto(hhh, ll, AbsString.alpha(i.toString)).locs
                       DOMTree.appendChild(hhh, lset_target, lset_html)
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_target = Helper.Proto(hh, ll, NumStr)._2
+                      val lset_target = Helper.Proto(hh, ll, NumStr).locs
                       DOMTree.appendChild(hh, lset_target, lset_html)
                     }
                     else
@@ -219,22 +219,22 @@ object JQueryManipulation extends ModelData {
           val h_2 =
             if (!lset_jq.isEmpty)
               lset_this.foldLeft(h)((h1, l1) => {
-                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(h1)((h2, i) => {
-                      val lset_parent = Helper.Proto(h2, l1, AbsString.alpha(i.toString))._2
+                      val lset_parent = Helper.Proto(h2, l1, AbsString.alpha(i.toString)).locs
                       lset_jq.foldLeft(h2)((h3, l3) => {
-                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h3)((h4, j) => {
-                              val lset_child = Helper.Proto(h4, l3, AbsString.alpha(j.toString))._2
+                              val lset_child = Helper.Proto(h4, l3, AbsString.alpha(j.toString)).locs
                               DOMTree.appendChild(h4, lset_parent, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_child = Helper.Proto(h3, l3, NumStr)._2
+                              val lset_child = Helper.Proto(h3, l3, NumStr).locs
                               // now length is top
                               val h5 = lset_parent.foldLeft(h3)((h4, l4) => Helper.PropStore(h4, l4, AbsString.alpha("length"), Value(UInt)))
                               DOMTree.appendChild(h5, lset_parent, lset_child)
@@ -246,18 +246,18 @@ object JQueryManipulation extends ModelData {
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_target = Helper.Proto(h1, l1, NumStr)._2
+                      val lset_target = Helper.Proto(h1, l1, NumStr).locs
                       lset_jq.foldLeft(h1)((h2, l2) => {
-                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h2)((h4, i) => {
-                              val lset_child = Helper.Proto(h4, l2, AbsString.alpha(i.toString))._2
+                              val lset_child = Helper.Proto(h4, l2, AbsString.alpha(i.toString)).locs
                               DOMTree.appendChild(h4, lset_target, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_child = Helper.Proto(h2, l2, NumStr)._2
+                              val lset_child = Helper.Proto(h2, l2, NumStr).locs
                               DOMTree.appendChild(h2, lset_target, lset_child)
                             }
                             else
@@ -276,7 +276,7 @@ object JQueryManipulation extends ModelData {
             val h_ret = h_1 + h_2
             ((Helper.ReturnStore(h_ret, Value(lset_this)), ctx), (he, ctxe))
           }
-          else if(v_arg1._1._5 </ StrBot){
+          else if(v_arg1.pv._5 </ StrBot){
             ((h, ctx), (he, ctxe))
           }
           else
@@ -286,13 +286,13 @@ object JQueryManipulation extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
-          val lset_arg = v_arg1._2
+          val lset_arg = v_arg1.locs
 
           // ignore HTMLString
-          if(v_arg1._1._5 </ StrBot){
+          if(v_arg1.pv._5 </ StrBot){
             System.err.println("* Warning: jQuery.prototype.appendTo(Selector or HTMLString) has not been modeled yet")
           }
           // argument is HTMLElement
@@ -300,17 +300,17 @@ object JQueryManipulation extends ModelData {
           val h_1 =
             if (!lset_html.isEmpty)
               lset_this.foldLeft(h)((hh, ll) => {
-                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(hh)((hhh, i) => {
-                      val lset_child = Helper.Proto(hhh, ll, AbsString.alpha(i.toString))._2
+                      val lset_child = Helper.Proto(hhh, ll, AbsString.alpha(i.toString)).locs
                       // append
                       DOMTree.appendChild(hhh, lset_html, lset_child)
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_child = Helper.Proto(hh, ll, NumStr)._2
+                      val lset_child = Helper.Proto(hh, ll, NumStr).locs
                       // now length is top
                       val _h = lset_html.foldLeft(hh)((_h, l) => Helper.PropStore(_h, l, AbsString.alpha("length"), Value(UInt)))
                       // append
@@ -328,22 +328,22 @@ object JQueryManipulation extends ModelData {
           val h_2 =
             if (!lset_jq.isEmpty)
               lset_this.foldLeft(h)((h1, l1) => {
-                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(h1)((h2, i) => {
-                      val lset_child = Helper.Proto(h2, l1, AbsString.alpha(i.toString))._2
+                      val lset_child = Helper.Proto(h2, l1, AbsString.alpha(i.toString)).locs
                       lset_jq.foldLeft(h2)((h3, l3) => {
-                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h3)((h4, j) => {
-                              val lset_parent = Helper.Proto(h4, l3, AbsString.alpha(j.toString))._2
+                              val lset_parent = Helper.Proto(h4, l3, AbsString.alpha(j.toString)).locs
                               DOMTree.appendChild(h4, lset_parent, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_parent = Helper.Proto(h3, l3, NumStr)._2
+                              val lset_parent = Helper.Proto(h3, l3, NumStr).locs
                               DOMTree.appendChild(h3, lset_parent, lset_child)
                             }
                             else
@@ -353,18 +353,18 @@ object JQueryManipulation extends ModelData {
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_child = Helper.Proto(h1, l1, NumStr)._2
+                      val lset_child = Helper.Proto(h1, l1, NumStr).locs
                       lset_jq.foldLeft(h1)((h2, l2) => {
-                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h2)((h4, i) => {
-                              val lset_target = Helper.Proto(h4, l2, AbsString.alpha(i.toString))._2
+                              val lset_target = Helper.Proto(h4, l2, AbsString.alpha(i.toString)).locs
                               DOMTree.appendChild(h4, lset_target, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_target = Helper.Proto(h2, l2, NumStr)._2
+                              val lset_target = Helper.Proto(h2, l2, NumStr).locs
                               DOMTree.appendChild(h2, lset_target, lset_child)
                             }
                             else
@@ -383,7 +383,7 @@ object JQueryManipulation extends ModelData {
             val h_ret = h_1 + h_2
             ((Helper.ReturnStore(h_ret, Value(lset_this)), ctx), (he, ctxe))
           }
-          else if(v_arg1._1._5 </ StrBot){
+          else if(v_arg1.pv._5 </ StrBot){
             ((h, ctx), (he, ctxe))
           }
           else
@@ -392,12 +392,12 @@ object JQueryManipulation extends ModelData {
      ("jQuery.prototype.empty" -> (
       (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
         /* jQuery object */
-        val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+        val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
         val h_ret = lset_this.foldLeft(h)((h1, l1) => {
-          val lset_parent = Helper.Proto(h1, l1, NumStr)._2
+          val lset_parent = Helper.Proto(h1, l1, NumStr).locs
           lset_parent.foldLeft(h1)((h2, l2) => {
-            val lset_ns = Helper.Proto(h2, l2, AbsString.alpha("childNodes"))._2
+            val lset_ns = Helper.Proto(h2, l2, AbsString.alpha("childNodes")).locs
             lset_ns.foldLeft(h2)((h3, l3) => h3.update(l3, DOMHelper.NewChildNodeListObj(0)))
           })
         })
@@ -407,10 +407,10 @@ object JQueryManipulation extends ModelData {
       ("jQuery.prototype.prepend" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
-          val lset_arg = v_arg1._2
+          val lset_arg = v_arg1.locs
 
           // ignore function, HTMLString, 2nd argument
 
@@ -419,16 +419,16 @@ object JQueryManipulation extends ModelData {
           val h_1 =
             if (!lset_html.isEmpty)
               lset_this.foldLeft(h)((hh, ll) => {
-                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(hh, ll, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(hh)((hhh, i) => {
-                      val lset_target = Helper.Proto(hhh, ll, AbsString.alpha(i.toString))._2
+                      val lset_target = Helper.Proto(hhh, ll, AbsString.alpha(i.toString)).locs
                       DOMTree.prependChild(hhh, lset_target, lset_html)
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_target = Helper.Proto(hh, ll, NumStr)._2
+                      val lset_target = Helper.Proto(hh, ll, NumStr).locs
                       DOMTree.prependChild(hh, lset_target, lset_html)
                     }
                     else
@@ -443,22 +443,22 @@ object JQueryManipulation extends ModelData {
           val h_2 =
             if (!lset_jq.isEmpty)
               lset_this.foldLeft(h)((h1, l1) => {
-                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length"))._1._4
+                val n_len = Helper.Proto(h1, l1, AbsString.alpha("length")).pv._4
                 n_len.getSingle match {
                   case Some(len) =>
                     (0 until len.toInt).foldLeft(h1)((h2, i) => {
-                      val lset_parent = Helper.Proto(h2, l1, AbsString.alpha(i.toString))._2
+                      val lset_parent = Helper.Proto(h2, l1, AbsString.alpha(i.toString)).locs
                       lset_jq.foldLeft(h2)((h3, l3) => {
-                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h3, l3, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h3)((h4, j) => {
-                              val lset_child = Helper.Proto(h4, l3, AbsString.alpha(j.toString))._2
+                              val lset_child = Helper.Proto(h4, l3, AbsString.alpha(j.toString)).locs
                               DOMTree.prependChild(h4, lset_parent, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_child = Helper.Proto(h3, l3, NumStr)._2
+                              val lset_child = Helper.Proto(h3, l3, NumStr).locs
                               // now length is top
                               val h5 = lset_parent.foldLeft(h3)((h4, l4) => Helper.PropStore(h4, l4, AbsString.alpha("length"), Value(UInt)))
                               DOMTree.prependChild(h5, lset_parent, lset_child)
@@ -470,18 +470,18 @@ object JQueryManipulation extends ModelData {
                     })
                   case None =>
                     if (n_len </ NumBot) {
-                      val lset_target = Helper.Proto(h1, l1, NumStr)._2
+                      val lset_target = Helper.Proto(h1, l1, NumStr).locs
                       lset_jq.foldLeft(h1)((h2, l2) => {
-                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length"))._1._4
+                        val n_len = Helper.Proto(h2, l2, AbsString.alpha("length")).pv._4
                         n_len.getSingle match {
                           case Some(len) =>
                             (0 until len.toInt).foldLeft(h2)((h4, i) => {
-                              val lset_child = Helper.Proto(h4, l2, AbsString.alpha(i.toString))._2
+                              val lset_child = Helper.Proto(h4, l2, AbsString.alpha(i.toString)).locs
                               DOMTree.prependChild(h4, lset_target, lset_child)
                             })
                           case None =>
                             if (n_len </ NumBot) {
-                              val lset_child = Helper.Proto(h2, l2, NumStr)._2
+                              val lset_child = Helper.Proto(h2, l2, NumStr).locs
                               DOMTree.prependChild(h2, lset_target, lset_child)
                             }
                             else
@@ -506,24 +506,24 @@ object JQueryManipulation extends ModelData {
       ("jQuery.prototype.remove" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           if (!lset_this.isEmpty) {
             val h_ret = lset_this.foldLeft(h)((h1, l1) => {
-              val n_len = Helper.Proto(h1, l1, AbsString.alpha("length"))._1._4
+              val n_len = Helper.Proto(h1, l1, AbsString.alpha("length")).pv._4
               n_len.getSingle match {
                 case Some(n) =>
                   (0 until n.toInt).foldLeft(h1)((h2, i) => {
-                    val lset_child = Helper.Proto(h2, l1, AbsString.alpha(i.toString))._2
+                    val lset_child = Helper.Proto(h2, l1, AbsString.alpha(i.toString)).locs
                     val lset_parent = lset_child.foldLeft(LocSetBot)((lset, _l) =>
-                      lset ++ Helper.Proto(h2, _l, AbsString.alpha("parentNode"))._2)
+                      lset ++ Helper.Proto(h2, _l, AbsString.alpha("parentNode")).locs)
                     DOMTree.removeChild(h2, lset_parent, lset_child)
                   })
                 case None =>
                   if (n_len </ NumBot) {
-                    val lset_child = Helper.Proto(h1, l1, NumStr)._2
+                    val lset_child = Helper.Proto(h1, l1, NumStr).locs
                     val lset_parent = lset_child.foldLeft(LocSetBot)((lset, _l) =>
-                      lset ++ Helper.Proto(h1, _l, AbsString.alpha("parentNode"))._2)
+                      lset ++ Helper.Proto(h1, _l, AbsString.alpha("parentNode")).locs)
                     DOMTree.removeChild(h1, lset_parent, lset_child)
                   }
                   else
@@ -539,18 +539,18 @@ object JQueryManipulation extends ModelData {
       ("jQuery.prototype.text" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
 
           val v_ret1 =
-            if (v_arg1._1._1 </ UndefBot)
+            if (v_arg1.pv._1 </ UndefBot)
               Value(StrTop)
             else
               ValueBot
 
           val v_ret2 =
-            if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot)
+            if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot)
               // TODO: unsound, igrnoe DOM manipulation
               Value(lset_this)
             else

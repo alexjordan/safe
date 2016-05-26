@@ -53,7 +53,7 @@ object BuiltinBoolean extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // 15.6.1.1 Boolean(value)
           val v_1 = getArgValue(h, ctx, args, "0")
-          val arg_length = getArgValue(h, ctx, args, "length")._1._4
+          val arg_length = getArgValue(h, ctx, args, "length").pv._4
 
           // Returns a Boolean value computed by ToBoolean(value).
           val value =
@@ -64,9 +64,9 @@ object BuiltinBoolean extends ModelData {
       "Boolean.constructor" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // 15.6.2.1 new Boolean(value)
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v_1 = getArgValue(h, ctx, args, "0")
-          val arg_length = getArgValue(h, ctx, args, "length")._1._4
+          val arg_length = getArgValue(h, ctx, args, "length").pv._4
 
           // [[PrimitiveValue]]
           val primitive_value =
@@ -83,10 +83,10 @@ object BuiltinBoolean extends ModelData {
         }),
       "Boolean.prototype.toString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val es = notGenericMethod(h, lset_this, "Boolean")
 
-          val lset_bool = lset_this.filter((l) => AbsString.alpha("Boolean") <= h(l)("@class")._2._1._5)
+          val lset_bool = lset_this.filter((l) => AbsString.alpha("Boolean") <= h(l)("@class")._2.pv._5)
           val s = Helper.defaultToString(h, lset_bool)
           val (h_1, c_1) =
             if (s == StrBot) {
@@ -100,11 +100,11 @@ object BuiltinBoolean extends ModelData {
         }),
       "Boolean.prototype.valueOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val es = notGenericMethod(h, lset_this, "Boolean")
 
-          val lset_bool = lset_this.filter((l) => AbsString.alpha("Boolean") <= h(l)("@class")._2._1._5)
-          val b = lset_bool.foldLeft[AbsBool](BoolBot)((_b, l) => _b + h(l)("@primitive")._2._1._3)
+          val lset_bool = lset_this.filter((l) => AbsString.alpha("Boolean") <= h(l)("@class")._2.pv._5)
+          val b = lset_bool.foldLeft[AbsBool](BoolBot)((_b, l) => _b + h(l)("@primitive")._2.pv._3)
           val (h_1, c_1) =
             if (b == BoolBot) {
               (HeapBot, ContextBot)

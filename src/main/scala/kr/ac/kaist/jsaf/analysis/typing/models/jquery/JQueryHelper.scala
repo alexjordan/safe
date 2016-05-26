@@ -33,19 +33,19 @@ object JQueryHelper {
   }
 
   def MakeArray(h: Heap, v_arr: Value, o_results: Obj): Obj = {
-    val n_len = o_results("length")._1._1._1._4 // number
+    val n_len = o_results("length")._1._1.pv._4 // number
     n_len.getSingle match {
       case Some(n) =>
         val o_1 =
-          if (v_arr._2.isEmpty)
+          if (v_arr.locs.isEmpty)
             o_results.
-              update(n.toString, PropValue(ObjectValue(v_arr._1, T, T, T))).
+              update(n.toString, PropValue(ObjectValue(v_arr.pv, T, T, T))).
               update("length", PropValue(ObjectValue(AbsNumber.alpha(n+1), T, T, T)))
           else
             Obj.bottom
         val o_2 =
-          if (!v_arr._2.isEmpty) {
-            v_arr._2.foldLeft(Obj.bottom)((_o, l) => {
+          if (!v_arr.locs.isEmpty) {
+            v_arr.locs.foldLeft(Obj.bottom)((_o, l) => {
               // window object
               if(l == GlobalLoc) { 
                 val obj1 = o_results.update(n.toInt.toString, PropValue(ObjectValue(Value(l), T, T, T))).update(
@@ -53,7 +53,7 @@ object JQueryHelper {
                 _o + obj1                            
               }
               else {
-                val n_arrlen = Helper.Proto(h, l, AbsString.alpha("length"))._1._4
+                val n_arrlen = Helper.Proto(h, l, AbsString.alpha("length")).pv._4
                 n_arrlen.getSingle match {
                   case Some(n_arr) =>
                     val oo = (0 until n_arr.toInt).foldLeft(_o)((_o1, i) =>
@@ -77,13 +77,13 @@ object JQueryHelper {
           Obj.bottom
         else {
           val o_1 =
-            if (v_arr._2.isEmpty)
-              o_results.update(Helper.toString(PValue(n_len)), PropValue(ObjectValue(v_arr._1, T, T, T)))
+            if (v_arr.locs.isEmpty)
+              o_results.update(Helper.toString(PValue(n_len)), PropValue(ObjectValue(v_arr.pv, T, T, T)))
             else
               Obj.bottom
           val o_2 =
-            if (!v_arr._2.isEmpty) {
-              v_arr._2.foldLeft(Obj.bottom)((_o, l) => {
+            if (!v_arr.locs.isEmpty) {
+              v_arr.locs.foldLeft(Obj.bottom)((_o, l) => {
                 // window object
                 if(l == GlobalLoc) {
                   val newo = o_results.update(NumStr, PropValue(ObjectValue(Value(l), T, T, T)))
@@ -101,21 +101,21 @@ object JQueryHelper {
   }
   def addEvent(h: Heap, ctx: Context, he: Heap, ctxe: Context,
                        v_data: Value, v_fn: Value, event_type: String): ((Heap, Context), (Heap, Context)) = {
-    val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+    val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
     val (v_fun1, v_dat1) =
-      if (v_fn._1._1 </ UndefBot || v_fn._1._2 </ NullBot)
-        (Value(v_data._2), ValueBot)
+      if (v_fn.pv._1 </ UndefBot || v_fn.pv._2 </ NullBot)
+        (Value(v_data.locs), ValueBot)
       else
         (ValueBot, ValueBot)
     val (v_fun2, v_dat2) =
-      if (v_fn._1._1 <= UndefBot && v_fn._1._2 <= NullBot)
-        (Value(v_fn._2), v_data)
+      if (v_fn.pv._1 <= UndefBot && v_fn.pv._2 <= NullBot)
+        (Value(v_fn.locs), v_data)
       else
         (ValueBot, ValueBot)
     val v_fun = v_fun1 + v_fun2
     val v_dat = v_dat1 + v_dat2
     val lset_target = lset_this.foldLeft(LocSetBot)((lset, l) =>
-      lset ++ h(l)(NumStr)._1._1._2
+      lset ++ h(l)(NumStr)._1._1.locs
     )
     if (v_fun </ ValueBot && !lset_target.isEmpty) {
       val h1 = JQueryHelper.addJQueryEvent(h, Value(lset_target), AbsString.alpha(event_type), v_fun, v_dat, ValueBot)
@@ -183,12 +183,12 @@ object JQueryHelper {
     //val h_start = h
     //val ctx_start = ctx_3
 
-    val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+    val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
     // 1) Handle $(""), $(null), $(undefined), $(false)
     val (h_ret1, v_ret1) =
-      if (UndefTop <= v_selector._1._1 || NullTop <= v_selector._1._2 ||
-        F <= v_selector._1._3 || AbsString.alpha("") <= v_selector._1._5) {
+      if (UndefTop <= v_selector.pv._1 || NullTop <= v_selector.pv._2 ||
+        F <= v_selector.pv._3 || AbsString.alpha("") <= v_selector.pv._5) {
         // empty jQuery object
         (h.update(l_jq, NewJQueryObject), Value(l_jq))
       }
@@ -197,8 +197,8 @@ object JQueryHelper {
 
     // 2) Handle $(DOMElement)
     val (h_ret2, v_ret2) =
-      if (!v_selector._2.isEmpty) {
-        v_selector._2.foldLeft((h, ValueBot))((hv, l) => {
+      if (!v_selector.locs.isEmpty) {
+        v_selector.locs.foldLeft((h, ValueBot))((hv, l) => {
           val v_nodeType = Helper.Proto(h, l, AbsString.alpha("nodeType"))
           if (T <= Helper.toBoolean(v_nodeType)) {
             // jQuery object
@@ -216,7 +216,7 @@ object JQueryHelper {
         (HeapBot, ValueBot)
 
     // 3) Handle HTML strings
-    val absstr = v_selector._1._5
+    val absstr = v_selector.pv._5
     val (h_ret3, v_ret3) = absstr.getAbsCase match {
       case _ if absstr.isAllNums =>
         // jQuery object
@@ -276,7 +276,7 @@ object JQueryHelper {
                   // else if ( !context || context.jquery ) {
                   val (h1, v1) =
                   //              if (v_context._1._1 </ UndefBot) {
-                    if (v_context._2 == LocSetBot) {
+                    if (v_context.locs == LocSetBot) {
                       // prev = rootjQuery
                       val lset_find = DOMHelper.querySelectorAll(h, s)
                       // jQuery object
@@ -307,13 +307,13 @@ object JQueryHelper {
                     }
                   //               (HeapBot, ValueBot)
 
-                  val v_jquery = v_context._2.foldLeft(ValueBot)((v,l) =>
+                  val v_jquery = v_context.locs.foldLeft(ValueBot)((v, l) =>
                     v + Helper.Proto(h, l, AbsString.alpha("jquery"))
                   )
                   val (h2, v2) =
-                    if (UndefTop <= v_context._1._1 && v_jquery._1._1 </ UndefBot) {
+                    if (UndefTop <= v_context.pv._1 && v_jquery.pv._1 </ UndefBot) {
                       // prev = context
-                      val lset_context = v_context._2.foldLeft(LocSetBot)((lset, l) => lset ++ h(l)(NumStr)._1._1._2)
+                      val lset_context = v_context.locs.foldLeft(LocSetBot)((lset, l) => lset ++ h(l)(NumStr)._1._1.locs)
                       val lset_find = lset_context.foldLeft(LocSetBot)((lset, l) => lset ++ DOMHelper.querySelectorAll(h, s))
                       // jQuery object
                       val o_jq = NewJQueryObject(lset_find.size)
@@ -351,7 +351,7 @@ object JQueryHelper {
     }
 
     // 4) HANDLE: $(function), Shortcut for document ready event
-    val lset_f = v_selector._2.filter(l => T <= Helper.IsCallable(h, l))
+    val lset_f = v_selector.locs.filter(l => T <= Helper.IsCallable(h, l))
     val (h_ret4, v_ret4) =
       if (!lset_f.isEmpty) {
         val h1 = addJQueryEvent(h, Value(HTMLDocument.GlobalDocumentLoc),
@@ -362,10 +362,10 @@ object JQueryHelper {
         (HeapBot, ValueBot)
 
     // Handle: else
-    val (h_ret5, v_ret5) = v_selector._2.foldLeft((HeapBot, ValueBot))((hv, l) => {
+    val (h_ret5, v_ret5) = v_selector.locs.foldLeft((HeapBot, ValueBot))((hv, l) => {
       // jquery  object
       val o_1 =
-        if (Helper.Proto(h, l, AbsString.alpha("selector"))._1._1 </ UndefBot) {
+        if (Helper.Proto(h, l, AbsString.alpha("selector")).pv._1 </ UndefBot) {
           NewJQueryObject().
             update("selector", PropValue(ObjectValue(Helper.Proto(h, l, AbsString.alpha("selector")), T, T, T))).
             update("context", PropValue(ObjectValue(Helper.Proto(h, l, AbsString.alpha("context")), T, T, T)))
@@ -391,8 +391,8 @@ object JQueryHelper {
     }
     else if (len == 1) {
       // target = this
-      val lset_this = h(SinglePureLocalLoc)("@this")._2._2
-      val lset_arg1 = args(0)._2
+      val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
+      val lset_arg1 = args(0).locs
       val h_ret = lset_this.foldLeft(h)((h1, l1) =>
         lset_arg1.foldLeft(h1)((h2, l2) => {
           val props = h2(l2).getProps
@@ -412,12 +412,12 @@ object JQueryHelper {
     else {
       val v_arg1 = args(0)
       val (target, list_obj) =
-        if (v_arg1._1._3 </ BoolBot)
+        if (v_arg1.pv._3 </ BoolBot)
           (args(1), args.tail.tail)
         else
           (v_arg1, args.tail)
-      val lset_target = target._2
-      val lset_obj = list_obj.foldLeft(LocSetBot)((lset, v) => lset ++ v._2)
+      val lset_target = target.locs
+      val lset_obj = list_obj.foldLeft(LocSetBot)((lset, v) => lset ++ v.locs)
       val h_ret = lset_target.foldLeft(h)((h1, l1) =>
         lset_obj.foldLeft(h1)((h2, l2) => {
           val props = h2(l2).getProps
@@ -445,9 +445,9 @@ object JQueryHelper {
   }
 
   def isArraylike(h: Heap, l: Loc): AbsBool = {
-    val n_len = Helper.Proto(h, l, AbsString.alpha("length"))._1._4
-    val s_class = h(l)("@class")._2._1._5
-    val n_nodeType = Helper.Proto(h, l, AbsString.alpha("nodeType"))._1._4
+    val n_len = Helper.Proto(h, l, AbsString.alpha("length")).pv._4
+    val s_class = h(l)("@class")._2.pv._5
+    val n_nodeType = Helper.Proto(h, l, AbsString.alpha("nodeType")).pv._4
     val b1 =
       if (n_len </ NumBot && AbsString.alpha("Function") </ s_class)
         T

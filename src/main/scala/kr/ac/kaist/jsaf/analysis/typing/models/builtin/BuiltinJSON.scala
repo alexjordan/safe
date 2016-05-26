@@ -180,7 +180,7 @@ object BuiltinJSON extends ModelData {
       val o = h(l)
       val s_set = o.getProps.filter(s => BoolTrue <= o(s)._1._3)
       s_set.foreach(s => {
-        val lset = o(s)._1._1._2
+        val lset = o(s)._1._1.locs
         if (!visited.intersect(lset).isEmpty) {
           throw new InternalError("cycle detected")
         }
@@ -198,28 +198,28 @@ object BuiltinJSON extends ModelData {
 
   private def SAFEValtoJVal(h: Heap, v: Value): Option[JValue] = {
     // pvalue
-    if(v.pvalue </ PValueBot && v.locset == LocSetBot){
-      val undefPVal = PValue(v.pvalue.undefval)
-      val nullPVal = PValue(v.pvalue.nullval)
-      val boolPVal = PValue(v.pvalue.boolval)
-      val numPVal = PValue(v.pvalue.numval)
-      val strPVal = PValue(v.pvalue.strval)
+    if(v.pv </ PValueBot && v.locs == LocSetBot){
+      val undefPVal = PValue(v.pv.undefval)
+      val nullPVal = PValue(v.pv.nullval)
+      val boolPVal = PValue(v.pv.boolval)
+      val numPVal = PValue(v.pv.numval)
+      val strPVal = PValue(v.pv.strval)
       // undefined
-      if(v.pvalue <= undefPVal)
+      if(v.pv <= undefPVal)
         Some(JNothing)
       // null
-      else if(v.pvalue <= nullPVal)
+      else if(v.pv <= nullPVal)
         Some(JNull)
       // boolean
-      else if(v.pvalue <= boolPVal) {
-        v.pvalue.boolval.getSingle match {
+      else if(v.pv <= boolPVal) {
+        v.pv.boolval.getSingle match {
           case Some(b) => Some(JBool(b))
           case None => None
         }
       }
       // num
-      else if (v.pvalue <= numPVal) {
-        v.pvalue.numval.getSingle match {
+      else if (v.pv <= numPVal) {
+        v.pv.numval.getSingle match {
           case Some(n) => 
             val n_int = n.toInt
             if(n_int == n)
@@ -229,8 +229,8 @@ object BuiltinJSON extends ModelData {
         }
       }
       // string
-      else if(v.pvalue <= strPVal) {
-        v.pvalue.strval.getSingle match {
+      else if(v.pv <= strPVal) {
+        v.pv.strval.getSingle match {
           case Some(s) => 
             Some(JString(s))
           case None => None
@@ -239,13 +239,13 @@ object BuiltinJSON extends ModelData {
       else None
     }
     // object
-    else if(v.pvalue <= PValueBot && v.locset != LocSetBot && v.locset.size ==1) {
-      val loc = v.locset.head
+    else if(v.pv <= PValueBot && v.locs != LocSetBot && v.locs.size ==1) {
+      val loc = v.locs.head
       try {
         Helper.IsArray(h, loc).getSingle match {
          // non-array object
          case Some(b) if b==false =>
-          val props = Helper.CollectOwnProps(h, v.locset)
+          val props = Helper.CollectOwnProps(h, v.locs)
           val (fieldList, isconcrete) = props.foldLeft((List[JField](), true))((li, prop) => {
             if(li._2) {
               val propv = Helper.Proto(h, loc, AbsString.alpha(prop))
@@ -331,14 +331,14 @@ object BuiltinJSON extends ModelData {
       "JSON.parse" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // Imprecise Semantics 
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val v_1 = getArgValue(h, ctx, args, "0")
-          if(v_1 <= Value(v_1.pvalue.strval)) {
+          if(v_1 <= Value(v_1.pv.strval)) {
             // String argument
-            val strarg =  v_1.pvalue.strval
+            val strarg =  v_1.pv.strval
             strarg.getSingle match {
               case Some(s) =>
                 try {
@@ -362,13 +362,13 @@ object BuiltinJSON extends ModelData {
           val v_1 = getArgValue(h, ctx, args, "0")
           val v_2 = getArgValue(h, ctx, args, "1")
           
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           val abstraction = lset_callee.size > 1
 
-          val lset_fn = v_2._2.filter(l => BoolTrue <= Helper.IsCallable(h, l))
+          val lset_fn = v_2.locs.filter(l => BoolTrue <= Helper.IsCallable(h, l))
           if (!lset_fn.isEmpty) System.err.println("* Warning: Semantics of the API function 'JSON.stringify(value, replacer)' is not defined.")
 
-          val lset = v_1._2
+          val lset = v_1.locs
           val cycle = lset.toSet.find(l => detectCycle(h, l))
 
           val value = Value(StrTop) + Value(UndefTop)

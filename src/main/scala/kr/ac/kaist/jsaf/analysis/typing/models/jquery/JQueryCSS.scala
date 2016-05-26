@@ -59,12 +59,12 @@ object JQueryCSS extends ModelData {
       ("jQuery.prototype.css" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 2nd argument */
           var v_arg2 = getArgValue(h, ctx, args, "1")
 
           val v_set =
-            if (v_arg2._1._1 <= UndefBot && v_arg2 </ ValueBot)
+            if (v_arg2.pv._1 <= UndefBot && v_arg2 </ ValueBot)
               Value(lset_this)
             else
               ValueBot
@@ -77,12 +77,12 @@ object JQueryCSS extends ModelData {
       ("jQuery.prototype.height" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           var v_arg1 = getArgValue(h, ctx, args, "0")
 
           val v_set =
-            if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot)
+            if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot)
               Value(lset_this)
             else
               ValueBot
@@ -103,9 +103,9 @@ object JQueryCSS extends ModelData {
       "jQuery.prototype.offset" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -116,7 +116,7 @@ object JQueryCSS extends ModelData {
 
           /* new loc */
           val (h_ret1, ctx_ret1, v_ret1) =
-            if (v_arg1._1._1 </ UndefBot) {
+            if (v_arg1.pv._1 </ UndefBot) {
               val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
               val o_new = Helper.NewObject(ObjProtoLoc).update("left", PropValue(ObjectValue(Value(NumTop), T, T, T)))
                 .update("top", PropValue(ObjectValue(Value(NumTop), T, T, T)))
@@ -128,7 +128,7 @@ object JQueryCSS extends ModelData {
               (HeapBot, ContextBot, ValueBot)
 
           val v_ret2 =
-            if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot)
+            if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot)
               Value(lset_this)
             else
               ValueBot
@@ -153,7 +153,7 @@ object JQueryCSS extends ModelData {
       "jQuery.prototype.position" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -169,12 +169,12 @@ object JQueryCSS extends ModelData {
       ("jQuery.prototype.scrollLeft" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           var v_arg1 = getArgValue(h, ctx, args, "0")
 
           val v_set =
-            if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot)
+            if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot)
               Value(lset_this)
             else
               ValueBot
@@ -187,12 +187,12 @@ object JQueryCSS extends ModelData {
       ("jQuery.prototype.scrollTop" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           var v_arg1 = getArgValue(h, ctx, args, "0")
 
           val v_set =
-            if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot)
+            if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot)
               Value(lset_this)
             else
               ValueBot
@@ -205,12 +205,12 @@ object JQueryCSS extends ModelData {
       ("jQuery.prototype.width" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           var v_arg1 = getArgValue(h, ctx, args, "0")
 
           val v_set =
-            if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot)
+            if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot)
               Value(lset_this)
             else
               ValueBot

@@ -74,7 +74,7 @@ object JQueryData extends ModelData {
       "jQuery.prototype.data" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -83,14 +83,14 @@ object JQueryData extends ModelData {
           val l_ret = addrToLoc(addr1, Recent)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           var v_key = getArgValue(h, ctx, args, "0")
           var v_value = getArgValue(h, ctx, args, "1")
 
           // no arguements
           val (h_ret1, ctx_ret1, v_ret1) =
-            if (UndefTop <= v_key._1._1) {
+            if (UndefTop <= v_key.pv._1) {
               val v_len = lset_this.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h, l, AbsString.alpha("length")))
               val (h_1, ctx_1, v_1) =
                 if (BoolTrue </ Helper.toBoolean(v_len)) {
@@ -112,8 +112,8 @@ object JQueryData extends ModelData {
 
           // 1st argument is object
           val (h_ret2, v_ret2) =
-            if (!v_key._2.isEmpty) {
-              val _h = v_key._2.foldLeft(h)((_h, l) => {
+            if (!v_key.locs.isEmpty) {
+              val _h = v_key.locs.foldLeft(h)((_h, l) => {
                 val _h1 = _h(l).getProps.foldLeft(_h)((hh, prop) =>
                   Helper.PropStore(hh, CacheDataLoc, AbsString.alpha(prop), hh(l)(prop)._1._1))
                 val o_data = _h1(CacheDataLoc)
@@ -130,15 +130,15 @@ object JQueryData extends ModelData {
 
           // one argument, 1st argument ia string
           val (h_ret3, v_ret3) =
-            if (v_key._1._5 </ StrBot && UndefTop <= v_value._1._1)
-              (h, Helper.Proto(h, CacheDataLoc, v_key._1._5))
+            if (v_key.pv._5 </ StrBot && UndefTop <= v_value.pv._1)
+              (h, Helper.Proto(h, CacheDataLoc, v_key.pv._5))
             else
               (HeapBot, ValueBot)
 
           // two arguments
           val (h_ret4, v_ret4) =
-            if (v_key._1._5 </ StrBot && v_value </ ValueBot)
-              (Helper.PropStore(h, CacheDataLoc, v_key._1._5, v_value), Value(lset_this))
+            if (v_key.pv._5 </ StrBot && v_value </ ValueBot)
+              (Helper.PropStore(h, CacheDataLoc, v_key.pv._5, v_value), Value(lset_this))
             else
               (HeapBot, ValueBot)
 
@@ -153,7 +153,7 @@ object JQueryData extends ModelData {
       ("jQuery.prototype.removeData" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // do nothing
           ((Helper.ReturnStore(h, Value(lset_this)), ctx), (he, ctxe))
         }))

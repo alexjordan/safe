@@ -76,7 +76,7 @@ object DOMCharacterData extends DOM {
         })),
       ("DOMCharacterData.appendData" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val s_arg = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           if (s_arg </ StrBot) {
@@ -92,7 +92,7 @@ object DOMCharacterData extends DOM {
         })),
       ("DOMCharacterData.insertData" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val n_offset = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           val s_arg    = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "1")))
@@ -109,7 +109,7 @@ object DOMCharacterData extends DOM {
         })),
       ("DOMCharacterData.deleteData" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val n_offset = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           val n_count  = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "1")))
@@ -126,7 +126,7 @@ object DOMCharacterData extends DOM {
         })),
       ("DOMCharacterData.replaceData" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val n_offset = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           val n_count  = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "1")))

@@ -464,7 +464,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
     val lset_this = LocSet(LibModeObjTopLoc)
     exitHeap.map.foreach((kv) => {
       val obj = kv._2
-      obj("@class")._2._1._5.getSingle match {
+      obj("@class")._2.pv._5.getSingle match {
         case Some(s) if s == "Function" =>
           obj("@function")._3.foreach((fid) => {
             if (cfg.isUserFunction(fid)) {
@@ -490,7 +490,7 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
               val h1 = exitState._1.update(l_arg, o_arg) // arguments object update
               val h2 = h1.remove(SinglePureLocalLoc)
               val h3 = h2.update(SinglePureLocalLoc, obj2)
-              val h4 = obj2("@env")._2._2.foldLeft(HeapBot)((hh, l_env) => {
+              val h4 = obj2("@env")._2.locs.foldLeft(HeapBot)((hh, l_env) => {
                 hh + h3.update(l_env, env_obj) })
                 // state set up
                 updateTable(((fid, LEntry), cc_new), State(h4, ContextEmpty))

@@ -238,14 +238,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = ErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -254,17 +254,17 @@ object BuiltinError extends ModelData {
       ("Error.constructor" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_arg = getArgValue(h, ctx, args, "0")
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
 
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               lset_this.foldLeft(h)((_h, l) => _h.update(l, h(l).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue)))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -272,23 +272,23 @@ object BuiltinError extends ModelData {
         })),
       ("Error.prototype.toString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val s_empty = AbsString.alpha("")
           val v_name = lset_this.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h, l, AbsString.alpha("name")))
           val v_msg = lset_this.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h, l, AbsString.alpha("message")))
           val s_1 =
-            if (v_name._1._1 </ UndefBot)
+            if (v_name.pv._1 </ UndefBot)
               AbsString.alpha("Error")
             else
               StrBot
-          val s_2 = Helper.toString(PValue(UndefBot, v_name._1._2, v_name._1._3, v_name._1._4, v_name._1._5))
+          val s_2 = Helper.toString(PValue(UndefBot, v_name.pv._2, v_name.pv._3, v_name.pv._4, v_name.pv._5))
           val s_name = s_1 + s_2
           val s_3 =
-            if (v_msg._1._1 </ UndefBot)
+            if (v_msg.pv._1 </ UndefBot)
               s_empty
             else
               StrBot
-          val s_4 = Helper.toString(PValue(UndefBot, v_msg._1._2, v_msg._1._3, v_msg._1._4, v_msg._1._5))
+          val s_4 = Helper.toString(PValue(UndefBot, v_msg.pv._2, v_msg.pv._3, v_msg.pv._4, v_msg.pv._5))
           val s_msg = s_3 + s_4
           val s_5 =
             if (s_empty <= s_name)
@@ -300,7 +300,7 @@ object BuiltinError extends ModelData {
               s_name
             else
               StrBot
-          val s_7 = Operator.bopPlus(Operator.bopPlus(Value(s_name), Value(AbsString.alpha(": "))), Value(s_msg))._1._5
+          val s_7 = Operator.bopPlus(Operator.bopPlus(Value(s_name), Value(AbsString.alpha(": "))), Value(s_msg)).pv._5
           val s_ret = s_5 + s_6 + s_7
 
           if (s_ret </ StrBot)
@@ -313,14 +313,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = EvalErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -331,14 +331,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = EvalErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -350,14 +350,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = RangeErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -368,14 +368,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = RangeErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -386,14 +386,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = RefErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -404,14 +404,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = RefErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -423,14 +423,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = SyntaxErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -441,14 +441,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = SyntaxErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -460,14 +460,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = TypeErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -478,14 +478,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = TypeErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -497,14 +497,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = URIErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot
@@ -515,14 +515,14 @@ object BuiltinError extends ModelData {
           val v_arg = getArgValue(h, ctx, args, "0")
           val l_e = URIErrLoc
           val h_1 =
-            if (Value(PValue(UndefBot, v_arg._1._2, v_arg._1._3, v_arg._1._4, v_arg._1._5), v_arg._2) </ ValueBot) {
+            if (Value(PValue(UndefBot, v_arg.pv._2, v_arg.pv._3, v_arg.pv._4, v_arg.pv._5), v_arg.locs) </ ValueBot) {
               val s = Helper.toString(Helper.toPrimitive_better(h, v_arg))
               h.update(l_e, h(l_e).update("message", PropValue(ObjectValue(s,BoolTrue,BoolFalse,BoolTrue))))
             }
             else
               HeapBot
           val h_2 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               h
             else
               HeapBot

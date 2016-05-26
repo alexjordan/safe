@@ -322,9 +322,9 @@ object DOMWindow extends DOM {
           /* arguments */
           // ignore eval-like feature
           val argv = getArgValue(h, ctx, args, "0")
-          val lset_fun = argv._2
+          val lset_fun = argv.locs
           val n_time = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "1")))
-          if(argv._1._5</StrBot){
+          if(argv.pv._5</StrBot){
             if (!quiet)
               System.out.println("* Warning: the 'setInterval(string, ...)' call is detected during analysis, analysis results may not be sound.")
             val s = Helper.toString(Helper.toPrimitive_better(h, argv))
@@ -369,9 +369,9 @@ object DOMWindow extends DOM {
           /* arguments */
           // ignore eval-like feature
           val argv = getArgValue(h, ctx, args, "0")
-          val lset_fun = getArgValue(h, ctx, args, "0")._2
+          val lset_fun = getArgValue(h, ctx, args, "0").locs
           val n_time = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "1")))
-          if(argv._1._5</StrBot){
+          if(argv.pv._5</StrBot){
             if (!quiet)
               System.out.println("* Warning: the 'setTimeout(string, ...)' call is detected during analysis, analysis results may not be sound.")
             val s = Helper.toString(Helper.toPrimitive_better(h, argv))
@@ -423,7 +423,7 @@ object DOMWindow extends DOM {
           val elements = getArgValue(h, ctx, args, "0")
           val nullval = if(Value(NullTop) <= elements) Value(NullTop) else ValueBot
 
-          val el_lset = elements._2
+          val el_lset = elements.locs
           val returnval = el_lset.foldLeft(ValueBot)((v, l) =>
             v + Helper.Proto(h, l, AbsString.alpha("style")))
           ((Helper.ReturnStore(h, returnval + nullval), ctx), (he, ctxe))

@@ -62,21 +62,21 @@ class CommonDetect(bugDetector: BugDetector) {
     for ((callContext, state) <- mergedCState) {
       // For expr1
       val value1: Value = SE.V(expr1, state.heap, state.context)._1
-      val pvalue1: PValue = if (doToPrimitive) Helper.toPrimitive_better(state.heap, value1) else value1.pvalue
+      val pvalue1: PValue = if (doToPrimitive) Helper.toPrimitive_better(state.heap, value1) else value1.pv
 
       // For expr2 (this can be null)
       val value2: Value = if (expr2 != null) SE.V(expr2, state.heap, state.context)._1 else null
-      val pvalue2: PValue = if (expr2 != null) {if (doToPrimitive) Helper.toPrimitive_better(state.heap, value2) else value2.pvalue} else null
+      val pvalue2: PValue = if (expr2 != null) {if (doToPrimitive) Helper.toPrimitive_better(state.heap, value2) else value2.pv} else null
 
       if (conditionFunction == null || conditionFunction(pvalue1, pvalue2)) {
-        if (!bugOption.ConvertUndefToNum_VariableMustHaveUndefinedOnly || pvalue1.typeCount == 1 && value1.locset.isEmpty) {
+        if (!bugOption.ConvertUndefToNum_VariableMustHaveUndefinedOnly || pvalue1.typeCount == 1 && value1.locs.isEmpty) {
           // Check possibility of being undefined
           val checkInstance = bugCheckInstance.insert(pvalue1.undefval == UndefTop, expr1Span, callContext, state)
           checkInstance.pValue = pvalue1
           checkInstance.string1 = varId1
         }
         if (expr2 != null) {
-          if (!bugOption.ConvertUndefToNum_VariableMustHaveUndefinedOnly || pvalue2.typeCount == 1 && value2.locset.isEmpty) {
+          if (!bugOption.ConvertUndefToNum_VariableMustHaveUndefinedOnly || pvalue2.typeCount == 1 && value2.locs.isEmpty) {
             // Check possibility of being undefined
             val checkInstance = bugCheckInstance.insert(pvalue2.undefval == UndefTop, expr2Span, callContext, state)
             checkInstance.pValue = pvalue2

@@ -102,7 +102,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.constructor" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           val pv_1 = Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0"))
           val n_prim_3 =
@@ -173,11 +173,11 @@ object BuiltinDate extends ModelData {
         })),
       "Date.prototype.toISOString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           val abstraction = (lset_callee.size > 1)
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v = lset_this.foldLeft(ValueBot)((_v, l) => _v + h(l)("@primitive")._2)
-          val num_v = v._1._4
+          val num_v = v.pv._4
 
           val v_1 =
             if ((num_v <> UInt) </ NumBot || (num_v <> NUInt) </ NumBot) {
@@ -210,7 +210,7 @@ object BuiltinDate extends ModelData {
         }),
       ("Date.prototype.valueOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v = lset_this.foldLeft(ValueBot)((_v, l) => _v + h(l)("@primitive")._2)
           if (v </ ValueBot)
             ((Helper.ReturnStore(h, v), ctx), (he, ctxe))
@@ -219,7 +219,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.getTime" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v = lset_this.foldLeft(ValueBot)((_v, l) => _v + h(l)("@primitive")._2)
           if (v </ ValueBot)
             ((Helper.ReturnStore(h, v), ctx), (he, ctxe))
@@ -296,7 +296,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setTime" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val time = getArgValue(h, ctx, args, "0")
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValue(time))))
@@ -304,7 +304,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setMilliseconds" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -314,7 +314,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setSeconds" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -324,7 +324,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setMinutes" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -334,7 +334,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setMinutes" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -344,7 +344,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setHours" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -354,7 +354,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setDate" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -364,7 +364,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setMonth" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -374,7 +374,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setFullYear" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -384,7 +384,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCMilliseconds" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -394,7 +394,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCSeconds" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -404,7 +404,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCMinutes" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -414,7 +414,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCHours" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -424,7 +424,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCDate" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -434,7 +434,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCMonth" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))
@@ -444,7 +444,7 @@ object BuiltinDate extends ModelData {
         })),
       ("Date.prototype.setUTCFullYear" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(HeapBot)((_h, l) =>
             _h + h.update(l, h(l).update("@primitive", PropValueNumTop)))
           if (!(h_1 <= HeapBot))

@@ -86,7 +86,7 @@ object Storage extends DOM {
           /* arguments */
           val n_index = Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           if (n_index </ NumBot) {
-            val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+            val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
             val n_length = lset_this.foldLeft[AbsNumber](NumBot)((n, l) =>
               n + Helper.toNumber(Helper.toPrimitive_better(h, Helper.Proto(h, l, AbsString.alpha("length")))))
             val s_index = Helper.toString(PValue(n_index))
@@ -104,7 +104,7 @@ object Storage extends DOM {
           /* arguments */
           val key = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           if (key </ StrBot) {
-            val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+            val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
             val value = lset_this.foldLeft(ValueBot)((v, l) =>{
               val v_t = if (BoolTrue <= Helper.HasOwnProperty(h, l, key))
                  Helper.Proto(h, l, key)
@@ -125,7 +125,7 @@ object Storage extends DOM {
           val key = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           val value = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "1")))
           if (key </ StrBot && value </ StrBot) {
-            val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+            val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
             val h_1 = lset_this.foldLeft(h)((_h, l) =>
               Helper.PropStore(_h, l, key, Value(value)))
             ((Helper.ReturnStore(h_1, Value(UndefTop)), ctx), (he, ctxe))
@@ -138,7 +138,7 @@ object Storage extends DOM {
           /* arguments */
           val key = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           if (key </ StrBot) {
-            val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+            val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
             val h_1 = lset_this.foldLeft(h)((_h, l) =>
               Helper.Delete(_h, l, key)._1)
             ((Helper.ReturnStore(h_1, Value(UndefTop)), ctx), (he, ctxe))

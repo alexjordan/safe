@@ -279,8 +279,8 @@ object StrictModeChecker {
               getCFGNodeAndCState(inst)
 
               for((callContext, state) <- mergedCState) {
-                val objLocSet = SE.V(obj, state.heap, state.context)._1.locset
-                val propValue = SE.V(index, state.heap, state.context)._1.pvalue
+                val objLocSet = SE.V(obj, state.heap, state.context)._1.locs
+                val propValue = SE.V(index, state.heap, state.context)._1.pv
 
                 // Check for each object location
                 var writable: AbsBool = BoolBot
@@ -295,7 +295,7 @@ object StrictModeChecker {
 
                       // [R4-4]
                       if(Helper.HasProperty(state.heap, objLoc, absValue.toAbsString) == BoolFalse)
-                        extensible+= state.heap(objLoc)("@extensible").objval.value.pvalue.boolval
+                        extensible+= state.heap(objLoc)("@extensible").objval.value.pv.boolval
                     }
                   }
                 }
@@ -322,7 +322,7 @@ object StrictModeChecker {
 
                     var isCallerCallee: AbsBool = BoolBot
                     for((callContext, state) <- mergedCState) {
-                      val propValue = SE.V(index, state.heap, state.context)._1.pvalue
+                      val propValue = SE.V(index, state.heap, state.context)._1.pv
                       for(absValue <- propValue) {
                         if(!absValue.isBottom) {
                           isCallerCallee+= AbsBool.alpha(absValue.toString == "\"caller\"" || absValue.toString == "\"callee\"")
@@ -359,8 +359,8 @@ object StrictModeChecker {
               getCFGNodeAndCState(inst)
 
               for((callContext, state) <- mergedCState) {
-                val objLocSet = SE.V(obj, state.heap, state.context)._1.locset
-                val propValue = SE.V(index, state.heap, state.context)._1.pvalue
+                val objLocSet = SE.V(obj, state.heap, state.context)._1.locs
+                val propValue = SE.V(index, state.heap, state.context)._1.pv
 
                 // Check for each object location
                 var configurable: AbsBool = BoolBot

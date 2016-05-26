@@ -139,7 +139,7 @@ object HTMLTopElement extends DOM {
     Map()
   }
 
-  def getInsLoc(h: Heap): LocSet = h(TopElementLoc)(AbsString.alpha("elements"))._1._1._2
+  def getInsLoc(h: Heap): LocSet = h(TopElementLoc)(AbsString.alpha("elements"))._1._1.locs
   def setInsLoc(h: Heap, l: Loc): Heap = {
     val l_set = getInsLoc(h) 
     Helper.PropStore(h, TopElementLoc, AbsString.alpha("elements"), Value(l_set + l))

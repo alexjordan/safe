@@ -24,12 +24,12 @@ object Helper {
   
   def IsArray(h: Heap, l: Loc): AbsBool = {
     val b1 = 
-      if (AbsString.alpha("Array") <= h(l)("@class")._2._1._5)
+      if (AbsString.alpha("Array") <= h(l)("@class")._2.pv._5)
         BoolTrue
       else
         BoolBot
     val b2 = 
-      if (AbsString.alpha("Array") != h(l)("@class")._2._1._5)
+      if (AbsString.alpha("Array") != h(l)("@class")._2.pv._5)
         BoolFalse
       else
         BoolBot
@@ -87,12 +87,12 @@ object Helper {
           if (BoolFalse <= h(l_1).domIn(s)) {
             val v_proto = h(l_1)("@proto")._1._1
             val b_3 =
-              if (v_proto._1._2 </ NullBot)
-                h(l_2)("@extensible")._2._1._3
+              if (v_proto.pv._2 </ NullBot)
+                h(l_2)("@extensible")._2.pv._3
               else
                 BoolBot
             b_3 +
-            v_proto._2.foldLeft(BoolBot: AbsBool)((b, l) => b + iter(h,l,s,l_2))
+            v_proto.locs.foldLeft(BoolBot: AbsBool)((b, l) => b + iter(h,l,s,l_2))
           } else {
             BoolBot
           }
@@ -118,7 +118,7 @@ object Helper {
         h.update(SinglePureLocalLoc, h(SinglePureLocalLoc).update(x, pv))
       case CapturedVar =>
         val pv = PropValue(ObjectValue(v, BoolTrue, BoolBot, BoolFalse))
-        h(SinglePureLocalLoc)("@env")._2._2.foldLeft(HeapBot)((hh, l) => {
+        h(SinglePureLocalLoc)("@env")._2.locs.foldLeft(HeapBot)((hh, l) => {
           hh + h.update(l, h(l).update(x, pv))
         })
       case CapturedCatchVar =>
@@ -139,7 +139,7 @@ object Helper {
         val pv = PropValue(ObjectValue(v, BoolBot, BoolBot, BoolFalse))
         h.update(SinglePureLocalLoc, h(SinglePureLocalLoc).update(x, pv))
       case CapturedVar =>
-        h(SinglePureLocalLoc)("@env")._2._2.foldLeft(HeapBot)((hh, l) => {
+        h(SinglePureLocalLoc)("@env")._2.locs.foldLeft(HeapBot)((hh, l) => {
           hh + VarStoreL(h, l, x, v)
         })
       case CapturedCatchVar =>
@@ -185,7 +185,7 @@ object Helper {
           }
         val h_2 =
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             lset_outer.foldLeft(HeapBot)((hh, l_outer) => hh + visit(l_outer))
           } else {
             HeapBot
@@ -288,7 +288,7 @@ object Helper {
     id.getVarKind match {
       case PureLocalVar => (h(SinglePureLocalLoc)(x)._1._1, ExceptionBot)
       case CapturedVar =>
-        val v = h(SinglePureLocalLoc)("@env")._2._2.foldLeft(ValueBot)((vv, l) => {
+        val v = h(SinglePureLocalLoc)("@env")._2.locs.foldLeft(ValueBot)((vv, l) => {
           vv + LookupL(h, l, x)
         })
         (v, ExceptionBot)
@@ -313,7 +313,7 @@ object Helper {
           }
         val v_2 =
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             lset_outer.foldLeft(ValueBot)((v, l_outer) => v + visit(l_outer))
           } else {
             ValueBot
@@ -332,7 +332,7 @@ object Helper {
           h(GlobalLoc)(x)._1._1
         else
           ValueBot
-      val lset_proto = h(GlobalLoc)("@proto")._1._1._2
+      val lset_proto = h(GlobalLoc)("@proto")._1._1.locs
       val (v_2, es) =
         if (BoolFalse <= h(GlobalLoc).domIn(x)) {
           val exc = lset_proto.foldLeft(ExceptionBot)(
@@ -366,7 +366,7 @@ object Helper {
     id.getVarKind match {
       case PureLocalVar => LocSet(SinglePureLocalLoc)
       case CapturedVar =>
-        h(SinglePureLocalLoc)("@env")._2._2.foldLeft(LocSetBot)((ll, l) => {
+        h(SinglePureLocalLoc)("@env")._2.locs.foldLeft(LocSetBot)((ll, l) => {
           ll ++ LookupBaseL(h, l, x)
         })
       case CapturedCatchVar => CollapsedSingleton
@@ -390,7 +390,7 @@ object Helper {
           }
         val lset_2 =
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             lset_outer.foldLeft(LocSetBot)((lset, l_outer) => lset ++ visit(l_outer))
           } else {
             LocSetBot
@@ -410,7 +410,7 @@ object Helper {
         LocSetBot
     val lset_2 =
       if (BoolFalse <= h(GlobalLoc).domIn(x)) {
-        val lset_proto = h(GlobalLoc)("@proto")._1._1._2
+        val lset_proto = h(GlobalLoc)("@proto")._1._1.locs
         lset_proto.foldLeft(LocSetBot)(
           (lset_3, l_proto) => {
             lset_3 ++ ProtoBase(h, l_proto, AbsString.alpha(x))
@@ -436,7 +436,7 @@ object Helper {
             LocSetBot
         val lset_2 =
           if (BoolFalse <= h(l).domIn(s)) {
-            val lset_proto = h(l)("@proto")._1._1._2
+            val lset_proto = h(l)("@proto")._1._1.locs
             lset_proto.foldLeft[LocSet](LocSetBot)((lset_3, l_proto) => {
               val lset_4 = iter(h,l_proto,s)
               lset_3 ++ lset_4
@@ -453,37 +453,37 @@ object Helper {
 
   def TypeTag(h: Heap, v: Value): AbsString = {
     val s_1 =
-      if (!(v._1._4 <= NumBot))
+      if (!(v.pv._4 <= NumBot))
         AbsString.alpha("number")
       else
         StrBot
     val s_2 =
-      if (!(v._1._3 <= BoolBot))
+      if (!(v.pv._3 <= BoolBot))
         AbsString.alpha("boolean")
       else
         StrBot
     val s_3 =
-      if (!(v._1._5 <= StrBot))
+      if (!(v.pv._5 <= StrBot))
         AbsString.alpha("string")
       else
         StrBot
     val s_4 =
-      if (!(v._2.subsetOf(LocSetBot)) && (BoolFalse <= v._2.foldLeft[AbsBool](BoolBot)((bool, l) => bool + IsCallable(h,l))))
+      if (!(v.locs.subsetOf(LocSetBot)) && (BoolFalse <= v.locs.foldLeft[AbsBool](BoolBot)((bool, l) => bool + IsCallable(h,l))))
         AbsString.alpha("object")
       else
         StrBot
     val s_5 =
-      if (!(v._2.subsetOf(LocSetBot)) && (BoolTrue <= v._2.foldLeft[AbsBool](BoolBot)((bool, l) => bool + IsCallable(h,l))))
+      if (!(v.locs.subsetOf(LocSetBot)) && (BoolTrue <= v.locs.foldLeft[AbsBool](BoolBot)((bool, l) => bool + IsCallable(h,l))))
         AbsString.alpha("function")
       else
         StrBot
     val s_6 =
-      if (!(v._1._2 <= NullBot))
+      if (!(v.pv._2 <= NullBot))
         AbsString.alpha("object")
       else
         StrBot
     val s_7 =
-      if (!(v._1._1 <= UndefBot))
+      if (!(v.pv._1 <= UndefBot))
         AbsString.alpha("undefined")
       else
         StrBot
@@ -509,12 +509,12 @@ object Helper {
           if (BoolFalse <= test) {
             val v_proto = h(l)("@proto")._1._1
             val b_3 =
-              if (v_proto._1._2 </ NullBot) {
+              if (v_proto.pv._2 </ NullBot) {
                 BoolFalse
               } else {
                 BoolBot
               }
-            b_3 + v_proto._2.foldLeft[AbsBool](BoolBot)((b,l_proto) => {
+            b_3 + v_proto.locs.foldLeft[AbsBool](BoolBot)((b, l_proto) => {
               b + iter(h,l_proto,s)
             })
           } else {
@@ -550,12 +550,12 @@ object Helper {
           if (BoolFalse <= test) {
             val v_proto = h(l)("@proto")._1._1
             val v_3 =
-              if (v_proto._1._2 </ NullBot) {
+              if (v_proto.pv._2 </ NullBot) {
                 Value(PValue(UndefTop))
               } else {
                 ValueBot
               }
-            v_3 + v_proto._2.foldLeft(ValueBot)((v,l_proto) => v + iter(h, l_proto, s))
+            v_3 + v_proto.locs.foldLeft(ValueBot)((v, l_proto) => v + iter(h, l_proto, s))
           } else {
             ValueBot
           }
@@ -578,7 +578,7 @@ object Helper {
         val v_2: PropValue =
           if (BoolFalse <= test) {
             val v_proto = h(l)("@proto").objval.value
-            v_proto.locset.foldLeft(PropValueBot)((v, l_proto) => v + iter(h, l_proto, s))
+            v_proto.locs.foldLeft(PropValueBot)((v, l_proto) => v + iter(h, l_proto, s))
           }
           else PropValueBot
         v_1 + v_2
@@ -661,12 +661,12 @@ object Helper {
 
   // 9.11 IsCallable
   def IsCallable(h: Heap, v: Value): AbsBool = {
-    val b_1 = if (v._1._1 </ UndefBot) BoolFalse else BoolBot
-    val b_2 = if (v._1._2 </ NullBot) BoolFalse else BoolBot
-    val b_3 = if (v._1._3 </ BoolBot) BoolFalse else BoolBot
-    val b_4 = if (v._1._4 </ NumBot) BoolFalse else BoolBot
-    val b_5 = if (v._1._5 </ StrBot) BoolFalse else BoolBot
-    val b_6 = v._2.foldLeft(AbsBool.bot)((b, l) => b + IsCallable(h, l))
+    val b_1 = if (v.pv._1 </ UndefBot) BoolFalse else BoolBot
+    val b_2 = if (v.pv._2 </ NullBot) BoolFalse else BoolBot
+    val b_3 = if (v.pv._3 </ BoolBot) BoolFalse else BoolBot
+    val b_4 = if (v.pv._4 </ NumBot) BoolFalse else BoolBot
+    val b_5 = if (v.pv._5 </ StrBot) BoolFalse else BoolBot
+    val b_6 = v.locs.foldLeft(AbsBool.bot)((b, l) => b + IsCallable(h, l))
 
     b_1 + b_2 + b_3 + b_4 + b_5 + b_6
   }
@@ -710,7 +710,7 @@ object Helper {
         AbsNumber.getUIntSingle(n_len) match {
           case Some(n) => {
             (0 until n.toInt).foldLeft(arg_prev)((o_new, i)=>
-              o_new.update(Helper.toString(Operator.bopPlus(Value(n_prev_arglen), Value(AbsNumber.alpha(i)))._1),
+              o_new.update(Helper.toString(Operator.bopPlus(Value(n_prev_arglen), Value(AbsNumber.alpha(i))).pv),
                            arg_next(i.toString)))
             .update(AbsString.alpha("length"), PropValue(ObjectValue(Value(AbsNumber.alpha(n_prev_ind + n)), BoolTrue, BoolFalse, BoolTrue)))
           }
@@ -823,7 +823,7 @@ object Helper {
 
     // 2.a. if thisArg is null or undefined, set the ThisBinding to the global object.
     val lset_1 =
-      if (NullTop <= v._1._2 || UndefTop <= v._1._1) GlobalSingleton
+      if (NullTop <= v.pv._2 || UndefTop <= v.pv._1) GlobalSingleton
       else LocSetBot
 
     // 3. if Type(thisArg) is not Object, set the ThisBinding to ToObject(thisArg).
@@ -831,7 +831,7 @@ object Helper {
 
     // 4. Else set the ThisBinding to thisArg.
     var foundDeclEnvRecord = false
-    val lset_3 = v._2.foldLeft[LocSet](LocSetBot)((lset, l) => {
+    val lset_3 = v.locs.foldLeft[LocSet](LocSetBot)((lset, l) => {
       val isObj = IsObject(h,l)
       if (BoolFalse <= isObj) foundDeclEnvRecord = true
       if (BoolTrue <= isObj) lset + l else lset
@@ -857,19 +857,19 @@ object Helper {
         visited += l_1
         val v_eq = Operator.bopSEq(Value(l_1), Value(l_2))
         val v_1 =
-          if (BoolTrue <= v_eq._1._3)
+          if (BoolTrue <= v_eq.pv._3)
             Value(BoolTrue)
           else
             Value(BoolBot)
         val v_2 =
-          if (BoolFalse <= v_eq._1._3) {
+          if (BoolFalse <= v_eq.pv._3) {
             val v_proto = h(l_1)("@proto")._1._1
             val v_1 =
-              if (v_proto._1._2 </ NullBot)
+              if (v_proto.pv._2 </ NullBot)
                 Value(BoolFalse)
               else
                 Value(BoolBot)
-            v_1 + v_proto._2.foldLeft[Value](ValueBot)((v,l) => v + iter(h, l, l_2))
+            v_1 + v_proto.locs.foldLeft[Value](ValueBot)((v, l) => v + iter(h, l, l_2))
           }
           else
             Value(BoolBot)
@@ -957,7 +957,7 @@ object Helper {
     props.foldLeft(h(l_1))((_obj, s) => {
       val prop = AbsString.alpha(s)
       val v_1 = Proto(h, l_2, prop)
-      v_1._2.foldLeft(_obj)((__obj, l) => __obj + DefineProperty(h, l_1, prop, l))
+      v_1.locs.foldLeft(_obj)((__obj, l) => __obj + DefineProperty(h, l_1, prop, l))
     })
   }
  
@@ -1018,19 +1018,19 @@ object Helper {
       PreHelper.toObject(h, ctx, v, a_new)
     } else {
       // 9.9 ToObject
-      val lset = v._2
+      val lset = v.locs
 
       val o_1 =
-        if (!(v._1._5 <= StrBot)) Helper.NewString(v._1._5)
+        if (!(v.pv._5 <= StrBot)) Helper.NewString(v.pv._5)
         else Obj.bottom
       val o_2 =
-        if (!(v._1._3 <= BoolBot)) Helper.NewBoolean(v._1._3)
+        if (!(v.pv._3 <= BoolBot)) Helper.NewBoolean(v.pv._3)
         else Obj.bottom
       val o_3 =
-        if (!(v._1._4 <= NumBot)) Helper.NewNumber(v._1._4)
+        if (!(v.pv._4 <= NumBot)) Helper.NewNumber(v.pv._4)
         else Obj.bottom
       val es =
-        if (!(v._1._1 <= UndefBot) || !(v._1._2 <= NullBot)) Set[Exception](TypeError)
+        if (!(v.pv._1 <= UndefBot) || !(v.pv._2 <= NullBot)) Set[Exception](TypeError)
         else Set[Exception]()
       val o = o_1 + o_2 + o_3
 
@@ -1113,26 +1113,26 @@ object Helper {
     if (Config.preAnalysis) {
       PreHelper.toBoolean(v)
     } else {
-      val b1 = if (v._1._1.isTop) BoolFalse else BoolBot
-      val b2 = if (v._1._2.isTop) BoolFalse else BoolBot
-      val b3 = v._1._3
-      val b4 = v._1._4.getPair match {
+      val b1 = if (v.pv._1.isTop) BoolFalse else BoolBot
+      val b2 = if (v.pv._2.isTop) BoolFalse else BoolBot
+      val b3 = v.pv._3
+      val b4 = v.pv._4.getPair match {
         case (AbsTop, _) => BoolTop
         case (AbsBot, _) => BoolBot
-        case (AbsSingle, _) => v._1._4.toBoolean
-        case (AbsMulti, _) if AbsNumber.isInfinity(v._1._4) => BoolTrue
+        case (AbsSingle, _) => v.pv._4.toBoolean
+        case (AbsMulti, _) if AbsNumber.isInfinity(v.pv._4) => BoolTrue
         case (AbsMulti, _) => BoolTop
       }
-      val b5 = if(v._1._5.isAllNums) BoolTrue
-        else v._1._5.getAbsCase match {
+      val b5 = if(v.pv._5.isAllNums) BoolTrue
+        else v.pv._5.getAbsCase match {
           case AbsTop => BoolTop
           case AbsBot => BoolBot
-          case _ => v._1._5.gamma match {
+          case _ => v.pv._5.gamma match {
             case Some(vs) => vs.foldLeft[AbsBool](BoolBot)((r, v) => r + AbsBool.alpha(v != ""))
             case None => BoolTop
           }
         }
-      val b6 = if (v._2.isEmpty) BoolBot else BoolTrue
+      val b6 = if (v.locs.isEmpty) BoolBot else BoolTrue
 
       (b1 + b2 + b3 + b4 + b5 + b6)
     }
@@ -1140,17 +1140,18 @@ object Helper {
 
   /**
    * Default toString method of {Boolean, Number, String} object.
-   * @param h heap
+    *
+    * @param h heap
    * @param lset location set of object
    * @return AbsString
    */
   def defaultToString(h: Heap, lset: LocSet): AbsString = {
-    val lset_bool = lset.filter(l => AbsString.alpha("Boolean") <= h(l)("@class")._2._1._5)
-    val lset_num = lset.filter(l => AbsString.alpha("Number") <= h(l)("@class")._2._1._5)
-    val lset_string = lset.filter(l => AbsString.alpha("String") <= h(l)("@class")._2._1._5)
-    val lset_regexp = lset.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2._1._5)
+    val lset_bool = lset.filter(l => AbsString.alpha("Boolean") <= h(l)("@class")._2.pv._5)
+    val lset_num = lset.filter(l => AbsString.alpha("Number") <= h(l)("@class")._2.pv._5)
+    val lset_string = lset.filter(l => AbsString.alpha("String") <= h(l)("@class")._2.pv._5)
+    val lset_regexp = lset.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2.pv._5)
     val lset_others = lset.filter(l => {
-      val v = h(l)("@class")._2._1._5
+      val v = h(l)("@class")._2.pv._5
       val b = AbsString.alpha("Boolean")
       val n = AbsString.alpha("Number")
       val s = AbsString.alpha("String")
@@ -1158,19 +1159,19 @@ object Helper {
       v != b && v != n && v != s && v != r
     })
 
-    val others = lset_others.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@class")._2._1._5)
-    val b = lset_bool.foldLeft[AbsBool](BoolBot)((_b, l) => _b + h(l)("@primitive")._2._1._3)
-    val n = lset_num.foldLeft[AbsNumber](NumBot)((_v, _l) => _v + h(_l)("@primitive")._2._1._4)
+    val others = lset_others.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@class")._2.pv._5)
+    val b = lset_bool.foldLeft[AbsBool](BoolBot)((_b, l) => _b + h(l)("@primitive")._2.pv._3)
+    val n = lset_num.foldLeft[AbsNumber](NumBot)((_v, _l) => _v + h(_l)("@primitive")._2.pv._4)
     val (s_src, b_g, b_i, b_m) =
       lset_regexp.foldLeft
         [(AbsString, AbsBool, AbsBool, AbsBool)]((StrBot, BoolBot, BoolBot, BoolBot))((s, l) => {
-        (s._1 + h(l)("source")._1._1._1._5,
-          s._2 + h(l)("global")._1._1._1._3,
-          s._3 + h(l)("ignoreCase")._1._1._1._3,
-          s._4 + h(l)("multiline")._1._1._1._3)
+        (s._1 + h(l)("source")._1._1.pv._5,
+          s._2 + h(l)("global")._1._1.pv._3,
+          s._3 + h(l)("ignoreCase")._1._1.pv._3,
+          s._4 + h(l)("multiline")._1._1.pv._3)
       })
 
-    val s_1 = lset_string.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@primitive")._2._1._5)
+    val s_1 = lset_string.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@primitive")._2.pv._5)
     val s_2 = absBoolToString(b)
     val s_3 = absNumberToString(n)
 
@@ -1196,18 +1197,19 @@ object Helper {
   }
   /**
    * Default [[DefalutValue]]("Number") method of {Boolean, Number, String, Date} object.
-   * @param h heap
+    *
+    * @param h heap
    * @param lset location set of object
    * @return AbsString
    */
   def defaultValueNumber(h: Heap, lset: LocSet): PValue = {
-    val lset_bool = lset.filter(l => AbsString.alpha("Boolean") <= h(l)("@class")._2._1._5)
-    val lset_num = lset.filter(l => AbsString.alpha("Number") <= h(l)("@class")._2._1._5)
-    val lset_string = lset.filter(l => AbsString.alpha("String") <= h(l)("@class")._2._1._5)
-    val lset_date = lset.filter(l => AbsString.alpha("Date") <= h(l)("@class")._2._1._5)
-    val lset_regexp = lset.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2._1._5)
+    val lset_bool = lset.filter(l => AbsString.alpha("Boolean") <= h(l)("@class")._2.pv._5)
+    val lset_num = lset.filter(l => AbsString.alpha("Number") <= h(l)("@class")._2.pv._5)
+    val lset_string = lset.filter(l => AbsString.alpha("String") <= h(l)("@class")._2.pv._5)
+    val lset_date = lset.filter(l => AbsString.alpha("Date") <= h(l)("@class")._2.pv._5)
+    val lset_regexp = lset.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2.pv._5)
     val lset_others = lset.filter(l => {
-      val v = h(l)("@class")._2._1._5
+      val v = h(l)("@class")._2.pv._5
       val b = AbsString.alpha("Boolean")
       val n = AbsString.alpha("Number")
       val d = AbsString.alpha("Date")
@@ -1216,20 +1218,20 @@ object Helper {
       v != b && v != n && v != s && v != r && v != d
     })
 
-    val others = lset_others.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@class")._2._1._5)
-    val b = lset_bool.foldLeft[AbsBool](BoolBot)((_b, l) => _b + h(l)("@primitive")._2._1._3)
-    val n = lset_num.foldLeft[AbsNumber](NumBot)((_v, _l) => _v + h(_l)("@primitive")._2._1._4)
-    val n2 = lset_date.foldLeft[AbsNumber](NumBot)((_v, _l) => _v + h(_l)("@primitive")._2._1._4)
+    val others = lset_others.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@class")._2.pv._5)
+    val b = lset_bool.foldLeft[AbsBool](BoolBot)((_b, l) => _b + h(l)("@primitive")._2.pv._3)
+    val n = lset_num.foldLeft[AbsNumber](NumBot)((_v, _l) => _v + h(_l)("@primitive")._2.pv._4)
+    val n2 = lset_date.foldLeft[AbsNumber](NumBot)((_v, _l) => _v + h(_l)("@primitive")._2.pv._4)
     val (s_src, b_g, b_i, b_m) =
       lset_regexp.foldLeft
         [(AbsString, AbsBool, AbsBool, AbsBool)]((StrBot, BoolBot, BoolBot, BoolBot))((s, l) => {
-        (s._1 + h(l)("source")._1._1._1._5,
-          s._2 + h(l)("global")._1._1._1._3,
-          s._3 + h(l)("ignoreCase")._1._1._1._3,
-          s._4 + h(l)("multiline")._1._1._1._3)
+        (s._1 + h(l)("source")._1._1.pv._5,
+          s._2 + h(l)("global")._1._1.pv._3,
+          s._3 + h(l)("ignoreCase")._1._1.pv._3,
+          s._4 + h(l)("multiline")._1._1.pv._3)
       })
 
-    val s_1 = lset_string.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@primitive")._2._1._5)
+    val s_1 = lset_string.foldLeft[AbsString](StrBot)((_s, l) => _s + h(l)("@primitive")._2.pv._5)
     val s_2 = b
     val s_3 = n
     val s_4 = n2
@@ -1284,12 +1286,12 @@ object Helper {
     if (Config.preAnalysis) {
       PreHelper.toPrimitive(v)
     } else {
-      v._1 + objToPrimitive(v._2, "String")
+      v.pv + objToPrimitive(v.locs, "String")
     }
   }
 
   def toPrimitive_better(h: Heap, v: Value): PValue = {
-    v._1 + objToPrimitive_better(h, v._2, "String")
+    v.pv + objToPrimitive_better(h, v.locs, "String")
   }
 
   // v_env is either LocSet or NullTop
@@ -1328,8 +1330,8 @@ object Helper {
       val v_proto = o("@proto")._1._1
 
       val list =
-        if (v_proto._1._2 </ NullBot) Set()
-        else CollectProps(h, v_proto._2)
+        if (v_proto.pv._2 </ NullBot) Set()
+        else CollectProps(h, v_proto.locs)
 
       val myset = o.getProps.filter(s => {
         val enum = o(s)._1._3

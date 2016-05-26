@@ -86,7 +86,7 @@ object JQueryDeferred extends ModelData {
       // beforeStart : Function(Deferred deferred)
       ("jQuery.Deferred" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -105,7 +105,7 @@ object JQueryDeferred extends ModelData {
           val deferred_obj = h_1(DeferredInsLoc)
           // create a new deferred object
           val (h_2, new_deferred_obj) = deferred_obj.getProps.zipWithIndex.foldLeft((h_1, Helper.NewObject(ObjProtoLoc)))((ho, si) => {
-            val fun_loc = deferred_obj(si._1)._1._1._2
+            val fun_loc = deferred_obj(si._1)._1._1.locs
             val fun_obj = fun_loc.foldLeft(Obj.bottom)((o, l) => o + ho._1(l))
             val _h1 = ho._1.update(loc(si._2 + 1), fun_obj)
             (_h1, ho._2.update(si._1, PropValue(ObjectValue(Value(loc(si._2+1)), T, T, T))))

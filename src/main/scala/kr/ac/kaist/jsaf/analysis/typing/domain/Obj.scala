@@ -573,7 +573,7 @@ class Obj(_map: ObjMap) {
     Obj(map.map(data => {
       val (s, old_o) = data
       val new_o =
-        PropValue(ObjectValue(Value(old_o._1._1._1._1, oldifyLoc(old_o._1._1._1._2)),
+        PropValue(ObjectValue(Value(old_o._1._1._1.pv, oldifyLoc(old_o._1._1._1.locs)),
           old_o._1._1._2, old_o._1._1._3, old_o._1._1._4),
           old_o._1._3)
       s -> (new_o, old_o._2)
@@ -606,7 +606,7 @@ class Obj(_map: ObjMap) {
       }
     }
     map.get(propName) match {
-      case Some(pva) => primitiveToConcrete(pva._1._2._1)
+      case Some(pva) => primitiveToConcrete(pva._1._2.pv)
       case None => None
     }
   }

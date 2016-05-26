@@ -265,7 +265,7 @@ object BuiltinMath extends ModelData {
         })),
       ("Math.max" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val n_arglen = getArgValue(h, ctx, args, "length")._1._4
+          val n_arglen = getArgValue(h, ctx, args, "length").pv._4
           def n_arg = (i : Int) => Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, i.toString)))
           val n_1 =
             forMatch(n_arglen) match {
@@ -295,7 +295,7 @@ object BuiltinMath extends ModelData {
         })),
       ("Math.min" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val n_arglen = getArgValue(h, ctx, args, "length")._1._4
+          val n_arglen = getArgValue(h, ctx, args, "length").pv._4
           def n_arg = (i : Int) => Helper.toNumber(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, i.toString)))
           val n_1 =
             forMatch(n_arglen) match {

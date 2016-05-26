@@ -103,7 +103,7 @@ object BuiltinArray extends ModelData {
     Map(
       ("Array" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -116,9 +116,9 @@ object BuiltinArray extends ModelData {
           // case for "new Array(n)"
           val (h_arg_1, es1) =
             if(v_1 </ ValueBot) {
-              val es = if (AbsNumber.isUIntOrBot(v_1._1._4)) ExceptionBot
+              val es = if (AbsNumber.isUIntOrBot(v_1.pv._4)) ExceptionBot
                        else Set[Exception](RangeError)
-              val v_notNum = Value(PValue(v_1._1._1,v_1._1._2,v_1._1._3,NumBot,v_1._1._5), v_1._2)
+              val v_notNum = Value(PValue(v_1.pv._1,v_1.pv._2,v_1.pv._3,NumBot,v_1.pv._5), v_1.locs)
               // case for new Array("value")
               val o_notNum =
                 if (v_notNum </ ValueBot) {
@@ -129,8 +129,8 @@ object BuiltinArray extends ModelData {
                   Obj.bottom
               // case for new Array(len)
               val o_num =
-                if (v_1._1._4 </ NumBot) {
-                  Helper.NewArrayObject(Operator.ToUInt32(Value(v_1._1._4)))
+                if (v_1.pv._4 </ NumBot) {
+                  Helper.NewArrayObject(Operator.ToUInt32(Value(v_1.pv._4)))
                 }
                 else
                   Obj.bottom
@@ -171,16 +171,16 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.constructor" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v_1 = getArgValue(h, ctx, args, "0")
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
 
           // case for "new Array(n)"
           val (h_arg_1, es1) =
             if(v_1 </ ValueBot) {
-              val es = if (AbsNumber.isUIntOrBot(v_1._1._4)) ExceptionBot
+              val es = if (AbsNumber.isUIntOrBot(v_1.pv._4)) ExceptionBot
                        else Set[Exception](RangeError)
-              val v_notNum = Value(PValue(v_1._1._1,v_1._1._2,v_1._1._3,NumBot,v_1._1._5), v_1._2)
+              val v_notNum = Value(PValue(v_1.pv._1,v_1.pv._2,v_1.pv._3,NumBot,v_1.pv._5), v_1.locs)
               // case for new Array("value")
               val o_notNum =
                 if (v_notNum </ ValueBot) {
@@ -191,8 +191,8 @@ object BuiltinArray extends ModelData {
                   Obj.bottom
               // case for new Array(len)
               val o_num =
-                if (v_1._1._4 </ NumBot) {
-                  Helper.NewArrayObject(Operator.ToUInt32(Value(v_1._1._4)))
+                if (v_1.pv._4 </ NumBot) {
+                  Helper.NewArrayObject(Operator.ToUInt32(Value(v_1.pv._4)))
                 }
                 else
                   Obj.bottom
@@ -233,17 +233,17 @@ object BuiltinArray extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v = getArgValue(h, ctx, args, "0")
           val b_1 =
-            if (v._1 </ PValueBot) BoolFalse
+            if (v.pv </ PValueBot) BoolFalse
             else BoolBot
-          val b_2 = v._2.foldLeft[AbsBool](BoolBot)((_b, l) => {
+          val b_2 = v.locs.foldLeft[AbsBool](BoolBot)((_b, l) => {
             // XXX : Check whether it is correct or not
             if (!h.domIn(l)) BoolBot
             else  {
               val _b1 =
-                if (AbsString.alpha("Array") <= h(l)("@class")._2._1._5) BoolTrue
+                if (AbsString.alpha("Array") <= h(l)("@class")._2.pv._5) BoolTrue
                 else BoolBot
               val _b2 =
-                if (AbsString.alpha("Array") </ h(l)("@class")._2._1._5) BoolFalse
+                if (AbsString.alpha("Array") </ h(l)("@class")._2.pv._5) BoolFalse
                 else BoolBot
               _b + _b1 + _b2}})
           val b = b_1 + b_2
@@ -254,24 +254,24 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.toString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val s_sep = AbsString.alpha(",")
           val n_len = Operator.ToUInt32(lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h, l, AbsString.alpha("length"))))
           val s = AbsNumber.getUIntSingle(n_len) match {
             case Some(n) if n == 0 => AbsString.alpha("")
             case Some(n) if n > 0 => {
               val v_f = lset_this.foldLeft(ValueBot)((_v, l) =>_v + Helper.Proto(h, l, AbsString.alpha("0")))
-              val v_f2 = Value(PValue(UndefBot,NullBot,v_f._1._3,v_f._1._4,v_f._1._5), v_f._2)
+              val v_f2 = Value(PValue(UndefBot,NullBot,v_f.pv._3,v_f.pv._4,v_f.pv._5), v_f.locs)
               val s_first =
-                if (v_f._1._1 </ UndefBot || v_f._1._2 </ NullBot)
+                if (v_f.pv._1 </ UndefBot || v_f.pv._2 </ NullBot)
                   AbsString.alpha("") + Helper.toString(Helper.toPrimitive_better(h, v_f2))
                 else
                   Helper.toString(Helper.toPrimitive_better(h, v_f))
               (1 until n.toInt).foldLeft(s_first)((_s, i) =>{
                 val v_i = lset_this.foldLeft(ValueBot)((_v, l) =>_v + Helper.Proto(h, l, AbsString.alpha(i.toString)))
-                val v_i2 = Value(PValue(UndefBot,NullBot,v_i._1._3,v_i._1._4,v_i._1._5), v_i._2)
+                val v_i2 = Value(PValue(UndefBot,NullBot,v_i.pv._3,v_i.pv._4,v_i.pv._5), v_i.locs)
                 val s_i =
-                  if (v_i._1._1 </ UndefBot || v_i._1._2 </ NullBot)
+                  if (v_i.pv._1 </ UndefBot || v_i.pv._2 </ NullBot)
                     AbsString.alpha("") + Helper.toString(Helper.toPrimitive_better(h, v_i2))
                   else
                     Helper.toString(Helper.toPrimitive_better(h, v_i))
@@ -293,7 +293,7 @@ object BuiltinArray extends ModelData {
             val v_this = h(SinglePureLocalLoc)("@this")._2
 
             // Get a new address
-            val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+            val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
             val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
             if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
             val addr_env = (cp._1._1, set_addr.head)
@@ -302,7 +302,7 @@ object BuiltinArray extends ModelData {
 
             // 1. Let array be the result of calling ToObject passing the this value as the argument.
             val (v_this2, h_1, ctx_1, es_1) = Helper.toObject(h, ctx, v_this, addr1)
-            val lset_this = v_this2._2
+            val lset_this = v_this2.locs
 
             // 2. Let arrayLen be the result of calling the [[Get]] internal method of array with argument "length".
             val v_len = lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, AbsString.alpha("length")))
@@ -314,19 +314,19 @@ object BuiltinArray extends ModelData {
               case Some(n) if n == 0 => (h_1, ctx_1, ExceptionBot, AbsString.alpha(""))
               case Some(n) if n > 0 => {
                 val v_f = lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, AbsString.alpha("0")))
-                val v_f2 = Value(PValue(UndefBot, NullBot, v_f._1._3, v_f._1._4, v_f._1._5), v_f._2)
+                val v_f2 = Value(PValue(UndefBot, NullBot, v_f.pv._3, v_f.pv._4, v_f.pv._5), v_f.locs)
                 val s_first =
-                  if (v_f._1._1 </ UndefBot || v_f._1._2 </ NullBot)
+                  if (v_f.pv._1 </ UndefBot || v_f.pv._2 </ NullBot)
                     AbsString.alpha("") + Helper.toString(Helper.toPrimitive_better(h_1, v_f2))
                   else
                     Helper.toString(Helper.toPrimitive_better(h_1, v_f))
 
                 // b. Let func be the result of calling the [[Get]] internal method of elementObj with argument "toLocaleString".
-                val func = v_f._2.foldLeft(ValueBot)((S, l) => S + Helper.Proto(h_1, l, AbsString.alpha("toLocaleString")))
-                val notfn = func._2.filter(l => BoolFalse <= Helper.IsCallable(h_1, l))
+                val func = v_f.locs.foldLeft(ValueBot)((S, l) => S + Helper.Proto(h_1, l, AbsString.alpha("toLocaleString")))
+                val notfn = func.locs.filter(l => BoolFalse <= Helper.IsCallable(h_1, l))
                 // c. If IsCallable(func) is false, throw a TypeError exception.
                 val es_1 =
-                  if (!notfn.isEmpty || func._1 </ PValueBot) {
+                  if (!notfn.isEmpty || func.pv </ PValueBot) {
                     Set[Exception](TypeError)
                   } else {
                     ExceptionBot
@@ -334,18 +334,18 @@ object BuiltinArray extends ModelData {
 
                 val (s, es_2) = (1 until n.toInt).foldLeft((s_first, es_1))((_s, i) => {
                   val v_i = lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h, l, AbsString.alpha(i.toString)))
-                  val v_i2 = Value(PValue(UndefBot, NullBot, v_i._1._3, v_i._1._4, v_i._1._5), v_i._2)
+                  val v_i2 = Value(PValue(UndefBot, NullBot, v_i.pv._3, v_i.pv._4, v_i.pv._5), v_i.locs)
                   val s_i =
-                    if (v_i._1._1 </ UndefBot || v_i._1._2 </ NullBot)
+                    if (v_i.pv._1 </ UndefBot || v_i.pv._2 </ NullBot)
                       AbsString.alpha("") + Helper.toString(Helper.toPrimitive_better(h, v_i2))
                     else
                       Helper.toString(Helper.toPrimitive_better(h, v_i))
                   // ii. Let func be the result of calling the [[Get]] internal method of elementObj with argument "toLocaleString".
-                  val func = v_i._2.foldLeft(ValueBot)((S, l) => S + Helper.Proto(h_1, l, AbsString.alpha("toLocaleString")))
-                  val notfn = func._2.filter(l => BoolFalse <= Helper.IsCallable(h_1, l))
+                  val func = v_i.locs.foldLeft(ValueBot)((S, l) => S + Helper.Proto(h_1, l, AbsString.alpha("toLocaleString")))
+                  val notfn = func.locs.filter(l => BoolFalse <= Helper.IsCallable(h_1, l))
                   // iii. If IsCallable(func) is false, throw a TypeError exception.
                   val es_i =
-                    if (!notfn.isEmpty || func._1 </ PValueBot) {
+                    if (!notfn.isEmpty || func.pv </ PValueBot) {
                       Set[Exception](TypeError)
                     } else {
                       ExceptionBot
@@ -361,7 +361,7 @@ object BuiltinArray extends ModelData {
                 // 5. If len is zero, return the empty String.
                 // 6. Let firstElement be the result of calling the [[Get]] internal method of array with argument "0".
                 val elements_1 =
-                  if (BoolTrue <= Operator.bopLessEq(Value(AbsNumber.alpha(1)), Value(n_len))._1._3) {
+                  if (BoolTrue <= Operator.bopLessEq(Value(AbsNumber.alpha(1)), Value(n_len)).pv._3) {
                     lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, AbsString.NumTop))
                   } else {
                     ValueBot
@@ -375,10 +375,10 @@ object BuiltinArray extends ModelData {
                   }
 
                 // ii. Let func be the result of calling the [[Get]] internal method of elementObj with argument "toLocaleString".
-                val func = elements_2._2.foldLeft(ValueBot)((S, l) => S + Helper.Proto(h_2, l, AbsString.alpha("toLocaleString")))
+                val func = elements_2.locs.foldLeft(ValueBot)((S, l) => S + Helper.Proto(h_2, l, AbsString.alpha("toLocaleString")))
 
                 // iii. If IsCallable(func) is false, throw a TypeError exception.
-                val notfn = func._2.filter(l => BoolFalse <= Helper.IsCallable(h_2, l))
+                val notfn = func.locs.filter(l => BoolFalse <= Helper.IsCallable(h_2, l))
                 val es_3 =
                   if (!notfn.isEmpty) {
                     Set[Exception](TypeError)
@@ -405,14 +405,14 @@ object BuiltinArray extends ModelData {
           }),
       ("Array.prototype.concat" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
           val l_r = addrToLoc(addr1, Recent)
           val (h_1, ctx_1)  = Helper.Oldify(h, ctx, addr1)
-          val lset_this = h_1(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h_1(SinglePureLocalLoc)("@this")._2.locs
 
           val n_arglen = Operator.ToUInt32(getArgValue(h_1, ctx_1, args, "length"))
 
@@ -423,9 +423,9 @@ object BuiltinArray extends ModelData {
               val obj = Helper.NewArrayObject(AbsNumber.alpha(0))
               val index = AbsNumber.alpha(0)
               val (obj_1, len) = elem_list.foldLeft((obj, index))((oi, elem) => {
-                val lset_array = elem._2.filter((l) => AbsString.alpha("Array") <= h(l)("@class")._2._1._5)
-                val lset_narray = elem._2.filter((l) => AbsString.alpha("Array") != h(l)("@class")._2._1._5)
-                val v_narray = Value(elem._1, lset_narray)
+                val lset_array = elem.locs.filter((l) => AbsString.alpha("Array") <= h(l)("@class")._2.pv._5)
+                val lset_narray = elem.locs.filter((l) => AbsString.alpha("Array") != h(l)("@class")._2.pv._5)
+                val v_narray = Value(elem.pv, lset_narray)
                 val o = oi._1
                 val index = oi._2
                 val (o_1, n_index_1) =
@@ -435,7 +435,7 @@ object BuiltinArray extends ModelData {
                       val __o = AbsNumber.getUIntSingle(n_len) match {
                         case Some(n) => {
                           (0 until n.toInt).foldLeft(o)((o_new, i)=>
-                            o_new.update(Helper.toString(Operator.bopPlus(Value(index), Value(AbsNumber.alpha(i)))._1),
+                            o_new.update(Helper.toString(Operator.bopPlus(Value(index), Value(AbsNumber.alpha(i))).pv),
                               PropValue(ObjectValue(Helper.Proto(h_1, l, AbsString.alpha(i.toString)),BoolTrue,BoolTrue,BoolTrue))))
                         }
                         case _ => n_len.getAbsCase match {
@@ -445,7 +445,7 @@ object BuiltinArray extends ModelData {
                             o.update(NumStr, PropValue(ObjectValue(v_all,BoolTrue,BoolTrue,BoolTrue)))
                         }
                       }
-                      val __i = Operator.bopPlus(Value(index), Value(n_len))._1._4
+                      val __i = Operator.bopPlus(Value(index), Value(n_len)).pv._4
                       (_oi._1 + __o , _oi._2 + __i)
                     })
                   }
@@ -454,7 +454,7 @@ object BuiltinArray extends ModelData {
                 val (o_2, n_index_2) =
                   if (v_narray </ ValueBot) {
                     val _o = o.update(Helper.toString(PValue(index)), PropValue(ObjectValue(elem, BoolTrue, BoolTrue, BoolTrue)))
-                    val _i = Operator.bopPlus(Value(index), Value(AbsNumber.alpha(1)))._1._4
+                    val _i = Operator.bopPlus(Value(index), Value(AbsNumber.alpha(1))).pv._4
                     (_o, _i)
                   }
                   else
@@ -466,7 +466,7 @@ object BuiltinArray extends ModelData {
               case AbsBot => Obj.bottom
               case _ =>
                 val v_all = Value(lset_this) + getArgValueAbs(h_1, ctx_1, args, NumStr)
-                val lset_array = v_all._2.filter((l) => AbsString.alpha("Array") <= h(l)("@class")._2._1._5)
+                val lset_array = v_all.locs.filter((l) => AbsString.alpha("Array") <= h(l)("@class")._2.pv._5)
                 val v_array = lset_array.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, NumStr))
                 Helper.NewArrayObject(UInt).update(NumStr, PropValue(ObjectValue(v_all + v_array, BoolTrue,BoolTrue,BoolTrue)))
             }
@@ -480,11 +480,11 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.join" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val v_sep = getArgValue(h, ctx, args, "0")
-          val v_sep2 = Value(PValue(UndefBot,v_sep._1._2,v_sep._1._3,v_sep._1._4,v_sep._1._5), v_sep._2)
+          val v_sep2 = Value(PValue(UndefBot,v_sep.pv._2,v_sep.pv._3,v_sep.pv._4,v_sep.pv._5), v_sep.locs)
           val s_sep =
-            if (v_sep._1._1 </ UndefBot)
+            if (v_sep.pv._1 </ UndefBot)
               AbsString.alpha(",") + Helper.toString(Helper.toPrimitive_better(h, v_sep2))
             else
               Helper.toString(Helper.toPrimitive_better(h, v_sep))
@@ -496,17 +496,17 @@ object BuiltinArray extends ModelData {
             case Some(n) if n == 0 => AbsString.alpha("")
             case Some(n) if n > 0 => {
               val v_f = lset_this.foldLeft(ValueBot)((_v, l) =>_v + Helper.Proto(h, l, AbsString.alpha("0")))
-              val v_f2 = Value(PValue(UndefBot,NullBot,v_f._1._3,v_f._1._4,v_f._1._5), v_f._2)
+              val v_f2 = Value(PValue(UndefBot,NullBot,v_f.pv._3,v_f.pv._4,v_f.pv._5), v_f.locs)
               val s_first =
-                if (v_f._1._1 </ UndefBot || v_f._1._2 </ NullBot)
+                if (v_f.pv._1 </ UndefBot || v_f.pv._2 </ NullBot)
                   AbsString.alpha("") + Helper.toString(Helper.toPrimitive_better(h, v_f2))
                 else
                   Helper.toString(Helper.toPrimitive_better(h, v_f))
               (1 until n.toInt).foldLeft(s_first)((_s, i) =>{
                 val v_i = lset_this.foldLeft(ValueBot)((_v, l) =>_v + Helper.Proto(h, l, AbsString.alpha(i.toString)))
-                val v_i2 = Value(PValue(UndefBot,NullBot,v_i._1._3,v_i._1._4,v_i._1._5), v_i._2)
+                val v_i2 = Value(PValue(UndefBot,NullBot,v_i.pv._3,v_i.pv._4,v_i.pv._5), v_i.locs)
                 val s_i =
-                  if (v_i._1._1 </ UndefBot || v_i._1._2 </ NullBot)
+                  if (v_i.pv._1 </ UndefBot || v_i.pv._2 </ NullBot)
                     AbsString.alpha("") + Helper.toString(Helper.toPrimitive_better(h, v_i2))
                   else
                     Helper.toString(Helper.toPrimitive_better(h, v_i))
@@ -523,7 +523,7 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.pop" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_len = Operator.ToUInt32(lset_this.foldLeft(ValueBot)((_v, l) =>
             _v + Helper.Proto(h, l, AbsString.alpha("length"))))
 
@@ -562,7 +562,7 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.push" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           val (h_1, v) = AbsNumber.getUIntSingle(n_arglen) match {
             case Some(n_arg) => {
@@ -604,7 +604,7 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.reverse" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val h_1 = lset_this.foldLeft(h)((_hh, l) => {
             val n_len = Operator.ToUInt32(Helper.Proto(h, l, AbsString.alpha("length")))
             AbsNumber.getUIntSingle(n_len) match {
@@ -664,7 +664,7 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.shift" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val (h_1, v) = lset_this.foldLeft((h,ValueBot))((_hv, l) => {
             val n_len = Operator.ToUInt32(Helper.Proto(h, l, AbsString.alpha("length")))
             val _h = _hv._1
@@ -710,14 +710,14 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.slice" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
           val l_r = addrToLoc(addr1, Recent)
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
-          val lset_this = h_1(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h_1(SinglePureLocalLoc)("@this")._2.locs
           val n_start = Operator.ToInteger(getArgValue(h_1, ctx_1, args, "0"))
           val v_end = getArgValue(h, ctx, args, "1")
           //val n_end = Operator.ToInteger(getArgValue(h_1, ctx_1, "1"))
@@ -727,7 +727,7 @@ object BuiltinArray extends ModelData {
               lset_this.foldLeft(Obj.bottom)((_o, l) => {
                 val n_len = Operator.ToUInt32(Helper.Proto(h_1, l, AbsString.alpha("length")))
                 val n_end =
-                  if (v_end._1._1 </ UndefBot)  n_len + v_end._1._4
+                  if (v_end.pv._1 </ UndefBot)  n_len + v_end.pv._4
                   else Operator.ToInteger(v_end)
                 _o + (n_end.getSingle match {
                   case Some(end) =>
@@ -798,7 +798,7 @@ object BuiltinArray extends ModelData {
         })),
       ("Array.prototype.sort" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this: LocSet = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this: LocSet = h(SinglePureLocalLoc)("@this")._2.locs
           // top value
           val h_1 = lset_this.foldLeft(h)((_h, l) => {
             Helper.PropStoreWeak(_h, l, NumStr, Helper.Proto(h, l, NumStr))
@@ -807,14 +807,14 @@ object BuiltinArray extends ModelData {
       })),
       "Array.prototype.splice" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
           val l_r = addrToLoc(addr1, Recent)
           val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
-          val lset_this = h_1(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h_1(SinglePureLocalLoc)("@this")._2.locs
 
           val n_arglen = Operator.ToUInt32(getArgValue(h_1, ctx_1, args, "length"))
           val n_start = Operator.ToInteger(getArgValue(h_1, ctx_1, args, "0"))
@@ -952,7 +952,7 @@ object BuiltinArray extends ModelData {
         }),
       ("Array.prototype.unshift" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           val (h_1, n) = AbsNumber.getUIntSingle(n_arglen) match {
             case Some(n_arglen) => {
@@ -1025,7 +1025,7 @@ object BuiltinArray extends ModelData {
         })),
       "Array.prototype.indexOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           val n_index = AbsNumber.getUIntSingle(n_arglen) match {
             case Some(n) => {
@@ -1053,7 +1053,7 @@ object BuiltinArray extends ModelData {
                                 __nb
                               else {
                                 val __n = __nb._1
-                                Operator.bopSEq(v_search, Helper.Proto(h, l, AbsString.alpha(i.toString)))._1._3.getPair match {
+                                Operator.bopSEq(v_search, Helper.Proto(h, l, AbsString.alpha(i.toString))).pv._3.getPair match {
                                   case (AbsTop, _) => (__n + AbsNumber.alpha(i), false)
                                   case (AbsBot, _) => (NumBot, true)
                                   case (AbsSingle, Some(true)) => (AbsNumber.alpha(i), true)
@@ -1094,7 +1094,7 @@ object BuiltinArray extends ModelData {
         }),
       "Array.prototype.lastIndexOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           val n_index = AbsNumber.getUIntSingle(n_arglen) match {
             case Some(n) => {
@@ -1118,7 +1118,7 @@ object BuiltinArray extends ModelData {
                           else {
                             val __n = __nb._1
                             val i_back = (k - i).toInt
-                            Operator.bopSEq(v_search, Helper.Proto(h, l, AbsString.alpha(i_back.toString)))._1._3.getPair match {
+                            Operator.bopSEq(v_search, Helper.Proto(h, l, AbsString.alpha(i_back.toString))).pv._3.getPair match {
                               case (AbsTop, _) => (__n + AbsNumber.alpha(i_back), false)
                               case (AbsBot, _) => (NumBot, true)
                               case (AbsSingle, Some(true)) => (AbsNumber.alpha(i_back), true)
@@ -1170,7 +1170,7 @@ object BuiltinArray extends ModelData {
           val bthisArgValue = v_thisArg.isDefined
 
           // Get a new address
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -1178,7 +1178,7 @@ object BuiltinArray extends ModelData {
 
           // 1. Let O be the result of calling ToObject passing the this value as the argument.
           val (v_this2, h_1, ctx_1, es_1) = Helper.toObject(h, ctx, v_this, addr1)
-          val lset_this = v_this2._2
+          val lset_this = v_this2.locs
 
 
           // 4. If IsCallable(callbackfn) is false, throw a TypeError exception.
@@ -1197,7 +1197,7 @@ object BuiltinArray extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_this = h(SinglePureLocalLoc)("@this")._2
 
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -1223,13 +1223,13 @@ object BuiltinArray extends ModelData {
 
           val (v_this2, h_3, ctx_3, es_1) = Helper.toObject(h_2, ctx_2, v_this, addr3)
 
-          val cond = v_callbackfn._2.exists((l) => BoolFalse <= Helper.IsCallable(h_3, l))
+          val cond = v_callbackfn.locs.exists((l) => BoolFalse <= Helper.IsCallable(h_3, l))
           val es =
             if (cond) Set[Exception](TypeError)
             else Set[Exception]()
           val (h_e, ctx_e) = Helper.RaiseException(h_3, ctx_3, es)
-          val lset_f = v_callbackfn._2.filter((l) => BoolTrue <= Helper.IsCallable(h_3, l))
-          val lset_this = v_this2._2
+          val lset_f = v_callbackfn.locs.filter((l) => BoolTrue <= Helper.IsCallable(h_3, l))
+          val lset_this = v_this2.locs
 
           val value = lset_this.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h_3, l, absNumberToString(AbsNumber.naturalNumbers)))
       
@@ -1257,7 +1257,7 @@ object BuiltinArray extends ModelData {
           lset_f.foreach((l_f) => {
             val o_f = h_4(l_f)
             o_f("@function")._3.foreach((fid) => {
-              cc_caller.NewCallContext(h, cfg, fid, l_r2, callee_this._2).foreach((pair) => {
+              cc_caller.NewCallContext(h, cfg, fid, l_r2, callee_this.locs).foreach((pair) => {
                 val (cc_new, o_new) = pair
                 val o_new2 = o_new.
                   update(cfg.getArgumentsName(fid),
@@ -1269,7 +1269,7 @@ object BuiltinArray extends ModelData {
               })
             })
           })
-          val h_5 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+          val h_5 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
             hh + h_4.update(l, h_4(l).update("callee",
               PropValue(ObjectValue(Value(lset_f), BoolTrue, BoolFalse, BoolTrue))))
           })
@@ -1301,7 +1301,7 @@ object BuiltinArray extends ModelData {
           val bInitValue = v_initial.isDefined
 
           // Get a new address
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -1309,7 +1309,7 @@ object BuiltinArray extends ModelData {
 
           // 1. Let O be the result of calling ToObject passing the this value as the argument.
           val (v_this2, h_1, ctx_1, es_1) = Helper.toObject(h, ctx, v_this, addr1)
-          val lset_this = v_this2._2
+          val lset_this = v_this2.locs
 
           // 2. Let lenValue be the result of calling the [[Get]] internal method of O with the argument "length".
           val v_len = lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, AbsString.alpha("length")))
@@ -1343,7 +1343,7 @@ object BuiltinArray extends ModelData {
                     if (b) b
                     else {
                       val v = lset_this.foldLeft(ValueBot)((_v, l) => _v + Helper.Proto(h_1, l, AbsString.alpha(k.toString)))
-                      val v_1 = Value(PValue(UndefBot, v._1._2, v._1._3, v._1._4, v._1._5), v._2)
+                      val v_1 = Value(PValue(UndefBot, v.pv._2, v.pv._3, v.pv._4, v.pv._5), v.locs)
                       v_1 </ ValueBot
                     }
                   })
@@ -1362,7 +1362,7 @@ object BuiltinArray extends ModelData {
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val v_this = h(SinglePureLocalLoc)("@this")._2
 
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -1389,14 +1389,14 @@ object BuiltinArray extends ModelData {
           val (v_this2, h_3, ctx_3, es_1) = Helper.toObject(h_2, ctx_2, v_this, addr3)
 
           // 1.
-          val cond = v_callbackfn._2.exists((l) => BoolFalse <= Helper.IsCallable(h_3, l))
+          val cond = v_callbackfn.locs.exists((l) => BoolFalse <= Helper.IsCallable(h_3, l))
           val es =
             if (cond) Set[Exception](TypeError)
             else Set[Exception]()
           val (h_e, ctx_e) = Helper.RaiseException(h_3, ctx_3, es)
-          val lset_f = v_callbackfn._2.filter((l) => BoolTrue <= Helper.IsCallable(h_3, l))
-          val lset_tarf = v_callbackfn._2.filter(l => BoolTrue <= Helper.IsBound(h_3,l))
-          val lset_this = v_this2._2
+          val lset_f = v_callbackfn.locs.filter((l) => BoolTrue <= Helper.IsCallable(h_3, l))
+          val lset_tarf = v_callbackfn.locs.filter(l => BoolTrue <= Helper.IsBound(h_3,l))
+          val lset_this = v_this2.locs
 
           val value = lset_this.foldLeft(ValueBot)((v, l) => v + Helper.Proto(h_3, l, absNumberToString(AbsNumber.naturalNumbers)))
           val temp = h_3(SinglePureLocalLoc)("temp")._1._1
@@ -1419,7 +1419,7 @@ object BuiltinArray extends ModelData {
               o_arg
             } else {
               val lset_target_args = lset_tarf.foldLeft(LBot)((lset, l_tf) => {
-                h_3(l_tf)("@bound_args")._2._2 ++ lset
+                h_3(l_tf)("@bound_args")._2.locs ++ lset
               })
               val target_args = lset_target_args.foldLeft(Obj.bottom)((obj, l_ta) => obj + h_3(l_ta))
               Helper.concat(target_args, o_arg)
@@ -1439,9 +1439,9 @@ object BuiltinArray extends ModelData {
          
           lset_tarf.foreach((l_f) => {
             val o_f = h_4(l_f)
-            val l_this = o_f("@bound_this")._2._2
+            val l_this = o_f("@bound_this")._2.locs
             //o_f("@target_function")._1._3.foreach((fid) => {
-            val (fids, scope_locs) = o_f("@target_function")._2._2.foldLeft((FunSetBot, LocSetBot))((fidslocs, l) => ((fidslocs._1 ++ h_4(l)("@function")._3, fidslocs._2 ++ h_4(l)("@scope")._2._2)))
+            val (fids, scope_locs) = o_f("@target_function")._2.locs.foldLeft((FunSetBot, LocSetBot))((fidslocs, l) => ((fidslocs._1 ++ h_4(l)("@function")._3, fidslocs._2 ++ h_4(l)("@scope")._2.locs)))
             fids.foreach((fid) => {
               cc_caller.NewCallContext(h, cfg, fid, l_r2, l_this).foreach((pair) => {
                 val (cc_new, o_new) = pair
@@ -1461,7 +1461,7 @@ object BuiltinArray extends ModelData {
           lset_f.foreach((l_f) => {
             val o_f = h_4(l_f)
             o_f("@function")._3.foreach((fid) => {
-              cc_caller.NewCallContext(h, cfg, fid, l_r2, callee_this._2).foreach((pair) => {
+              cc_caller.NewCallContext(h, cfg, fid, l_r2, callee_this.locs).foreach((pair) => {
                 val (cc_new, o_new) = pair
                 val o_new2 = o_new.
                   update(cfg.getArgumentsName(fid),
@@ -1473,7 +1473,7 @@ object BuiltinArray extends ModelData {
               })
             })
           })
-          val h_5 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+          val h_5 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
             hh + h_4.update(l, h_4(l).update("callee",
               PropValue(ObjectValue(Value(lset_f), BoolTrue, BoolFalse, BoolTrue))))
           })

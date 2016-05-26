@@ -89,7 +89,7 @@ object DOMElement extends DOM {
       //TODO: not yet implemented
       ("DOMElement.getAttribute" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val attr_name = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0"))).toLowerCase
           if(Shell.params.opt_Dommodel2){
             if(attr_name </ StrBot){
@@ -109,7 +109,7 @@ object DOMElement extends DOM {
         })),
       ("DOMElement.setAttribute" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -118,7 +118,7 @@ object DOMElement extends DOM {
           val addr3 = cfg.getAPIAddress(addr_env, 2)
           val addr4 = cfg.getAPIAddress(addr_env, 3)
           val addr5 = cfg.getAPIAddress(addr_env, 4)
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // For 'Attr' node
           val l_attr = addrToLoc(addr1, Recent)
           // For 'Text' node
@@ -153,7 +153,7 @@ object DOMElement extends DOM {
         })),
       ("DOMElement.removeAttribute" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val attr_name = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0"))).toLowerCase
           if(attr_name </ StrBot){
@@ -176,9 +176,9 @@ object DOMElement extends DOM {
       ("DOMElement.getElementsByTagName" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
          /* imprecise modeling */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -190,7 +190,7 @@ object DOMElement extends DOM {
           val tagname = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           if (tagname </ StrBot) {
             if(Shell.params.opt_Dommodel2){
-              val lset = Helper.Proto(h, TagTableLoc, tagname.toUpperCase)._2
+              val lset = Helper.Proto(h, TagTableLoc, tagname.toUpperCase).locs
               val proplist = HTMLCollection.getInsList(0) 
               val obj = proplist.foldLeft(Obj.empty)((o, p) => o.update(p._1, p._2))
               val new_obj = if(lset.size > 0) 
@@ -268,7 +268,7 @@ object DOMElement extends DOM {
       //case "DOMElement.setAttributeNodeNS" => ((h, ctx), (he, ctxe))
       "DOMElement.getElementsByTagNameNS" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -298,7 +298,7 @@ object DOMElement extends DOM {
         }),
       "DOMElement.hasAttribute" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
           val attr_name = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0"))).toLowerCase
           if(attr_name </ StrBot) {
@@ -308,7 +308,7 @@ object DOMElement extends DOM {
             else {
             val attr_val = lset_this.foldLeft(ValueBot)((v, l_this) => {
               // read the list of attributes in the current node
-              val attributes_lset = Helper.Proto(h, l_this, AbsString.alpha("attributes"))._2
+              val attributes_lset = Helper.Proto(h, l_this, AbsString.alpha("attributes")).locs
               val attr_val_1 = attributes_lset.foldLeft(ValueBot)((v, l_attributes) => {
                 v + Value(Helper.HasOwnProperty(h, l_attributes, attr_name))
               })
@@ -326,15 +326,15 @@ object DOMElement extends DOM {
       //case "DOMElement.setIdAttributeNode" => ((h, ctx), (he, ctxe))
       "DOMElement.querySelector" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
 
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
-          val s_selector = getArgValue(h, ctx, args, "0")._1._5
+          val s_selector = getArgValue(h, ctx, args, "0").pv._5
           if (s_selector </ StrBot) {
             val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
             // start here
@@ -357,15 +357,15 @@ object DOMElement extends DOM {
         }),
       "DOMElement.querySelectorAll" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
 
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* arguments */
-          val s_selector = getArgValue(h, ctx, args, "0")._1._5
+          val s_selector = getArgValue(h, ctx, args, "0").pv._5
           if (s_selector </ StrBot) {
             val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
             val l_result = addrToLoc(addr1, Recent)
@@ -408,8 +408,8 @@ object DOMElement extends DOM {
         }),
       "DOMElement.getElementsByClassName" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -421,7 +421,7 @@ object DOMElement extends DOM {
 
           if (s_class </ StrBot) {
             if(Shell.params.opt_Dommodel2){
-              val lset = Helper.Proto(h, ClassTableLoc, s_class)._2
+              val lset = Helper.Proto(h, ClassTableLoc, s_class).locs
               val proplist = HTMLCollection.getInsList(0) 
               val obj = proplist.foldLeft(Obj.empty)((o, p) => o.update(p._1, p._2))
               val new_obj = if(lset.size > 0) 

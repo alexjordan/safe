@@ -97,7 +97,7 @@ object JQueryAttribute extends ModelData {
       "jQuery.prototype.addClass" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -117,18 +117,18 @@ object JQueryAttribute extends ModelData {
           val (h_4, ctx_4) = Helper.Oldify(h_3, ctx_3, addr4)
 
           /* jQuery object */
-          val lset_this = h_4(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h_4(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg = getArgValue(h_4, ctx, args, "0")
-          val s_arg = v_arg._1._5
+          val s_arg = v_arg.pv._5
 
           val (h_ret1, v_ret1) =
             if (s_arg </ StrBot) {
               val h3 = lset_this.foldLeft(h_4)((h1, l1) => {
-                val lset_elem = Helper.Proto(h1, l1, NumStr)._2
+                val lset_elem = Helper.Proto(h1, l1, NumStr).locs
                 lset_elem.foldLeft(h1)((h2, l2) => {
                   val v_class = DOMHelper.getAttribute(h2, l2, AbsString.alpha("class"))
-                  val s_class = v_class._1._5
+                  val s_class = v_class.pv._5
                   val h2_1 =
                     if (s_class </ StrBot)
                       (s_class.gamma, s_arg.gamma) match {
@@ -144,7 +144,7 @@ object JQueryAttribute extends ModelData {
                     else
                       HeapBot
                   val h2_2 =
-                    if (v_class._1._2 </ NullBot)
+                    if (v_class.pv._2 </ NullBot)
                       DOMHelper.setAttribute(h2, l2, l_attr, l_text, l_child1, l_child2, AbsString.alpha("class"), s_arg)
                     else
                       HeapBot
@@ -157,7 +157,7 @@ object JQueryAttribute extends ModelData {
               (HeapBot, ValueBot)
 
           val (h_ret2, v_ret2) =
-            if (!v_arg._2.isEmpty)
+            if (!v_arg.locs.isEmpty)
               (h_4, Value(lset_this))
             else
               (HeapBot, ValueBot)
@@ -172,7 +172,7 @@ object JQueryAttribute extends ModelData {
       "jQuery.prototype.attr" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -189,7 +189,7 @@ object JQueryAttribute extends ModelData {
           val l_tableentry = addrToLoc(addr5, Recent)
 
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
           val v_arg2 = getArgValue(h, ctx, args, "1")
@@ -197,11 +197,11 @@ object JQueryAttribute extends ModelData {
           // only 1st argument
           // get
           val (h_ret1, v_ret1, ctx_ret1) =
-            if (v_arg2._1._1 </ UndefBot && v_arg1._1._5 </ StrBot && UndefTop <= v_arg2._1._1) {
+            if (v_arg2.pv._1 </ UndefBot && v_arg1.pv._5 </ StrBot && UndefTop <= v_arg2.pv._1) {
               val v1 = lset_this.foldLeft(ValueBot)((v, l) => {
-                val lset_first = Helper.Proto(h, l, AbsString.alpha("0"))._2
+                val lset_first = Helper.Proto(h, l, AbsString.alpha("0")).locs
                 v + lset_first.foldLeft(ValueBot)((vv, ll) =>
-                  vv + DOMHelper.getAttribute(h, ll, v_arg1._1._5))
+                  vv + DOMHelper.getAttribute(h, ll, v_arg1.pv._5))
               })
               (h, v1, ctx)
             }
@@ -211,14 +211,14 @@ object JQueryAttribute extends ModelData {
           // has 2nd argument
           // set
           val (h_ret2, v_ret2, ctx_ret2) =
-            if (v_arg2._1._1 <= UndefBot && v_arg2 </ ValueBot && v_arg1._1._5 </ StrBot) {
+            if (v_arg2.pv._1 <= UndefBot && v_arg2 </ ValueBot && v_arg1.pv._5 </ StrBot) {
               val (h_1, ctx_1) = Helper.Oldify(h, ctx, addr1)
               val (h_2, ctx_2) = Helper.Oldify(h_1, ctx_1, addr2)
               val (h_3, ctx_3) = Helper.Oldify(h_2, ctx_2, addr3)
               val (h_4, ctx_4) = Helper.Oldify(h_3, ctx_3, addr4)
               val (h_5, ctx_5) = Helper.Oldify(h_4, ctx_4, addr5)
-              val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h_5, l, NumStr)._2)
-              val h1 = DOMHelper.setAttribute(h_5, lset_elem, l_attr, l_text, l_child1, l_child2, l_tableentry, v_arg1._1._5, v_arg2._1._5)
+              val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h_5, l, NumStr).locs)
+              val h1 = DOMHelper.setAttribute(h_5, lset_elem, l_attr, l_text, l_child1, l_child2, l_tableentry, v_arg1.pv._5, v_arg2.pv._5)
               (h1, Value(lset_this), ctx_5)
             }
             else
@@ -236,17 +236,17 @@ object JQueryAttribute extends ModelData {
       ("jQuery.prototype.hasClass" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
-          val s_arg = getArgValue(h, ctx, args, "0")._1._5
+          val s_arg = getArgValue(h, ctx, args, "0").pv._5
 
           val b_ret = s_arg.gamma match {
             case Some(_) =>
               lset_this.foldLeft[AbsBool](BoolBot)((b, l) => {
-                val lset_elem = h(l)(NumStr)._1._1._2
+                val lset_elem = h(l)(NumStr)._1._1.locs
                 val b1 =
                   lset_elem.foldLeft[AbsBool](BoolBot)((r, ll) => {
-                    val s_prop = DOMHelper.getAttribute(h, ll, AbsString.alpha("class"))._1._5
+                    val s_prop = DOMHelper.getAttribute(h, ll, AbsString.alpha("class")).pv._5
                     r + (s_prop.gamma match {
                       case Some(_) =>
                         s_prop.contains(s_arg)
@@ -259,7 +259,7 @@ object JQueryAttribute extends ModelData {
                   })
                 val b2 =
                   lset_elem.foldLeft[AbsBool](BoolBot)((r, ll) => {
-                    val s_prop = DOMHelper.getAttribute(h, ll, AbsString.alpha("class"))._1._5
+                    val s_prop = DOMHelper.getAttribute(h, ll, AbsString.alpha("class")).pv._5
                     r + (s_prop.gamma match {
                       case Some(_) =>
                         !s_prop.contains(s_arg)
@@ -286,14 +286,14 @@ object JQueryAttribute extends ModelData {
       ("jQuery.prototype.html" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg = getArgValue(h, ctx, args, "0")
 
           // no arguments
           // get
           val v_ret1 =
-            if (v_arg._1._1 </ UndefBot)
+            if (v_arg.pv._1 </ UndefBot)
               Value(StrTop)
             else
               ValueBot
@@ -302,7 +302,7 @@ object JQueryAttribute extends ModelData {
           // set
           // TODO: unsound
           val v_ret2 =
-            if (v_arg._1._1 <= UndefBot && v_arg </ ValueBot)
+            if (v_arg.pv._1 <= UndefBot && v_arg </ ValueBot)
               Value(lset_this)
             else
               ValueBot
@@ -317,7 +317,7 @@ object JQueryAttribute extends ModelData {
       ("jQuery.prototype.prop" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
           val v_arg2 = getArgValue(h, ctx, args, "1")
@@ -325,11 +325,11 @@ object JQueryAttribute extends ModelData {
           // only 1st argument
           // get
           val (h_ret1, v_ret1) =
-          if (v_arg2._1._1 </ UndefBot && v_arg1._1._5 </ StrBot && UndefTop <= v_arg2._1._1) {
+          if (v_arg2.pv._1 </ UndefBot && v_arg1.pv._5 </ StrBot && UndefTop <= v_arg2.pv._1) {
             val v1 = lset_this.foldLeft(ValueBot)((v, l) => {
-              val lset_first = Helper.Proto(h, l, AbsString.alpha("0"))._2
+              val lset_first = Helper.Proto(h, l, AbsString.alpha("0")).locs
               v + lset_first.foldLeft(ValueBot)((vv, ll) =>
-                vv + Helper.Proto(h, ll, v_arg1._1._5)
+                vv + Helper.Proto(h, ll, v_arg1.pv._5)
               )
             })
             (h, v1)
@@ -340,10 +340,10 @@ object JQueryAttribute extends ModelData {
           // has 2nd argument
           // set
           val (h_ret2, v_ret2) =
-            if (v_arg2._1._1 <= UndefBot && v_arg2 </ ValueBot && v_arg1._1._5 </ StrBot) {
-              val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr)._2)
+            if (v_arg2.pv._1 <= UndefBot && v_arg2 </ ValueBot && v_arg1.pv._5 </ StrBot) {
+              val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr).locs)
               val h1 = lset_elem.foldLeft(h)((_h, l) =>
-                Helper.PropStore(_h, l, v_arg1._1._5, v_arg2)
+                Helper.PropStore(_h, l, v_arg1.pv._5, v_arg2)
               )
               (h1, Value(lset_this))
           }
@@ -361,7 +361,7 @@ object JQueryAttribute extends ModelData {
       "jQuery.prototype.removeClass" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -380,18 +380,18 @@ object JQueryAttribute extends ModelData {
           val (h_4, ctx_4) = Helper.Oldify(h_3, ctx_3, addr4)
 
           /* jQuery object */
-          val lset_this = h_4(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h_4(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg = getArgValue(h_4, ctx, args, "0")
-          val s_arg = v_arg._1._5
+          val s_arg = v_arg.pv._5
 
           val (h_ret1, v_ret1) =
             if (s_arg </ StrBot) {
               val h3 = lset_this.foldLeft(h_4)((h1, l1) => {
-                val lset_elem = Helper.Proto(h1, l1, NumStr)._2
+                val lset_elem = Helper.Proto(h1, l1, NumStr).locs
                 lset_elem.foldLeft(h1)((h2, l2) => {
                   val v_class = DOMHelper.getAttribute(h2, l2, AbsString.alpha("class"))
-                  val s_class = v_class._1._5
+                  val s_class = v_class.pv._5
                   val h2_1 =
                     if (s_class </ StrBot)
                       (s_class.gamma, s_arg.gamma) match {
@@ -420,7 +420,7 @@ object JQueryAttribute extends ModelData {
                     else
                       HeapBot
                   val h2_2 =
-                    if (v_class._1._2 </ NullBot)
+                    if (v_class.pv._2 </ NullBot)
                       h2
                     else
                       HeapBot
@@ -433,7 +433,7 @@ object JQueryAttribute extends ModelData {
               (HeapBot, ValueBot)
 
           val (h_ret2, v_ret2) =
-            if (!v_arg._2.isEmpty)
+            if (!v_arg.locs.isEmpty)
               (h_4, Value(lset_this))
             else
               (HeapBot, ValueBot)
@@ -448,13 +448,13 @@ object JQueryAttribute extends ModelData {
       ("jQuery.prototype.removeProp" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* jQuery object */
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg1 = getArgValue(h, ctx, args, "0")
 
-          val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr)._2)
+          val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr).locs)
           val h_ret =
-            lset_elem.foldLeft(h)((_h, l) => Helper.Delete(_h, l, v_arg1._1._5)._1)
+            lset_elem.foldLeft(h)((_h, l) => Helper.Delete(_h, l, v_arg1.pv._5)._1)
           if (!lset_this.isEmpty) {
             ((Helper.ReturnStore(h_ret, Value(lset_this)), ctx), (he, ctxe))
           }
@@ -464,7 +464,7 @@ object JQueryAttribute extends ModelData {
       "jQuery.prototype.toggleClass" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           /* new addr */
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
@@ -483,18 +483,18 @@ object JQueryAttribute extends ModelData {
           val (h_4, ctx_4) = Helper.Oldify(h_3, ctx_3, addr4)
 
           /* jQuery object */
-          val lset_this = h_4(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h_4(SinglePureLocalLoc)("@this")._2.locs
           /* 1st argument */
           val v_arg = getArgValue(h_4, ctx, args, "0")
-          val s_arg = v_arg._1._5
+          val s_arg = v_arg.pv._5
 
           val (h_ret1, v_ret1) =
             if (s_arg </ StrBot) {
               val h3 = lset_this.foldLeft(h_4)((h1, l1) => {
-                val lset_elem = Helper.Proto(h1, l1, NumStr)._2
+                val lset_elem = Helper.Proto(h1, l1, NumStr).locs
                 lset_elem.foldLeft(h1)((h2, l2) => {
                   val v_class = DOMHelper.getAttribute(h2, l2, AbsString.alpha("class"))
-                  val s_class = v_class._1._5
+                  val s_class = v_class.pv._5
                   val h2_1 =
                     if (s_class </ StrBot)
                       (s_class.gamma, s_arg.gamma) match {
@@ -530,7 +530,7 @@ object JQueryAttribute extends ModelData {
                     else
                       HeapBot
                   val h2_2 =
-                    if (v_class._1._2 </ NullBot)
+                    if (v_class.pv._2 </ NullBot)
                       h2
                     else
                       HeapBot
@@ -543,7 +543,7 @@ object JQueryAttribute extends ModelData {
               (HeapBot, ValueBot)
 
           val (h_ret2, v_ret2) =
-            if (!v_arg._2.isEmpty)
+            if (!v_arg.locs.isEmpty)
               (h_4, Value(lset_this))
             else
               (HeapBot, ValueBot)
@@ -558,16 +558,16 @@ object JQueryAttribute extends ModelData {
         ("jQuery.prototype.val" -> (
           (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
             /* jQuery object */
-            val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+            val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
             /* 1st argument */
             val v_arg1 = getArgValue(h, ctx, args, "0")
 
             // no arguments
             // get
             val (h_ret1, v_ret1) =
-              if (v_arg1._1._1 </ UndefBot) {
+              if (v_arg1.pv._1 </ UndefBot) {
                 val v1 = lset_this.foldLeft(ValueBot)((v, l) => {
-                  val lset_first = Helper.Proto(h, l, AbsString.alpha("0"))._2
+                  val lset_first = Helper.Proto(h, l, AbsString.alpha("0")).locs
                   v + lset_first.foldLeft(ValueBot)((vv, ll) =>
                     vv + Helper.Proto(h, ll, AbsString.alpha("value"))
                   )
@@ -581,8 +581,8 @@ object JQueryAttribute extends ModelData {
             // set
             // TODO: ignore function, array
             val (h_ret2, v_ret2) =
-              if (v_arg1._1._1 <= UndefBot && v_arg1 </ ValueBot && v_arg1._1._5 </ StrBot) {
-                val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr)._2)
+              if (v_arg1.pv._1 <= UndefBot && v_arg1 </ ValueBot && v_arg1.pv._5 </ StrBot) {
+                val lset_elem = lset_this.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, NumStr).locs)
                 val h1 = lset_elem.foldLeft(h)((_h, l) =>
                   Helper.PropStore(_h, l, AbsString.alpha("value"), v_arg1)
                 )

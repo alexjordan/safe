@@ -54,7 +54,7 @@ object AccessHelper {
     val LP_3 = LPSet(Set((ContextLoc, "3"), (ContextLoc, "4")))
     val LP_4 = h.map.keySet.foldLeft(LPBot)((S, l) => {
       S ++ h(l).getAllProps.foldLeft(LPBot)((Sp, x) =>
-        if (h(l)(x)._1._1._2.contains(l_r) || h(l)(x)._2._2.contains(l_r))
+        if (h(l)(x)._1._1.locs.contains(l_r) || h(l)(x)._2.locs.contains(l_r))
           Sp + ((l,x))
         else Sp)
     })
@@ -97,7 +97,7 @@ object AccessHelper {
           }
         val LP_2 = 
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             lset_outer.foldLeft(LPBot)((S, l_outer) => S ++ visit(l_outer))
           } else {
             LPBot
@@ -152,13 +152,13 @@ object AccessHelper {
 
   def toObject_def(h: Heap, ctx: Context, v: Value, a: Address): LPSet = {
     val o_1 = 
-      if (!(v._1._5 <= StrBot)) NewString_def(v._1._5)
+      if (!(v.pv._5 <= StrBot)) NewString_def(v.pv._5)
       else Set[String]()
     val o_2 = 
-      if (!(v._1._3 <= BoolBot)) NewBoolean_def
+      if (!(v.pv._3 <= BoolBot)) NewBoolean_def
       else Set[String]()
     val o_3 = 
-      if (!(v._1._4 <= NumBot)) NewNumber_def
+      if (!(v.pv._4 <= NumBot)) NewNumber_def
       else Set[String]()
     val o = o_1 ++ o_2 ++ o_3
 
@@ -181,7 +181,7 @@ object AccessHelper {
     props.foldLeft(LPBot)((lpset, p) => {
       val prop = AbsString.alpha(p)
       val v_1 = Helper.Proto(h, l_2, prop)
-      lpset ++ v_1._2.foldLeft(LPBot)((_lpset, l) => _lpset ++ DefineProperty_def(h, l_1, prop, l))
+      lpset ++ v_1.locs.foldLeft(LPBot)((_lpset, l) => _lpset ++ DefineProperty_def(h, l_1, prop, l))
     })
   }
 
@@ -272,7 +272,7 @@ object AccessHelper {
         visited += l
         val LP =
           if (BoolFalse <= h(l).domIn(s)) {
-            val lset_proto = h(l)("@proto")._1._1._2
+            val lset_proto = h(l)("@proto")._1._1.locs
             lset_proto.foldLeft(LPBot)((S,l_proto) => S ++ iter(h,l_proto,s))
           } else LPBot
 
@@ -314,7 +314,7 @@ object AccessHelper {
         val has_x = env.domIn(x)
         val LP = 
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             LPSet((l, "@outer")) ++
             lset_outer.foldLeft(LPBot)((S, l_outer) => S ++ visit(l_outer))
           } else {
@@ -328,7 +328,7 @@ object AccessHelper {
   }
 
   def LookupG_use(h: Heap, x: String): LPSet = {
-    val lset_proto = h(GlobalLoc)("@proto")._1._1._2
+    val lset_proto = h(GlobalLoc)("@proto")._1._1.locs
     val ax = AbsString.alpha(x)
     val LP_1 = lookup(h, GlobalLoc, x) ++ LPSet((GlobalLoc, "@proto"))
     val LP_2 = lset_proto.foldLeft(LPBot)((S, l_proto) => S + ((l_proto, x)))
@@ -344,7 +344,7 @@ object AccessHelper {
   }
 
   def TypeTag_use(h: Heap, v: Value): LPSet = {
-    v._2.foldLeft(LPBot)((S, l) => S ++ IsCallable_use(h,l))
+    v.locs.foldLeft(LPBot)((S, l) => S ++ IsCallable_use(h,l))
   }
 
   def IsCallable_use(h: Heap, l: Loc): LPSet = {
@@ -352,7 +352,7 @@ object AccessHelper {
   }
 
   def IsCallable_use(h: Heap, v: Value): LPSet = {
-    v._2.foldLeft(LPBot)((S, l) => S + (l, "@function"))
+    v.locs.foldLeft(LPBot)((S, l) => S + (l, "@function"))
   }
 
   def HasConstruct_use(h: Heap, l: Loc): LPSet = {
@@ -370,8 +370,8 @@ object AccessHelper {
         visited += l_1
         val v_eq = Operator.bopSEq(Value(l_1), Value(l_2))
         val LP =
-          if (BoolFalse <= v_eq._1._3) {
-            val lset_proto = h(l_1)("@proto")._1._1._2
+          if (BoolFalse <= v_eq.pv._3) {
+            val lset_proto = h(l_1)("@proto")._1._1.locs
             lset_proto.foldLeft(LPBot)((S, l) => S ++ iter(h,l,l_2))
           }
           else
@@ -395,7 +395,7 @@ object AccessHelper {
         LPBot
     val LP_3 = h.map.keySet.foldLeft(LPBot)((S, l) => {
       S ++ h(l).getAllProps.foldLeft(LPBot)((Sp, x) =>
-        if (h(l)(x)._1._1._2.contains(l_r) || h(l)(x)._2._2.contains(l_r))
+        if (h(l)(x)._1._1.locs.contains(l_r) || h(l)(x)._2.locs.contains(l_r))
           Sp ++ lookup(h,l,x)
         else Sp)
     })
@@ -430,7 +430,7 @@ object AccessHelper {
         val has_x = env.domIn(x)
         val LP = 
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             LPSet((l, "@outer")) ++
             lset_outer.foldLeft(LPBot)((S, l_outer) => S ++ visit(l_outer))
           } else {
@@ -485,14 +485,14 @@ object AccessHelper {
       if (!visited.contains(l_1)) {
         visited += l_1
         val v_proto = h(l_1)("@proto")._1._1
-        val lset_proto = v_proto._2
+        val lset_proto = v_proto.locs
         val LP_1 =
           if (BoolFalse <= h(l_1).domIn(s))
             lset_proto.foldLeft(LPBot)((S, l_proto) => S ++ iter(h,l_proto,s,l_2))
           else
             LPBot
         val LP_2 =
-          if (v_proto._1._2 </ NullBot)
+          if (v_proto.pv._2 </ NullBot)
             LPSet((l_2, "@extensible"))
           else
             LPBot
@@ -531,7 +531,7 @@ object AccessHelper {
         val has_x = env.domIn(x)
         val LP = 
           if (BoolFalse <= has_x) {
-            val lset_outer = env("@outer")._2._2
+            val lset_outer = env("@outer")._2.locs
             LPSet((l, "@outer")) ++
             lset_outer.foldLeft(LPBot)((S, l_outer) => S ++ visit(l_outer))
           } else {
@@ -545,7 +545,7 @@ object AccessHelper {
   }
 
   def LookupBaseG_use(h: Heap, x: String): LPSet = {
-    val lset_proto = h(GlobalLoc)("@proto")._1._1._2
+    val lset_proto = h(GlobalLoc)("@proto")._1._1.locs
     val ax = AbsString.alpha(x)
     val LP_1 = lset_proto.foldLeft(LPBot)((S, l_proto) => S + ((l_proto, x)))
     val LP_2 =
@@ -564,7 +564,7 @@ object AccessHelper {
   }
 
   def getThis_use(h: Heap, v: Value): LPSet = {
-    v._2.foldLeft(LPBot)((lpset, l) => lpset + (l, "@class"))
+    v.locs.foldLeft(LPBot)((lpset, l) => lpset + (l, "@class"))
   }
   
   def CreateMutableBinding_use(h: Heap, env: LocSet, id: CFGId): LPSet = {
@@ -583,7 +583,7 @@ object AccessHelper {
   }
 
   def toObject_use(h: Heap, ctx: Context, v: Value, a: Address): LPSet = {
-    if ((!(v._1._5 <= StrBot)) || (!(v._1._3 <= BoolBot)) || (!(v._1._4 <= NumBot)))
+    if ((!(v.pv._5 <= StrBot)) || (!(v.pv._3 <= BoolBot)) || (!(v.pv._4 <= NumBot)))
       Oldify_use(h, ctx, a)
     else LPBot
   }
@@ -605,7 +605,7 @@ object AccessHelper {
     val LP_2 = LPSet((l, "@proto"))
     val LP_3 =
       if (BoolFalse <= Helper.HasOwnProperty(h, l, s)) {
-        val lset_proto = h(l)("@proto")._1._1._2
+        val lset_proto = h(l)("@proto")._1._1.locs
         lset_proto.foldLeft(LPBot)((S, l_proto) => S ++ HasProperty_use(h, l_proto, s))
       } else {
         LPBot
@@ -621,7 +621,7 @@ object AccessHelper {
       val v_1 = Helper.Proto(h, l_2, prop)
       lpset ++
       Proto_use(h, l_2, prop) ++ 
-      v_1._2.foldLeft(LPBot)((_lpset, l) => _lpset ++ DefineProperty_use(h, l_1, prop, l))
+      v_1.locs.foldLeft(LPBot)((_lpset, l) => _lpset ++ DefineProperty_use(h, l_1, prop, l))
     })
   }
 
@@ -638,7 +638,7 @@ object AccessHelper {
   }
 
   def CollectProps_use(h: Heap, lset: LocSet) : LPSet = {
-    val lset_proto = lset.foldLeft(LocSetBot)((lset_proto_, l) => lset_proto_ ++ h(l)("@proto")._1._1._2)
+    val lset_proto = lset.foldLeft(LocSetBot)((lset_proto_, l) => lset_proto_ ++ h(l)("@proto")._1._1.locs)
 
     val LP_1 = lset.foldLeft(LPBot)((lp, l) => lp ++ absPair(h, l, StrTop))
     val LP_2 = lset.foldLeft(LPBot)((lp, l) => lp ++ LPSet((l, "@proto")))
@@ -648,7 +648,7 @@ object AccessHelper {
   }
 
   def toPrimitive_use(h: Heap, v: Value): LPSet = {
-    v._2.foldLeft(LPBot)((S, l) => S + ((l, "@class")) + ((l, "@primitive")))
+    v.locs.foldLeft(LPBot)((S, l) => S + ((l, "@class")) + ((l, "@primitive")))
   }
 
   def DetectCycle_use(h: Heap, l: Loc): LPSet = {
@@ -662,7 +662,7 @@ object AccessHelper {
         BoolTrue <= o(s)._1._3
       })
       s_set.foreach(s => {
-        val lset = o(s)._1._1._2
+        val lset = o(s)._1._1.locs
         val lset_2 = lset -- visited
         lset_2.foreach(l => detectCycle_(l, visited + l))
       })

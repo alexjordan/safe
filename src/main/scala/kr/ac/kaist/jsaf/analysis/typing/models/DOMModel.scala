@@ -174,25 +174,25 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
 
       case "#ALL" =>
         val (f, t) = all_event.foldLeft((LocSetBot, LocSetBot))((llset, e) =>
-          (llset._1 ++ fun_table(e)._2._2, llset._2 ++ target_table(e)._2._2)
+          (llset._1 ++ fun_table(e)._2.locs, llset._2 ++ target_table(e)._2.locs)
         )
         val global_o = h(GlobalLoc)
         val lset_static = global_o.getProps.foldLeft(LocSetBot)((lset, kv) =>
           if (all_event_name.exists((e) => kv.startsWith(e)))
-            lset ++ global_o(kv)._1._1._2
+            lset ++ global_o(kv)._1._1.locs
           else
             lset
         )
         (f ++ lset_static, t)
       case "#NOT_LOAD_UNLOAD" =>
         val (f, t) = all_event.filterNot(_ == "#LOAD").filterNot(_ == "#UNLOAD").foldLeft((LocSetBot, LocSetBot))((llset, e) =>
-          (llset._1 ++ fun_table(e)._2._2, llset._2 ++ target_table(e)._2._2)
+          (llset._1 ++ fun_table(e)._2.locs, llset._2 ++ target_table(e)._2.locs)
         )
         val event_names = all_event_name.filterNot(_ == "__LOADEvent__").filterNot(_ == "__UNLOADEvent__")
         val global_o = h(GlobalLoc)
         val lset_static = global_o.getProps.foldLeft(LocSetBot)((lset, kv) =>
           if (event_names.exists((e) => kv.startsWith(e)))
-            lset ++ global_o(kv)._1._1._2
+            lset ++ global_o(kv)._1._1.locs
           else
             lset
         )
@@ -203,12 +203,12 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
           if (Config.jqMode) {
             // delegate
             val selector_table = h(EventSelectorTableLoc)
-            val s_selector = selector_table(name)._2._1._5
-            val lset_target = DOMHelper.querySelectorAll(h, s_selector) ++ target_table(name)._2._2
-            (fun_table(name)._2._2 , lset_target)
+            val s_selector = selector_table(name)._2.pv._5
+            val lset_target = DOMHelper.querySelectorAll(h, s_selector) ++ target_table(name)._2.locs
+            (fun_table(name)._2.locs , lset_target)
           }
           else
-            (fun_table(name)._2._2 , target_table(name)._2._2)
+            (fun_table(name)._2.locs , target_table(name)._2.locs)
 
         val lset_static =
           if (name == "#TIME")
@@ -216,15 +216,15 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
           else {
             val event_name = all_event_name(all_event.indexOf(name))
             h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
-              if (kv.startsWith(event_name)) lset ++ h(GlobalLoc)(kv)._1._1._2
+              if (kv.startsWith(event_name)) lset ++ h(GlobalLoc)(kv)._1._1.locs
               else lset
             )
           }
         val (f_onload, t_onload) =
           if (name == "#LOAD") {
-            val lset_window = Helper.Proto(h, GlobalLoc, AbsString.alpha("window"))._2
+            val lset_window = Helper.Proto(h, GlobalLoc, AbsString.alpha("window")).locs
             val lset_onload = lset_window.foldLeft(LocSetBot)((lset, l) =>
-              lset ++ Helper.Proto(h, l, AbsString.alpha("onload"))._2
+              lset ++ Helper.Proto(h, l, AbsString.alpha("onload")).locs
             )
             (lset_onload, lset_window)
           }
@@ -313,7 +313,7 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
         }}
       }}
     }}
-    val h_6 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+    val h_6 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
       val pv = PropValue(ObjectValue(Value(lset_fun), BoolTrue, BoolFalse, BoolTrue))
       hh + h_5.update(l, h_5(l).update("callee", pv))
     })
@@ -335,37 +335,37 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
 
       case "#ALL" =>
         val (f, t) = all_event.foldLeft((LocSetBot, LocSetBot))((llset, e) =>
-          (llset._1 ++ fun_table(e)._2._2, llset._2 ++ target_table(e)._2._2)
+          (llset._1 ++ fun_table(e)._2.locs, llset._2 ++ target_table(e)._2.locs)
         )
         val lset_static = h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
           if (all_event_name.exists((e) => kv.startsWith(e)))
-            lset ++ h(GlobalLoc)(kv)._1._1._2
+            lset ++ h(GlobalLoc)(kv)._1._1.locs
           else
             lset
         )
         (f ++ lset_static, t)
       case "#NOT_LOAD_UNLOAD" =>
         val (f, t) = all_event.filterNot(_ == "#LOAD").filterNot(_ == "#UNLOAD").foldLeft((LocSetBot, LocSetBot))((llset, e) =>
-          (llset._1 ++ fun_table(e)._2._2, llset._2 ++ target_table(e)._2._2)
+          (llset._1 ++ fun_table(e)._2.locs, llset._2 ++ target_table(e)._2.locs)
         )
         val event_names = all_event_name.filterNot(_ == "__LOADEvent__").filterNot(_ == "__UNLOADEvent__")
         val lset_static = h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
           if (event_names.exists((e) => kv.startsWith(e)))
-            lset ++ h(GlobalLoc)(kv)._1._1._2
+            lset ++ h(GlobalLoc)(kv)._1._1.locs
           else
             lset
         )
         (f ++ lset_static, t)
 
       case _ =>
-        val (f,t) = (fun_table(name)._2._2 , target_table(name)._2._2)
+        val (f,t) = (fun_table(name)._2.locs , target_table(name)._2.locs)
         val lset_static =
           if (name == "#TIME")
             LocSetBot
           else {
             val event_name = all_event_name(all_event.indexOf(name))
             h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
-              if (kv.startsWith(event_name)) lset ++ h(GlobalLoc)(kv)._1._1._2
+              if (kv.startsWith(event_name)) lset ++ h(GlobalLoc)(kv)._1._1.locs
               else lset
             )
           }
@@ -444,7 +444,7 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
         }}
       }}
     }}
-    val h_6 = v_arg._2.foldLeft(HeapBot)((hh, l) => {
+    val h_6 = v_arg.locs.foldLeft(HeapBot)((hh, l) => {
       val pv = PropValue(ObjectValue(Value(lset_fun), BoolTrue, BoolFalse, BoolTrue))
       hh + h_5.update(l, h_5(l).update("callee", pv))
     })
@@ -485,32 +485,32 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
 
       case "#ALL" =>
         val (f, t, lpset_1) = all_event.foldLeft((LocSetBot, LocSetBot, LPBot))((llpset, e) =>
-          (llpset._1 ++ fun_table(e)._2._2, llpset._2 ++ target_table(e)._2._2,
+          (llpset._1 ++ fun_table(e)._2.locs, llpset._2 ++ target_table(e)._2.locs,
             llpset._3 + (EventFunctionTableLoc, e) + (EventTargetTableLoc, e))
         )
         val (lset_static, lpset_2) = h(GlobalLoc).getProps.foldLeft((LocSetBot, LPBot))((set, kv) =>
           if (all_event_name.exists((e) => kv.startsWith(e)))
-            (set._1 ++ h(GlobalLoc)(kv)._1._1._2, set._2 + (GlobalLoc, kv))
+            (set._1 ++ h(GlobalLoc)(kv)._1._1.locs, set._2 + (GlobalLoc, kv))
           else
             set
         )
         (f ++ lset_static, t, lpset_1 ++ lpset_2)
       case "#NOT_LOAD_UNLOAD" =>
         val (f, t, lpset_1) = all_event.filterNot(_ == "#LOAD").filterNot(_ == "#UNLOAD").foldLeft((LocSetBot, LocSetBot, LPBot))((llpset, e) =>
-          (llpset._1 ++ fun_table(e)._2._2, llpset._2 ++ target_table(e)._2._2,
+          (llpset._1 ++ fun_table(e)._2.locs, llpset._2 ++ target_table(e)._2.locs,
             llpset._3 + (EventFunctionTableLoc, e) + (EventTargetTableLoc, e))
         )
         val event_names = all_event_name.filterNot(_ == "__LOADEvent__").filterNot(_ == "__UNLOADEvent__")
         val (lset_static, lpset_2) = h(GlobalLoc).getProps.foldLeft((LocSetBot, LPBot))((set, kv) =>
           if (event_names.exists((e) => kv.startsWith(e)))
-            (set._1 ++ h(GlobalLoc)(kv)._1._1._2, set._2 + (GlobalLoc, kv))
+            (set._1 ++ h(GlobalLoc)(kv)._1._1.locs, set._2 + (GlobalLoc, kv))
           else
             set
         )
         (f ++ lset_static, t, lpset_1 ++ lpset_2)
 
       case _ =>
-        val (f,t) = (fun_table(name)._2._2 , target_table(name)._2._2)
+        val (f,t) = (fun_table(name)._2.locs , target_table(name)._2.locs)
         val lpset_1 =  LPBot + (EventFunctionTableLoc, name) + (EventTargetTableLoc, name)
         val (lset_static, lpset_2) =
           if (name == "#TIME")
@@ -519,7 +519,7 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
             val event_name = all_event_name(all_event.indexOf(name))
             h(GlobalLoc).getProps.foldLeft((LocSetBot, LPBot))((set, kv) =>
               if (kv.startsWith(event_name))
-                (set._1 ++ h(GlobalLoc)(kv)._1._1._2, set._2 + (GlobalLoc, kv))
+                (set._1 ++ h(GlobalLoc)(kv)._1._1.locs, set._2 + (GlobalLoc, kv))
               else
                 set
             )
@@ -564,36 +564,36 @@ class DOMModel(cfg: CFG) extends Model(cfg) {
     val lset_fun = name match {
       case "#ALL" =>
         val f = all_event.foldLeft(LocSetBot)((llset, e) =>
-          llset ++ fun_table(e)._2._2
+          llset ++ fun_table(e)._2.locs
         )
         val lset_static = h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
           if (all_event_name.exists((e) => kv.startsWith(e)))
-            lset ++ h(GlobalLoc)(kv)._1._1._2
+            lset ++ h(GlobalLoc)(kv)._1._1.locs
           else
             lset
         )
         f ++ lset_static
       case "#NOT_LOAD_UNLOAD" =>
         val f = all_event.filterNot(_ == "#LOAD").filterNot(_ == "#UNLOAD").foldLeft(LocSetBot)((llset, e) =>
-          llset ++ fun_table(e)._2._2
+          llset ++ fun_table(e)._2.locs
         )
         val event_names = all_event_name.filterNot(_ == "__LOADEvent__").filterNot(_ == "__UNLOADEvent__")
         val lset_static = h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
           if (event_names.exists((e) => kv.startsWith(e)))
-            lset ++ h(GlobalLoc)(kv)._1._1._2
+            lset ++ h(GlobalLoc)(kv)._1._1.locs
           else
             lset
         )
         f ++ lset_static
       case _ =>
-        val f = fun_table(name)._2._2
+        val f = fun_table(name)._2.locs
         val lset_static =
           if (name == "#TIME")
             LocSetBot
           else {
             val event_name = all_event_name(all_event.indexOf(name))
             h(GlobalLoc).getProps.foldLeft(LocSetBot)((lset, kv) =>
-              if (kv.startsWith(event_name)) lset ++ h(GlobalLoc)(kv)._1._1._2
+              if (kv.startsWith(event_name)) lset ++ h(GlobalLoc)(kv)._1._1.locs
               else lset
             )
           }

@@ -151,8 +151,8 @@ class ExprDetect(bugDetector: BugDetector) {
       val bugCheckInstance = new BugCheckInstance()
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, bugOption.contextSensitive(AbsentReadProperty))
       for ((callContext, state) <- mergedCState) {
-        val objLocSet = SE.V(obj, state.heap, state.context)._1.locset
-        val propValue = SE.V(index, state.heap, state.context)._1.pvalue
+        val objLocSet = SE.V(obj, state.heap, state.context)._1.locs
+        val propValue = SE.V(index, state.heap, state.context)._1.pv
 
         // Check for each object location
         for (objLoc <- objLocSet) {
@@ -163,7 +163,7 @@ class ExprDetect(bugDetector: BugDetector) {
               for (fid <- state.heap(loc)("@construct").funid) {
                 ModelManager.getFIdMap("Builtin").get(fid) match {
                   case Some(funName) if funName == "RegExp.constructor" =>
-                    val propValue = SE.V(index, state.heap, state.context)._1.pvalue
+                    val propValue = SE.V(index, state.heap, state.context)._1.pv
                     propValue.foreach((absValue) => if (regExpDeprecated contains BugHelper.getPropName(absValue.toAbsString)) {
                       bugStorage.addMessage(span, RegExpDeprecated, inst, callContext, "'" + objId + "." + BugHelper.getPropName(absValue.toAbsString) + "'")  
                       return
@@ -278,15 +278,15 @@ class ExprDetect(bugDetector: BugDetector) {
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, bugOption.contextSensitive(BinaryOpSecondType))
       for ((callContext, state) <- mergedCState) {
         val value = SE.V(second, state.heap, state.context)._1
-        val pvalue = value.pvalue
+        val pvalue = value.pv
 
         // Check object type (in & instanceof)
         val isBug = bugOption.BinaryOpSecondType_OperandMustBeCorrectForAllValue match {
           case true => 
-            value.locset.isEmpty || !pvalue.undefval.isBottom ||
+            value.locs.isEmpty || !pvalue.undefval.isBottom ||
             !pvalue.nullval.isBottom || !pvalue.boolval.isBottom ||
             !pvalue.numval.isBottom || !pvalue.strval.isBottom
-          case false => value.locset.isEmpty
+          case false => value.locs.isEmpty
         }
         val checkInstance = bugCheckInstance.insertWithStrings(isBug, span, callContext, state, "non-object")
         checkInstance.loc1 = Integer.MIN_VALUE
@@ -294,7 +294,7 @@ class ExprDetect(bugDetector: BugDetector) {
 
         // Check function type (instanceof)
         if (op.getKind == EJSOp.BIN_COMP_REL_INSTANCEOF) {
-          value.locset.foreach(loc => {
+          value.locs.foreach(loc => {
             val isBug = bugOption.BinaryOpSecondType_OperandMustBeCorrectForAllValue match {
               case true =>
                 Helper.IsCallable(state.heap, loc) != BoolTrue ||
@@ -444,7 +444,7 @@ class ExprDetect(bugDetector: BugDetector) {
       val bugCheckInstance = new BugCheckInstance()
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, bugOption.contextSensitive(GlobalThis))
       for((callContext, state) <- mergedCState) {
-        val thisLocSet = state.heap(SinglePureLocalLoc)("@this").objval.value.locset
+        val thisLocSet = state.heap(SinglePureLocalLoc)("@this").objval.value.locs
 
         val isGlobalCode = (fid == cfg.getGlobalFId) // Is current instruction in the global code?
         val referGlobal = bugOption.GlobalThis_MustReferExactly match { // Does 'this' refer global object?
@@ -492,8 +492,8 @@ class ExprDetect(bugDetector: BugDetector) {
         // expr1, expr2
         val value1: Value = SE.V(expr1, state.heap, state.context)._1
         val value2: Value = SE.V(expr2, state.heap, state.context)._1
-        val pvalue1: PValue = value1.pvalue
-        val pvalue2: PValue = value2.pvalue
+        val pvalue1: PValue = value1.pv
+        val pvalue2: PValue = value2.pv
 
         def nonBugCase(): Boolean = {
           // undefined == undefined ?
@@ -519,13 +519,13 @@ class ExprDetect(bugDetector: BugDetector) {
           // boolean == boolean ?
           pvalue1.boolval != BoolBot && pvalue2.boolval != BoolBot ||
           // object == undefined ?
-          !value1.locset.isEmpty && pvalue2.undefval != UndefBot ||
-          pvalue1.undefval != UndefBot && !value2.locset.isEmpty ||
+          !value1.locs.isEmpty && pvalue2.undefval != UndefBot ||
+          pvalue1.undefval != UndefBot && !value2.locs.isEmpty ||
           // object == null ?
-          !value1.locset.isEmpty && pvalue2.nullval != NullBot ||
-          pvalue1.nullval != NullBot && !value2.locset.isEmpty ||
+          !value1.locs.isEmpty && pvalue2.nullval != NullBot ||
+          pvalue1.nullval != NullBot && !value2.locs.isEmpty ||
           // object == object ?
-          !value1.locset.isEmpty && !value2.locset.isEmpty
+          !value1.locs.isEmpty && !value2.locs.isEmpty
         }
 
         // Insert a bug check instance
@@ -615,11 +615,11 @@ class ExprDetect(bugDetector: BugDetector) {
 
         // object == number ?
         if (bugOption.ImplicitTypeConvert_CheckObjectAndNumber) {
-          if (!value1.locset.isEmpty && pvalue2.numval != NumBot ||
-            pvalue1.numval != NumBot && !value2.locset.isEmpty) {
+          if (!value1.locs.isEmpty && pvalue2.numval != NumBot ||
+            pvalue1.numval != NumBot && !value2.locs.isEmpty) {
             if (!bugOption.ImplicitTypeConvert_MustBeConvertedForAllValue || !nonBugCase) {
               isBug = true
-              if (!value1.locset.isEmpty) insertBugCheckInstance(isBug, "object", "number", "", pvalue2.numval.getConcreteValueAsString())
+              if (!value1.locs.isEmpty) insertBugCheckInstance(isBug, "object", "number", "", pvalue2.numval.getConcreteValueAsString())
               else insertBugCheckInstance(isBug, "number", "object", pvalue1.numval.getConcreteValueAsString(), "")
             }
           }
@@ -627,11 +627,11 @@ class ExprDetect(bugDetector: BugDetector) {
 
         // object == string ?
         if (bugOption.ImplicitTypeConvert_CheckObjectAndString) {
-          if (!value1.locset.isEmpty && pvalue2.strval != StrBot ||
-            pvalue1.strval != StrBot && !value2.locset.isEmpty) {
+          if (!value1.locs.isEmpty && pvalue2.strval != StrBot ||
+            pvalue1.strval != StrBot && !value2.locs.isEmpty) {
             if (!bugOption.ImplicitTypeConvert_MustBeConvertedForAllValue || !nonBugCase) {
               isBug = true
-              if (!value1.locset.isEmpty) insertBugCheckInstance(isBug, "object", "string", "", pvalue2.strval.getConcreteValueAsString())
+              if (!value1.locs.isEmpty) insertBugCheckInstance(isBug, "object", "string", "", pvalue2.strval.getConcreteValueAsString())
               else insertBugCheckInstance(isBug, "string", "object", pvalue1.strval.getConcreteValueAsString(), "")
             }
           }
@@ -639,11 +639,11 @@ class ExprDetect(bugDetector: BugDetector) {
 
         // object == boolean ?
         if (bugOption.ImplicitTypeConvert_CheckObjectAndBoolean) {
-          if (!value1.locset.isEmpty && pvalue2.boolval != BoolBot ||
-            pvalue1.boolval != BoolBot && !value2.locset.isEmpty) {
+          if (!value1.locs.isEmpty && pvalue2.boolval != BoolBot ||
+            pvalue1.boolval != BoolBot && !value2.locs.isEmpty) {
             if (!bugOption.ImplicitTypeConvert_MustBeConvertedForAllValue || !nonBugCase) {
               isBug = true
-              if (!value1.locset.isEmpty) insertBugCheckInstance(isBug, "object", "boolean", "", pvalue2.boolval.getConcreteValueAsString())
+              if (!value1.locs.isEmpty) insertBugCheckInstance(isBug, "object", "boolean", "", pvalue2.boolval.getConcreteValueAsString())
               else insertBugCheckInstance(isBug, "boolean", "object", pvalue1.boolval.getConcreteValueAsString(), "")
             }
           }

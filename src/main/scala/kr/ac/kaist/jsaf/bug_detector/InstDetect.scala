@@ -152,9 +152,9 @@ class InstDetect(bugDetector: BugDetector) {
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, bugOption.contextSensitive(ObjectNullOrUndef))
       for ((callContext, state) <- mergedCState) {
         val objValue = SE.V(expr, state.heap, state.context)._1
-        val pValue = objValue.pvalue
+        val pValue = objValue.pv
 
-        val isBug1 = (!bugOption.NullOrUndefined_OnlyWhenPrimitive || objValue.locset.isEmpty) && pValue.typeCount > 0
+        val isBug1 = (!bugOption.NullOrUndefined_OnlyWhenPrimitive || objValue.locs.isEmpty) && pValue.typeCount > 0
         val isBug2 = if (bugOption.NullOrUndefined_OnlyNullOrUndefined) isOnlyNullUndef(pValue) else !isNotNullUndef(pValue)
         val checkInstance = bugCheckInstance.insert(isBug1 && isBug2, span, callContext, state)
         checkInstance.pValue = pValue
@@ -202,8 +202,8 @@ class InstDetect(bugDetector: BugDetector) {
       val bugCheckInstance = new BugCheckInstance()
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, CallContext._MOST_SENSITIVE)
       for((callContext, state) <- mergedCState) {
-        val funLocSet = SE.V(const, state.heap, state.context)._1.locset
-        val argLocSet = SE.V(args, state.heap, state.context)._1.locset
+        val funLocSet = SE.V(const, state.heap, state.context)._1.locs
+        val argLocSet = SE.V(args, state.heap, state.context)._1.locs
 
         // Check for each function location set
         for(funLoc <- funLocSet) {
@@ -212,7 +212,7 @@ class InstDetect(bugDetector: BugDetector) {
             ModelManager.getFIdMap("Builtin").get(fid) match {
               case Some(funName) if funName == "Array.constructor" =>
                 for(argLoc <- argLocSet) {
-                  val arg = state.heap(argLoc)("0").objval.value.pvalue.numval
+                  val arg = state.heap(argLoc)("0").objval.value.pv.numval
                   val isBug = arg.getAbsCase match {
                     case AbsTop => bugOption.ArrayConstructor_ArgumentMustBeUIntDefinitely
                     case AbsBot => false
@@ -256,9 +256,9 @@ class InstDetect(bugDetector: BugDetector) {
       val bugCheckInstance3 = new BugCheckInstance() // for BuiltinRange
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, CallContext._MOST_SENSITIVE)
       for((callContext, state) <- mergedCState) {
-        val funLocSet = SE.V(fun, state.heap, state.context)._1.locset
-        val thisLocSet = SE.V(thisArg, state.heap, state.context)._1.locset
-        val argLocSet = SE.V(args, state.heap, state.context)._1.locset
+        val funLocSet = SE.V(fun, state.heap, state.context)._1.locs
+        val thisLocSet = SE.V(thisArg, state.heap, state.context)._1.locs
+        val argLocSet = SE.V(args, state.heap, state.context)._1.locs
 
         // Check for each function location set
         for(funLoc <- funLocSet) {
@@ -286,7 +286,7 @@ class InstDetect(bugDetector: BugDetector) {
                         }
                         val objPropName = if(objName == "") propName else objName + "." + propName
                         for(thisLoc <- thisLocSet) {
-                          val toStringLocSet = Helper.Proto(state.heap, thisLoc, AbsString.alpha(propName)).locset
+                          val toStringLocSet = Helper.Proto(state.heap, thisLoc, AbsString.alpha(propName)).locs
                           val isBug = bugOption.BuiltinThrow_MustBeThrownDefinitely match {
                             case true => BugHelper.isCallable(heap, toStringLocSet) != BoolTrue
                             case false => BugHelper.isCallable(heap, toStringLocSet) <= BoolFalse
@@ -301,13 +301,13 @@ class InstDetect(bugDetector: BugDetector) {
                         bugCheckInstance1.insertWithStrings(isBug, span, callContext, state, objName, funcName)
                       case "RegExp.constructor" =>
                         for(argLoc <- argLocSet) {
-                          val patternLocSet = state.heap(argLoc)("0").objval.value.locset
+                          val patternLocSet = state.heap(argLoc)("0").objval.value.locs
                           val flags = state.heap(argLoc)("1").objval.value
                           for(patternLoc <- patternLocSet) {
-                            if(state.heap(patternLoc)("@class").objval.value.pvalue.strval.toString() == "\"RegExp\"") {
+                            if(state.heap(patternLoc)("@class").objval.value.pv.strval.toString() == "\"RegExp\"") {
                               val isBug = bugOption.BuiltinThrow_MustBeThrownDefinitely match {
-                                case true => flags == ValueBot || flags.pvalue.undefval == UndefTop
-                                case false => !(flags == ValueBot || flags.locset.size == 0 && flags.pvalue.typeCount == 1 && flags.pvalue.undefval == UndefTop)
+                                case true => flags == ValueBot || flags.pv.undefval == UndefTop
+                                case false => !(flags == ValueBot || flags.locs.size == 0 && flags.pv.typeCount == 1 && flags.pv.undefval == UndefTop)
                               }
                               bugCheckInstance2.insert(isBug, span, callContext, state)
                             }
@@ -322,7 +322,7 @@ class InstDetect(bugDetector: BugDetector) {
                     argRangeMap.get(funcName) match {
                       case Some((min, max)) =>
                         for(argLoc <- argLocSet) {
-                          val arg = state.heap(argLoc)("0").objval.value.pvalue.numval
+                          val arg = state.heap(argLoc)("0").objval.value.pv.numval
                           val isBug = arg.getAbsCase match {
                             case AbsTop => bugOption.BuiltinRange_ArgumentMustBeCorrectDefinitely
                             case AbsBot => false
@@ -381,7 +381,7 @@ class InstDetect(bugDetector: BugDetector) {
             val mergedCState = stateManager.getInputCState(node, inst.getInstId, CallContext._MOST_SENSITIVE)
             for((callContext, state) <- mergedCState) {
               val thisValue = state.heap(SinglePureLocalLoc)("@this").objval.value
-              val isBug = thisValue.locset.size == 0
+              val isBug = thisValue.locs.size == 0
               bugCheckInstance.insert(isBug, span, callContext, state)
             }
             // Filter out bugs depending on options
@@ -412,7 +412,7 @@ class InstDetect(bugDetector: BugDetector) {
       val bugCheckInstance = new BugCheckInstance()
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, bugOption.contextSensitive(CallNonFunction))
       for ((callContext, state) <- mergedCState) {
-        val funLocSet = SE.V(fun, state.heap, state.context)._1.locset
+        val funLocSet = SE.V(fun, state.heap, state.context)._1.locs
 
         // Check for each location
         for (funLoc <- funLocSet) {
@@ -462,7 +462,7 @@ class InstDetect(bugDetector: BugDetector) {
       val bugCheckInstance = new BugCheckInstance()
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, bugOption.contextSensitive(CallNonConstructor))
       for ((callContext, state) <- mergedCState) {
-        val funLocSet = SE.V(const, state.heap, state.context)._1.locset
+        val funLocSet = SE.V(const, state.heap, state.context)._1.locs
 
         // Check for each location
         for (funLoc <- funLocSet) {
@@ -518,7 +518,7 @@ class InstDetect(bugDetector: BugDetector) {
       for ((callContext, state) <- mergedCState) {
         // expr value
         val value: Value = SE.V(expr, state.heap, state.context)._1
-        val pvalue: PValue = value.pvalue
+        val pvalue: PValue = value.pv
 
         // undefined
         if (pvalue.undefval == UndefTop) {
@@ -589,7 +589,7 @@ class InstDetect(bugDetector: BugDetector) {
           case None =>
         }
         // Object
-        if (!value.locset.isEmpty) {
+        if (!value.locs.isEmpty) {
           val checkInstance = bugCheckInstance.insert(true, info.getSpan, callContext, state)
           checkInstance.valueType = EJSType.OBJECT
           checkInstance.string1 = "Object"
@@ -698,13 +698,13 @@ class InstDetect(bugDetector: BugDetector) {
         val objValue = SE.V(rhsExpr, state.heap, state.context)._1
 
         // Check primitive value
-        if(objValue.pvalue.typeCount > 0) {
+        if(objValue.pv.typeCount > 0) {
           val checkInstance = bugCheckInstance.insert(true, info.getSpan, callContext, state)
           checkInstance.loc1 = -1
         }
 
         // Check for each location
-        for(loc <- objValue.locset) {
+        for(loc <- objValue.locs) {
           // Collect function's callablility
           val isCallable = Helper.IsCallable(state.heap, loc)
           val isBug = bugOption.DefaultValue_MustBeCallableDefinitely match {
@@ -739,8 +739,8 @@ class InstDetect(bugDetector: BugDetector) {
       val bugCheckInstance = new BugCheckInstance()
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, CallContext._MOST_SENSITIVE)
       for ((callContext, state) <- mergedCState) {
-        val funLocSet = SE.V(fun, state.heap, state.context)._1.locset
-        val argLocSet = SE.V(args, state.heap, state.context)._1.locset
+        val funLocSet = SE.V(fun, state.heap, state.context)._1.locs
+        val argLocSet = SE.V(args, state.heap, state.context)._1.locs
 
         // Check for each function location set
         for (funLoc <- funLocSet) {
@@ -758,7 +758,7 @@ class InstDetect(bugDetector: BugDetector) {
                     case Some(funName) => {
                       for (argLoc <- argLocSet) {
                         val argsObj:Obj = state.heap(argLoc)
-                        val argLen:Int = AbsNumber.getUIntSingle(argsObj("length").objval.value.pvalue.numval) match {
+                        val argLen:Int = AbsNumber.getUIntSingle(argsObj("length").objval.value.pv.numval) match {
                           case Some(n) => n.toInt
                           case None => -1
                         }
@@ -792,13 +792,13 @@ class InstDetect(bugDetector: BugDetector) {
                             val isBug = jsType match {
                               case EJSType.OBJECT =>
                                 bugOption.BuiltinWrongArgType_TypeMustBeCorrectForAllValue match {
-                                  case true => obj.locset.isEmpty || obj.pvalue </ PValueBot
-                                  case false => obj.locset.isEmpty
+                                  case true => obj.locs.isEmpty || obj.pv </ PValueBot
+                                  case false => obj.locs.isEmpty
                                 }
                               case EJSType.OBJECT_FUNCTION =>
                                 bugOption.BuiltinWrongArgType_TypeMustBeCorrectForAllValue match {
-                                  case true => obj.locset.isEmpty || obj.locset.exists(loc => BoolTrue != state.heap(loc).domIn("@function")) || obj.pvalue </ PValueBot
-                                  case false => obj.locset.isEmpty || obj.locset.exists(loc => BoolFalse <= state.heap(loc).domIn("@function"))
+                                  case true => obj.locs.isEmpty || obj.locs.exists(loc => BoolTrue != state.heap(loc).domIn("@function")) || obj.pv </ PValueBot
+                                  case false => obj.locs.isEmpty || obj.locs.exists(loc => BoolFalse <= state.heap(loc).domIn("@function"))
                                 }
                             }
                             val checkInstance = bugCheckInstance.insert(isBug, span, callContext, state)
@@ -821,7 +821,7 @@ class InstDetect(bugDetector: BugDetector) {
               if(bugOption.FunctionArgSize_Check) {
                 // Check for each argument location set
                 for (argLoc <- argLocSet) {
-                  AbsNumber.getUIntSingle(state.heap(argLoc)("length").objval.value.pvalue.numval) match {
+                  AbsNumber.getUIntSingle(state.heap(argLoc)("length").objval.value.pv.numval) match {
                     case Some(n) =>
                       // Get argument size range
                       var argSize: (Int, Int) = (-1, -1)
@@ -888,7 +888,7 @@ class InstDetect(bugDetector: BugDetector) {
       for ((callContext, state) <- mergedCState) {
         // expr value
         val value: Value = SE.V(expr, state.heap, state.context)._1
-        val pvalue: PValue = value.pvalue
+        val pvalue: PValue = value.pv
 
         // undefined (type error)
         //if (pvalue.undefval != UndefBot) bugCheckInstance.insertWithStrings(true, span, callContext, state, "undefined")
@@ -904,7 +904,7 @@ class InstDetect(bugDetector: BugDetector) {
           else bugCheckInstance.insert(false, span, callContext, state)
         }
         // Object
-        if (!value.locset.isEmpty) bugCheckInstance.insert(false, span, callContext, state)
+        if (!value.locs.isEmpty) bugCheckInstance.insert(false, span, callContext, state)
       }
 
       // Filter out bugs depending on options
@@ -968,11 +968,11 @@ class InstDetect(bugDetector: BugDetector) {
     def unreferencedFunctionCheck(span: Span, args: CFGExpr): Unit = {
       if(!bugOption.UnreferencedFunction_Check) return
 
-      val argLocSet = SE.V(args, heap, context)._1._2
+      val argLocSet = SE.V(args, heap, context)._1.locs
       val argObj = argLocSet.foldLeft(Obj.bottom)((obj, loc) => obj + heap(loc))
-      val argLen = argObj("length")._1._1._1._4
+      val argLen = argObj("length")._1._1.pv._4
       AbsNumber.getUIntSingle(argLen) match {
-        case Some(n) => (0 to (n.toInt - 1)).foreach((i) => argObj(i.toString)._1._1._2.foreach((l) =>
+        case Some(n) => (0 to (n.toInt - 1)).foreach((i) => argObj(i.toString)._1._1.locs.foreach((l) =>
           heap(l)("@function")._3.foreach((fid) => bugStorage.appendUsedFunction(fid))))
         case _ => Unit 
       }
@@ -988,7 +988,7 @@ class InstDetect(bugDetector: BugDetector) {
       if(!bugOption.UncalledFunction_Check) return
 
       val fval = SE.V(fun, heap, context)._1
-      fval._2.foreach((loc) => heap(loc)("@function")._3.foreach((fid) => bugStorage.appendUsedFunction(fid)))
+      fval.locs.foreach((loc) => heap(loc)("@function")._3.foreach((fid) => bugStorage.appendUsedFunction(fid)))
     }
 
 
@@ -1002,8 +1002,8 @@ class InstDetect(bugDetector: BugDetector) {
       expr match {
         case CFGVarRef(info, id) => id match {
           case CFGTempId(text,_) => 
-            Helper.LookupBase(heap, id).foreach((l1) => heap(l1)(text)._1._1._2.foreach((l2) =>
-              if (BoolTrue == heap(l2).domIn("@function")) heap(l1)("@this")._2._2.foreach((loc) => bugStorage.updateFuncSet(loc, name))))
+            Helper.LookupBase(heap, id).foreach((l1) => heap(l1)(text)._1._1.locs.foreach((l2) =>
+              if (BoolTrue == heap(l2).domIn("@function")) heap(l1)("@this")._2.locs.foreach((loc) => bugStorage.updateFuncSet(loc, name))))
           case _ => // pass 
         } case _ => // pass
       }
@@ -1046,8 +1046,8 @@ class InstDetect(bugDetector: BugDetector) {
 
     def unreadPropertyReadCheck(span: Span, obj: CFGExpr, index: CFGExpr): List[RWEntry] = {
       if (obj.isInstanceOf[CFGVarRef] && obj.asInstanceOf[CFGVarRef].id.isInstanceOf[CFGTempId]) return List()
-      val s = SE.V(index, heap, context)._1._1._5
-      val locSet = SE.V(obj, heap, context)._1._2
+      val s = SE.V(index, heap, context)._1.pv._5
+      val locSet = SE.V(obj, heap, context)._1.locs
       val locSetBase = locSet.foldLeft(LocSetBot)((locset, loc) => locset ++ Helper.ProtoBase(heap, loc, s))
       locSetBase.foldLeft[List[RWEntry]](List())((list, loc) => 
         BugHelper.props(heap, loc, s).foldLeft[List[RWEntry]](list)((l, name) => l :+ (read, property, loc, name, span))
@@ -1062,8 +1062,8 @@ class InstDetect(bugDetector: BugDetector) {
 
     def unreadPropertyWriteCheck(span: Span, obj: CFGExpr, index: CFGExpr): List[RWEntry] = {
       if (obj.isInstanceOf[CFGVarRef] && obj.asInstanceOf[CFGVarRef].id.isInstanceOf[CFGTempId]) return List()
-      val s = SE.V(index, heap, context)._1._1._5
-      val locSet = SE.V(obj, heap, context)._1._2
+      val s = SE.V(index, heap, context)._1.pv._5
+      val locSet = SE.V(obj, heap, context)._1.locs
       locSet.foldLeft[List[RWEntry]](List())((list, loc) => s.gamma match {
         case Some(names) => list ++ names.foldLeft[List[RWEntry]](List())((r, name) => r :+ (write, property, loc, name, span))
         case None => list // Ignore StrTop, NumStr and OtherStr (UNSOUND)
@@ -1082,8 +1082,8 @@ class InstDetect(bugDetector: BugDetector) {
       // Check for each CState
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, CallContext._MOST_SENSITIVE)
       for ((callContext, state) <- mergedCState) {
-        val funLocSet = SE.V(fun, state.heap, state.context)._1.locset
-        val argLocSet = SE.V(args, state.heap, state.context)._1.locset
+        val funLocSet = SE.V(fun, state.heap, state.context)._1.locs
+        val argLocSet = SE.V(args, state.heap, state.context)._1.locs
 
         // Check for each function location set
         for (funLoc <- funLocSet) {
@@ -1118,7 +1118,7 @@ class InstDetect(bugDetector: BugDetector) {
       val mergedCState = stateManager.getInputCState(node, inst.getInstId, CallContext._MOST_SENSITIVE)
       for((callContext, state) <- mergedCState) {
         // For each function loc
-        for(funLoc <- SE.V(fun, state.heap, state.context)._1.locset) {
+        for(funLoc <- SE.V(fun, state.heap, state.context)._1.locs) {
           // For each function id
           for(fid <- state.heap(funLoc)("@function").funid) {
             // Is this a native function?
@@ -1130,7 +1130,7 @@ class InstDetect(bugDetector: BugDetector) {
                     // For each this loc
                     val thisLocSet = Helper.getThis(state.heap, SE.V(thisArg, state.heap, state.context)._1)
                     for(thisLoc <- thisLocSet) {
-                      state.heap(thisLoc)("@class").objval.value.pvalue.strval.gamma match {
+                      state.heap(thisLoc)("@class").objval.value.pv.strval.gamma match {
                         case Some(thisClassNameSet) =>
                           // Debug
                           //println("Native function name = " + funName + ", thisLoc = " + thisLoc + ", this.@class = " + thisClassName + ", expected @class = " + expectedClassName)

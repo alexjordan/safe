@@ -54,11 +54,11 @@ object Operator {
   }
   /* + */
   def uopPlus(value:Value): Value = {
-    Value(Helper.toNumber(value.pvalue) + Helper.toNumber(Helper.objToPrimitive(value.locset, "Number")))
+    Value(Helper.toNumber(value.pv) + Helper.toNumber(Helper.objToPrimitive(value.locs, "Number")))
   }
   /* - */
   def uopMinus(value:Value): Value = {
-    val oldValue = Helper.toNumber(value.pvalue) + Helper.toNumber(Helper.objToPrimitive(value.locset, "Number"))
+    val oldValue = Helper.toNumber(value.pv) + Helper.toNumber(Helper.objToPrimitive(value.locs, "Number"))
     forMatch(oldValue) match {
       case NaNPattern =>  Value(NaN)
       case UIntSinglePattern(0) =>  Value(oldValue)
@@ -79,7 +79,7 @@ object Operator {
 
   /* - */
   def uopMinus_better(h: Heap, value:Value): Value = {
-    val oldValue = Helper.toNumber(value.pvalue) + Helper.toNumber(Helper.objToPrimitive_better(h, value.locset, "Number"))
+    val oldValue = Helper.toNumber(value.pv) + Helper.toNumber(Helper.objToPrimitive_better(h, value.locs, "Number"))
     forMatch(oldValue) match {
       case NaNPattern =>  Value(NaN)
       case UIntSinglePattern(0) =>  Value(oldValue)
@@ -278,8 +278,8 @@ object Operator {
   }
   /* + */
   def bopPlus (left: Value, right: Value): Value = {
-    val lpval = left.pvalue
-    val rpval = right.pvalue
+    val lpval = left.pv
+    val rpval = right.pv
     val lprim = Helper.toPrimitive(left)
     val rprim = Helper.toPrimitive(right)
 
@@ -401,8 +401,8 @@ object Operator {
   }
   /* - */
   def bopMinus (left: Value, right: Value): Value = {
-    val lnum = Helper.toNumber(left.pvalue) + Helper.toNumber(Helper.objToPrimitive(left.locset, "Number"))  // TODO : toNumber function for obj was not implemented yet.
-    val rnum = Helper.toNumber(right.pvalue) + Helper.toNumber(Helper.objToPrimitive(right.locset, "Number"))
+    val lnum = Helper.toNumber(left.pv) + Helper.toNumber(Helper.objToPrimitive(left.locs, "Number"))  // TODO : toNumber function for obj was not implemented yet.
+    val rnum = Helper.toNumber(right.pv) + Helper.toNumber(Helper.objToPrimitive(right.locs, "Number"))
     // bopPlus(Value(lnum), uopMinus(Value(rnum)))
     (forMatch(lnum), forMatch(rnum)) match {
       case (NumBotPattern, _)|(_, NumBotPattern) =>  Value(NumBot)
@@ -436,8 +436,8 @@ object Operator {
   }
   /* * */
   def bopMul (left: Value, right: Value) = {
-    val leftNum = Helper.toNumber(left.pvalue) + Helper.toNumber(Helper.objToPrimitive(left.locset, "Number"))  // TODO : toNumber function for obj was not implemented yet.
-    val rightNum = Helper.toNumber(right.pvalue) + Helper.toNumber(Helper.objToPrimitive(right.locset, "Number"))
+    val leftNum = Helper.toNumber(left.pv) + Helper.toNumber(Helper.objToPrimitive(left.locs, "Number"))  // TODO : toNumber function for obj was not implemented yet.
+    val rightNum = Helper.toNumber(right.pv) + Helper.toNumber(Helper.objToPrimitive(right.locs, "Number"))
     (forMatch(leftNum), forMatch(rightNum)) match {
       case (NumBotPattern, _)|(_, NumBotPattern) =>  Value(NumBot)
       /* 11.5.1 first */
@@ -509,8 +509,8 @@ object Operator {
   }
   /* / */
   def bopDiv(left: Value, right: Value): Value = {
-    val leftNum = Helper.toNumber(left.pvalue) + Helper.toNumber(Helper.objToPrimitive(left.locset, "Number"))  // TODO : toNumber function for obj was not implemented yet.
-    val rightNum = Helper.toNumber(right.pvalue) + Helper.toNumber(Helper.objToPrimitive(right.locset, "Number"))
+    val leftNum = Helper.toNumber(left.pv) + Helper.toNumber(Helper.objToPrimitive(left.locs, "Number"))  // TODO : toNumber function for obj was not implemented yet.
+    val rightNum = Helper.toNumber(right.pv) + Helper.toNumber(Helper.objToPrimitive(right.locs, "Number"))
     (forMatch(leftNum), forMatch(rightNum)) match {
       case (NumBotPattern, _)|(_, NumBotPattern) =>  Value(NumBot)
       /* 11.5.2 first */
@@ -575,8 +575,8 @@ object Operator {
   }
   /* % */
   def bopMod(left: Value, right: Value): Value = {
-    val leftNum = Helper.toNumber(left.pvalue) + Helper.toNumber(Helper.objToPrimitive(left.locset, "Number"))  // TODO : toNumber function for obj was not implemented yet.
-    val rightNum = Helper.toNumber(right.pvalue) + Helper.toNumber(Helper.objToPrimitive(right.locset, "Number"))
+    val leftNum = Helper.toNumber(left.pv) + Helper.toNumber(Helper.objToPrimitive(left.locs, "Number"))  // TODO : toNumber function for obj was not implemented yet.
+    val rightNum = Helper.toNumber(right.pv) + Helper.toNumber(Helper.objToPrimitive(right.locs, "Number"))
     (forMatch(leftNum), forMatch(rightNum)) match {
       case (NumBotPattern, _)|(_, NumBotPattern) =>  Value(NumBot)
        /* 11.5.3 first */
@@ -617,61 +617,61 @@ object Operator {
     // 1
     val b1 =
       // a 
-      (left._1._1 === right._1._1) +
+      (left.pv._1 === right.pv._1) +
       // b
-      (left._1._2 === right._1._2) +
+      (left.pv._2 === right.pv._2) +
       // c
-      (left._1._4 === right._1._4) +
+      (left.pv._4 === right.pv._4) +
       // d
-      (left._1._5 === right._1._5) +
+      (left.pv._5 === right.pv._5) +
       // e
-      (left._1._3 === right._1._3) +
+      (left.pv._3 === right.pv._3) +
       // f
-      (if (!left._2.isEmpty && !right._2.isEmpty) {
-        val intersect = left._2.intersect(right._2) 
+      (if (!left.locs.isEmpty && !right.locs.isEmpty) {
+        val intersect = left.locs.intersect(right.locs)
         if (intersect.isEmpty) BoolFalse
-        else if (left._2.size == 1 && right._2.size == 1 && isRecentLoc(intersect.head)) BoolTrue
+        else if (left.locs.size == 1 && right.locs.size == 1 && isRecentLoc(intersect.head)) BoolTrue
         else BoolTop}
       else BoolBot)
     // 2
     val b2 = 
-      if (NullTop <= left._1._2 && UndefTop <= right._1._1) BoolTrue
+      if (NullTop <= left.pv._2 && UndefTop <= right.pv._1) BoolTrue
       else BoolBot
     // 3
     val b3 = 
-      if (UndefTop <= left._1._1 && NullTop <= right._1._2) BoolTrue
+      if (UndefTop <= left.pv._1 && NullTop <= right.pv._2) BoolTrue
       else BoolBot
     // 4
     val b4 = 
-      if (left._1._4 </ NumBot && right._1._5 </ StrBot)
-        left._1._4 === Helper.toNumber(PValue(right._1._5))
+      if (left.pv._4 </ NumBot && right.pv._5 </ StrBot)
+        left.pv._4 === Helper.toNumber(PValue(right.pv._5))
       else BoolBot
     // 5
     val b5 = 
-      if (left._1._5 </ StrBot && right._1._4 </ NumBot)
-        Helper.toNumber(PValue(left._1._5)) === right._1._4
+      if (left.pv._5 </ StrBot && right.pv._4 </ NumBot)
+        Helper.toNumber(PValue(left.pv._5)) === right.pv._4
       else BoolBot
     // 6
     val b6 = 
-      if (left._1._3 </ BoolBot) {
-        val num = Helper.toNumber(PValue(left._1._3))
+      if (left.pv._3 </ BoolBot) {
+        val num = Helper.toNumber(PValue(left.pv._3))
         val b6_1 =
-          if (right._1._4 </ NumBot)
-            num === right._1._4
+          if (right.pv._4 </ NumBot)
+            num === right.pv._4
           else
             BoolBot
         val b6_4 =
-          if (right._1._5 </ StrBot)
-            num === Helper.toNumber(PValue(right._1._5))
+          if (right.pv._5 </ StrBot)
+            num === Helper.toNumber(PValue(right.pv._5))
           else
             BoolBot
         val b6_8 =
-          if (!right._2.isEmpty)
-            num === Helper.objToPrimitive_better(h, right._2, "Number")._4
+          if (!right.locs.isEmpty)
+            num === Helper.objToPrimitive_better(h, right.locs, "Number")._4
           else
             BoolBot
         val b6_10 =
-          if (right._1._1 </ UndefBot || right._1._2 </ NullBot)
+          if (right.pv._1 </ UndefBot || right.pv._2 </ NullBot)
             BoolFalse
           else
             BoolBot
@@ -681,25 +681,25 @@ object Operator {
         BoolBot
     // 7
     val b7 = 
-      if (right._1._3 </ BoolBot) {
-        val num = Helper.toNumber(PValue(right._1._3))
+      if (right.pv._3 </ BoolBot) {
+        val num = Helper.toNumber(PValue(right.pv._3))
         val b7_1 =
-          if (left._1._4 </ NumBot)
-            left._1._4 === num
+          if (left.pv._4 </ NumBot)
+            left.pv._4 === num
           else
             BoolBot
         val b7_4 =
-          if (left._1._5 </ StrBot)
-            Helper.toNumber(PValue(left._1._5)) === num
+          if (left.pv._5 </ StrBot)
+            Helper.toNumber(PValue(left.pv._5)) === num
           else
             BoolBot
         val b7_8 =
-          if (!left._2.isEmpty)
-            Helper.objToPrimitive_better(h, left._2, "Number")._4 === num
+          if (!left.locs.isEmpty)
+            Helper.objToPrimitive_better(h, left.locs, "Number")._4 === num
           else
             BoolBot
         val b7_10 =
-          if (left._1._1 </ UndefBot || left._1._2 </ NullBot)
+          if (left.pv._1 </ UndefBot || left.pv._2 </ NullBot)
             BoolFalse
           else
             BoolBot
@@ -709,15 +709,15 @@ object Operator {
         BoolBot
     // 8
     val b8 =
-      if (!right._2.isEmpty) {
+      if (!right.locs.isEmpty) {
         val b8_num =
-          if (left._1._4 </ NumBot)
-            left._1._4 === Helper.objToPrimitive_better(h, right._2, "Number")._4
+          if (left.pv._4 </ NumBot)
+            left.pv._4 === Helper.objToPrimitive_better(h, right.locs, "Number")._4
           else
             BoolBot
         val b8_str =
-          if (left._1._5 </ StrBot)
-            left._1._5 === Helper.objToPrimitive_better(h, right._2, "String")._5
+          if (left.pv._5 </ StrBot)
+            left.pv._5 === Helper.objToPrimitive_better(h, right.locs, "String")._5
           else
             BoolBot
         b8_num + b8_str
@@ -726,15 +726,15 @@ object Operator {
         BoolBot
     // 9
     val b9 =
-      if (!left._2.isEmpty) {
+      if (!left.locs.isEmpty) {
         val b9_num =
-          if (right._1._4 </ NumBot)
-            right._1._4 === Helper.objToPrimitive_better(h, left._2, "Number")._4
+          if (right.pv._4 </ NumBot)
+            right.pv._4 === Helper.objToPrimitive_better(h, left.locs, "Number")._4
           else
             BoolBot
         val b9_str =
-          if (right._1._5 </ StrBot)
-            right._1._5 === Helper.objToPrimitive_better(h, left._2, "String")._5
+          if (right.pv._5 </ StrBot)
+            right.pv._5 === Helper.objToPrimitive_better(h, left.locs, "String")._5
           else
             BoolBot
         b9_num + b9_str
@@ -743,10 +743,10 @@ object Operator {
         BoolBot
     // 10
     val b10 =
-      if (   (   (left._1._1 </ UndefBot || left._1._2 </ NullBot) 
-              && (right._1._4 </ NumBot || right._1._5 </ StrBot || !right._2.isEmpty))
-          || (   (right._1._1 </ UndefBot || right._1._2 </ NullBot) 
-              && (left._1._4 </ NumBot || left._1._5 </ StrBot || !left._2.isEmpty)))
+      if (   (   (left.pv._1 </ UndefBot || left.pv._2 </ NullBot)
+              && (right.pv._4 </ NumBot || right.pv._5 </ StrBot || !right.locs.isEmpty))
+          || (   (right.pv._1 </ UndefBot || right.pv._2 </ NullBot)
+              && (left.pv._4 </ NumBot || left.pv._5 </ StrBot || !left.locs.isEmpty)))
         BoolFalse
       else
         BoolBot
@@ -759,61 +759,61 @@ object Operator {
     // 1
     val b1 =
       // a 
-      (left._1._1 === right._1._1) +
+      (left.pv._1 === right.pv._1) +
       // b
-      (left._1._2 === right._1._2) +
+      (left.pv._2 === right.pv._2) +
       // c
-      (left._1._4 === right._1._4) +
+      (left.pv._4 === right.pv._4) +
       // d
-      (left._1._5 === right._1._5) +
+      (left.pv._5 === right.pv._5) +
       // e
-      (left._1._3 === right._1._3) +
+      (left.pv._3 === right.pv._3) +
       // f
-      (if (!left._2.isEmpty && !right._2.isEmpty) {
-        val intersect = left._2.intersect(right._2) 
+      (if (!left.locs.isEmpty && !right.locs.isEmpty) {
+        val intersect = left.locs.intersect(right.locs)
         if (intersect.isEmpty) BoolFalse
-        else if (left._2.size == 1 && right._2.size == 1 && isRecentLoc(intersect.head)) BoolTrue
+        else if (left.locs.size == 1 && right.locs.size == 1 && isRecentLoc(intersect.head)) BoolTrue
         else BoolTop}
       else BoolBot)
     // 2
     val b2 = 
-      if (NullTop <= left._1._2 && UndefTop <= right._1._1) BoolTrue
+      if (NullTop <= left.pv._2 && UndefTop <= right.pv._1) BoolTrue
       else BoolBot
     // 3
     val b3 = 
-      if (UndefTop <= left._1._1 && NullTop <= right._1._2) BoolTrue
+      if (UndefTop <= left.pv._1 && NullTop <= right.pv._2) BoolTrue
       else BoolBot
     // 4
     val b4 = 
-      if (left._1._4 </ NumBot && right._1._5 </ StrBot)
-        left._1._4 === Helper.toNumber(PValue(right._1._5))
+      if (left.pv._4 </ NumBot && right.pv._5 </ StrBot)
+        left.pv._4 === Helper.toNumber(PValue(right.pv._5))
       else BoolBot
     // 5
     val b5 = 
-      if (left._1._5 </ StrBot && right._1._4 </ NumBot)
-        Helper.toNumber(PValue(left._1._5)) === right._1._4
+      if (left.pv._5 </ StrBot && right.pv._4 </ NumBot)
+        Helper.toNumber(PValue(left.pv._5)) === right.pv._4
       else BoolBot
     // 6
     val b6 = 
-      if (left._1._3 </ BoolBot) {
-        val num = Helper.toNumber(PValue(left._1._3))
+      if (left.pv._3 </ BoolBot) {
+        val num = Helper.toNumber(PValue(left.pv._3))
         val b6_1 =
-          if (right._1._4 </ NumBot)
-            num === right._1._4
+          if (right.pv._4 </ NumBot)
+            num === right.pv._4
           else
             BoolBot
         val b6_4 =
-          if (right._1._5 </ StrBot)
-            num === Helper.toNumber(PValue(right._1._5))
+          if (right.pv._5 </ StrBot)
+            num === Helper.toNumber(PValue(right.pv._5))
           else
             BoolBot
         val b6_8 =
-          if (!right._2.isEmpty)
-            num === Helper.objToPrimitive(right._2, "Number")._4
+          if (!right.locs.isEmpty)
+            num === Helper.objToPrimitive(right.locs, "Number")._4
           else
             BoolBot
         val b6_10 =
-          if (right._1._1 </ UndefBot || right._1._2 </ NullBot)
+          if (right.pv._1 </ UndefBot || right.pv._2 </ NullBot)
             BoolFalse
           else
             BoolBot
@@ -823,25 +823,25 @@ object Operator {
         BoolBot
     // 7
     val b7 = 
-      if (right._1._3 </ BoolBot) {
-        val num = Helper.toNumber(PValue(right._1._3))
+      if (right.pv._3 </ BoolBot) {
+        val num = Helper.toNumber(PValue(right.pv._3))
         val b7_1 =
-          if (left._1._4 </ NumBot)
-            left._1._4 === num
+          if (left.pv._4 </ NumBot)
+            left.pv._4 === num
           else
             BoolBot
         val b7_4 =
-          if (left._1._5 </ StrBot)
-            Helper.toNumber(PValue(left._1._5)) === num
+          if (left.pv._5 </ StrBot)
+            Helper.toNumber(PValue(left.pv._5)) === num
           else
             BoolBot
         val b7_8 =
-          if (!left._2.isEmpty)
-            Helper.objToPrimitive(left._2, "Number")._4 === num
+          if (!left.locs.isEmpty)
+            Helper.objToPrimitive(left.locs, "Number")._4 === num
           else
             BoolBot
         val b7_10 =
-          if (left._1._1 </ UndefBot || left._1._2 </ NullBot)
+          if (left.pv._1 </ UndefBot || left.pv._2 </ NullBot)
             BoolFalse
           else
             BoolBot
@@ -851,15 +851,15 @@ object Operator {
         BoolBot
     // 8
     val b8 =
-      if (!right._2.isEmpty) {
+      if (!right.locs.isEmpty) {
         val b8_num =
-          if (left._1._4 </ NumBot)
-            left._1._4 === Helper.objToPrimitive(right._2, "Number")._4
+          if (left.pv._4 </ NumBot)
+            left.pv._4 === Helper.objToPrimitive(right.locs, "Number")._4
           else
             BoolBot
         val b8_str =
-          if (left._1._5 </ StrBot)
-            left._1._5 === Helper.objToPrimitive(right._2, "String")._5
+          if (left.pv._5 </ StrBot)
+            left.pv._5 === Helper.objToPrimitive(right.locs, "String")._5
           else
             BoolBot
         b8_num + b8_str
@@ -868,15 +868,15 @@ object Operator {
         BoolBot
     // 9
     val b9 =
-      if (!left._2.isEmpty) {
+      if (!left.locs.isEmpty) {
         val b9_num =
-          if (right._1._4 </ NumBot)
-            right._1._4 === Helper.objToPrimitive(left._2, "Number")._4
+          if (right.pv._4 </ NumBot)
+            right.pv._4 === Helper.objToPrimitive(left.locs, "Number")._4
           else
             BoolBot
         val b9_str =
-          if (right._1._5 </ StrBot)
-            right._1._5 === Helper.objToPrimitive(left._2, "String")._5
+          if (right.pv._5 </ StrBot)
+            right.pv._5 === Helper.objToPrimitive(left.locs, "String")._5
           else
             BoolBot
         b9_num + b9_str
@@ -885,10 +885,10 @@ object Operator {
         BoolBot
     // 10
     val b10 =
-      if (   (   (left._1._1 </ UndefBot || left._1._2 </ NullBot) 
-              && (right._1._4 </ NumBot || right._1._5 </ StrBot || !right._2.isEmpty))
-          || (   (right._1._1 </ UndefBot || right._1._2 </ NullBot) 
-              && (left._1._4 </ NumBot || left._1._5 </ StrBot || !left._2.isEmpty)))
+      if (   (   (left.pv._1 </ UndefBot || left.pv._2 </ NullBot)
+              && (right.pv._4 </ NumBot || right.pv._5 </ StrBot || !right.locs.isEmpty))
+          || (   (right.pv._1 </ UndefBot || right.pv._2 </ NullBot)
+              && (left.pv._4 </ NumBot || left.pv._5 </ StrBot || !left.locs.isEmpty)))
         BoolFalse
       else
         BoolBot
@@ -897,7 +897,7 @@ object Operator {
   
   /* != */
   def bopNeq(left: Value, right: Value): Value = {
-    bopEq(left,right).pvalue._3.getPair match {
+    bopEq(left,right).pv._3.getPair match {
       case (AbsSingle, Some(b)) => if (b) Value(BoolFalse) else Value(BoolTrue)
       case (AbsTop, _) => Value(BoolTop)
       case (AbsBot, _) => Value(BoolBot)
@@ -915,20 +915,20 @@ object Operator {
         BoolBot
     val b_same =
       // 2
-      (left._1._1 === right._1._1) +
+      (left.pv._1 === right.pv._1) +
       // 3
-      (left._1._2 === right._1._2) +
+      (left.pv._2 === right.pv._2) +
       // 4
-      (left._1._4 === right._1._4) +
+      (left.pv._4 === right.pv._4) +
       // 5
-      (left._1._5 === right._1._5) +
+      (left.pv._5 === right.pv._5) +
       // 6
-      (left._1._3 === right._1._3) +
+      (left.pv._3 === right.pv._3) +
       // 7
-      (if (!left._2.isEmpty && !right._2.isEmpty) {
-        val intersect = left._2.intersect(right._2) 
+      (if (!left.locs.isEmpty && !right.locs.isEmpty) {
+        val intersect = left.locs.intersect(right.locs)
         if (intersect.isEmpty) BoolFalse
-        else if (left._2.size == 1 && right._2.size == 1 && isRecentLoc(intersect.head)) BoolTrue
+        else if (left.locs.size == 1 && right.locs.size == 1 && isRecentLoc(intersect.head)) BoolTrue
         else BoolTop}
       else BoolBot)
     Value(b_type + b_same)
@@ -936,7 +936,7 @@ object Operator {
   
   /* !== */
   def bopSNeq(left: Value, right: Value): Value = {
-    bopSEq(left, right).pvalue._3.getPair match {
+    bopSEq(left, right).pv._3.getPair match {
       case (AbsSingle, Some(b)) => if (b) Value(BoolFalse) else Value(BoolTrue)
       case (AbsTop, _) => Value(BoolTop)
       case (AbsBot, _) => Value(BoolBot)
@@ -1140,8 +1140,8 @@ object Operator {
   }
 
   def ToInt32(value:Value):AbsNumber = {
-    val pv = value.pvalue
-    val number = Helper.toNumber(pv) + Helper.toNumber(Helper.objToPrimitive(value.locset, "Number"))
+    val pv = value.pv
+    val number = Helper.toNumber(pv) + Helper.toNumber(Helper.objToPrimitive(value.locs, "Number"))
     forMatch(number) match {
       case NaNPattern | PosInfPattern | NegInfPattern | InfinityPattern =>  AbsNumber.alpha(0)
       case UIntSinglePattern(n) =>  AbsNumber.alpha(n)        
@@ -1164,8 +1164,8 @@ object Operator {
   }
 
   def ToUInt32(value:Value):AbsNumber = {
-    val pv = value.pvalue
-    val number = Helper.toNumber(pv) + Helper.toNumber(Helper.objToPrimitive(value.locset, "Number"))
+    val pv = value.pv
+    val number = Helper.toNumber(pv) + Helper.toNumber(Helper.objToPrimitive(value.locs, "Number"))
     forMatch(number) match {
       case NaNPattern | UIntSinglePattern(0) | PosInfPattern | NegInfPattern | InfinityPattern =>  AbsNumber.alpha(0)
       case UIntSinglePattern(n) =>
@@ -1182,8 +1182,8 @@ object Operator {
   }
 
   def ToUInt16(value:Value):AbsNumber = {
-    val pv = value.pvalue
-    val number = Helper.toNumber(pv) + Helper.toNumber(Helper.objToPrimitive(value.locset, "Number"))
+    val pv = value.pv
+    val number = Helper.toNumber(pv) + Helper.toNumber(Helper.objToPrimitive(value.locs, "Number"))
     forMatch(number) match {
       case NaNPattern | UIntSinglePattern(0) | PosInfPattern | NegInfPattern | InfinityPattern =>  AbsNumber.alpha(0)
       case UIntSinglePattern(n) =>

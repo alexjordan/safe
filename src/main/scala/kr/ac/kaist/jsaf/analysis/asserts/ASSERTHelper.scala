@@ -92,7 +92,7 @@ object ASSERTHelper {
   }
 
   def K(op:IROp, o: Obj, x: AbsString, rv: Value, top_loc: LocSet): Obj = {
-    val (pv, loc) = (rv._1, rv._2)
+    val (pv, loc) = (rv.pv, rv.locs)
     val absUndef = if(UndefTop <= pv._1) true else false
     val absNull = if(NullTop <= pv._2) true else false
     val (v, b) =
@@ -128,8 +128,8 @@ object ASSERTHelper {
   }
 
   def PruneInstanceof(l_obj: Loc, l_fun: Loc, b: AbsBool, h: Heap): Heap = {
-    val L_prototype = h(l_fun)("prototype")._1._1._2
-    val L_proto = h(l_obj)(Prop_proto)._1._1._2
+    val L_prototype = h(l_fun)("prototype")._1._1.locs
+    val L_proto = h(l_obj)(Prop_proto)._1._1.locs
     // inheritProto using filter
     /*
     val L1 = L_prototype.filter(l2 => PValue(b) <= Helper.inherit(h, L_proto.head, l2)._1)
@@ -138,9 +138,9 @@ object ASSERTHelper {
     val H2 = if(L_proto.size == 1) h.update(l_fun, h(l_fun).update("prototype", PropValue(ObjectValue(Value(PValueBot, L1), BoolFalse, BoolFalse, BoolFalse)))) else h
     */
     val L1 = L_prototype.filter(l2 => PValue(b) <=
-                         L_proto.foldLeft(PValueBot)((_b, l) => _b + Helper.inherit(h, l, l2)._1))
+                         L_proto.foldLeft(PValueBot)((_b, l) => _b + Helper.inherit(h, l, l2).pv))
     val L2 = L_proto.filter(l1 => PValue(b) <=
-                         L_prototype.foldLeft(PValueBot)((_b, l) => _b + Helper.inherit(h, l1, l)._1))
+                         L_prototype.foldLeft(PValueBot)((_b, l) => _b + Helper.inherit(h, l1, l).pv))
 //    val L2 = L_proto.filter(l1 => PValue(b) <= Helper.inherit(h, l1, L_prototype.head)._1)
     val H1 = h.update(l_obj, h(l_obj).update(Prop_proto, PropValue(ObjectValue(Value(PValueBot, L2), BoolFalse, BoolFalse, BoolFalse))))
     val H2 = h.update(l_fun, h(l_fun).update(SProp_prototype, PropValue(ObjectValue(Value(PValueBot, L1), BoolFalse, BoolFalse, BoolFalse))))
@@ -150,8 +150,8 @@ object ASSERTHelper {
   def DeleteAll(h: Heap, l: Loc, s: AbsString): Heap = {
     val h2 = Helper.Delete(h, l, s)._1
     val v = h(l)(Prop_proto)._1._1
-    if (v._2.size == 1 && v._1._2 <= NullBot) {
-      DeleteAll(h2, v._2.head, s)
+    if (v.locs.size == 1 && v.pv._2 <= NullBot) {
+      DeleteAll(h2, v.locs.head, s)
     }
     else h2
   }

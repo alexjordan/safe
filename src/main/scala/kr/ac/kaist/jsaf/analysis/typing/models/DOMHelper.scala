@@ -324,7 +324,7 @@ object DOMHelper {
     val o_target = event_list.foldLeft(target_table)((o, s_ev) =>
       o.update(s_ev, o(s_ev) + propv_target)
     )
-    eventBindingMap += v_target._2.head -> v_fun._2.head 
+    eventBindingMap += v_target.locs.head -> v_fun.locs.head
     h.update(EventFunctionTableLoc, o_fun).update(EventTargetTableLoc, o_target)    
   }
 
@@ -473,8 +473,8 @@ object DOMHelper {
         true
       else {
         // check childrens of 'l_root'next elements
-        val lset_children = Helper.Proto(h, l_root, AbsString.alpha("childNodes"))._2.foldLeft(LocSetBot)((lset, l_n) =>
-          lset ++ Helper.Proto(h, l_n, NumStr)._2)
+        val lset_children = Helper.Proto(h, l_root, AbsString.alpha("childNodes")).locs.foldLeft(LocSetBot)((lset, l_n) =>
+          lset ++ Helper.Proto(h, l_n, NumStr).locs)
         lset_children.foldLeft(false)((b, l_child) => 
           if(contains(h, lset_visited + l_root, l_child, l_target)==false) 
             b
@@ -495,9 +495,9 @@ object DOMHelper {
         // get attribute value
         val v_attr = DOMHelper.getAttribute(h, LocSet(l_this), ab_attr_name)
         // next elements
-        val lset_children = Helper.Proto(h, l_this, ab_childNodes)._2.foldLeft(LocSetBot)((lset, l_n) =>
-          lset ++ Helper.Proto(h, l_n, NumStr)._2)
-        if ((!contain && v_attr._1._5 </ StrBot && v_attr._1._5 <= s) || (contain && BoolTrue <= v_attr._1._5.contains(s)))
+        val lset_children = Helper.Proto(h, l_this, ab_childNodes).locs.foldLeft(LocSetBot)((lset, l_n) =>
+          lset ++ Helper.Proto(h, l_n, NumStr).locs)
+        if ((!contain && v_attr.pv._5 </ StrBot && v_attr.pv._5 <= s) || (contain && BoolTrue <= v_attr.pv._5.contains(s)))
           lset_children.foldLeft(LocSet(l_this))((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
         else
           lset_children.foldLeft(LocSetBot)((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
@@ -518,9 +518,9 @@ object DOMHelper {
         // get property value
         val v_prop = Helper.Proto(h, l_this, ab_prop_name)
         // next elements
-        val lset_children = Helper.Proto(h, l_this, ab_childNodes)._2.foldLeft(LocSetBot)((lset, l_n) =>
-          lset ++ Helper.Proto(h, l_n, NumStr)._2)
-        if ((v_prop._1._5 </ ab_empty && BoolTrue <= (v_prop._1._5 === s)) || (tag && ab_asterisk <= s))
+        val lset_children = Helper.Proto(h, l_this, ab_childNodes).locs.foldLeft(LocSetBot)((lset, l_n) =>
+          lset ++ Helper.Proto(h, l_n, NumStr).locs)
+        if ((v_prop.pv._5 </ ab_empty && BoolTrue <= (v_prop.pv._5 === s)) || (tag && ab_asterisk <= s))
           lset_children.foldLeft(LocSet(l_this))((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
         else
           lset_children.foldLeft(LocSetBot)((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
@@ -540,8 +540,8 @@ object DOMHelper {
         // get property value
         val v_prop = Helper.Proto(h, l_this, ab_prop_name)
         // next elements
-        val lset_children = Helper.Proto(h, l_this, ab_childNodes)._2.foldLeft(LocSetBot)((lset, l_n) =>
-          lset ++ Helper.Proto(h, l_n, NumStr)._2)
+        val lset_children = Helper.Proto(h, l_this, ab_childNodes).locs.foldLeft(LocSetBot)((lset, l_n) =>
+          lset ++ Helper.Proto(h, l_n, NumStr).locs)
         if (v_prop <= v || v <= v_prop)
           lset_children.foldLeft(LocSet(l_this))((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
         else
@@ -596,9 +596,9 @@ object DOMHelper {
         // get attribute value
         val v_attr = DOMHelper.getAttribute(h, LocSet(l_this), ab_attr_name)
         // next elements
-        val lset_children = Helper.Proto(h, l_this, ab_childNodes)._2.foldLeft(LocSetBot)((lset, l_n) =>
-          lset ++ Helper.Proto(h, l_n, NumStr)._2)
-        if (BoolTrue <= classNameMatch(v_attr._1._5, s))
+        val lset_children = Helper.Proto(h, l_this, ab_childNodes).locs.foldLeft(LocSetBot)((lset, l_n) =>
+          lset ++ Helper.Proto(h, l_n, NumStr).locs)
+        if (BoolTrue <= classNameMatch(v_attr.pv._5, s))
           lset_children.foldLeft(LocSet(l_this))((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
         else
           lset_children.foldLeft(LocSetBot)((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
@@ -642,8 +642,8 @@ object DOMHelper {
         // get property value
         val v_attr = Helper.Proto(h, l_this, ab_prop_name)
         // next elements
-        val lset_children = Helper.Proto(h, l_this, ab_nextSibling)._2
-        if (BoolTrue <= (v_attr._1._5 === s) || (tag && ab_asterisk <= s))
+        val lset_children = Helper.Proto(h, l_this, ab_nextSibling).locs
+        if (BoolTrue <= (v_attr.pv._5 === s) || (tag && ab_asterisk <= s))
           lset_children.foldLeft(LocSet(l_this))((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
         else
           lset_children.foldLeft(LocSetBot)((lset, l_child) => lset ++ search(lset_visited + l_this, l_child))
@@ -664,7 +664,7 @@ object DOMHelper {
     def search(lset_visited: LocSet, l_this: Loc): LocSet = {
       if (!lset_visited.contains(l_this)) {
         // next elements
-        val lset_parent = Helper.Proto(h, l_this, ab_parentNode)._2
+        val lset_parent = Helper.Proto(h, l_this, ab_parentNode).locs
         lset_parent.foldLeft(LocSet(l_this))((lset, l_parent) => lset ++ search(lset_visited + l_this, l_parent))
       }
       else
@@ -749,15 +749,15 @@ object DOMHelper {
         lset
       else
         lset.filter((l) =>
-          AbsString.alpha(name.toUpperCase) <= Helper.Proto(h, l, AbsString.alpha("tagName"))._1._5)
+          AbsString.alpha(name.toUpperCase) <= Helper.Proto(h, l, AbsString.alpha("tagName")).pv._5)
     }
     def filterById(lset: LocSet, name: String): LocSet = {
       lset.filter((l) =>
-        AbsString.alpha(name) <= Helper.Proto(h, l, AbsString.alpha("id"))._1._5)
+        AbsString.alpha(name) <= Helper.Proto(h, l, AbsString.alpha("id")).pv._5)
     }
     def filterByClass(lset: LocSet, name: String): LocSet = {
       lset.filter((l) =>
-        BoolTrue <= getAttribute(h, l, AbsString.alpha("class"))._1._5.contains(AbsString.alpha(name)))
+        BoolTrue <= getAttribute(h, l, AbsString.alpha("class")).pv._5.contains(AbsString.alpha(name)))
     }
     def filterByAttr(lset: LocSet, name: String): LocSet = {
       lset.filter((l) =>
@@ -783,10 +783,10 @@ object DOMHelper {
           lset.foldLeft(LocSetBot)((ls, l) => ls ++ findByTag(h, l, AbsString.alpha("*")))
         case ">" => // children
           lset.foldLeft(LocSetBot)((ls, l) =>
-            ls ++ Helper.Proto(h, l, AbsString.alpha("childNodes"))._2.foldLeft(LocSetBot)((ls2, l2) =>
-              ls2 ++ Helper.Proto(h, l2, NumStr)._2))
+            ls ++ Helper.Proto(h, l, AbsString.alpha("childNodes")).locs.foldLeft(LocSetBot)((ls2, l2) =>
+              ls2 ++ Helper.Proto(h, l2, NumStr).locs))
         case "+" => // nextSibling
-          lset.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, AbsString.alpha("nextSibling"))._2)
+          lset.foldLeft(LocSetBot)((ls, l) => ls ++ Helper.Proto(h, l, AbsString.alpha("nextSibling")).locs)
         case "~" => // all following siblings
           lset.foldLeft(LocSetBot)((ls, l) => ls ++ findByTagWidth(h, l, AbsString.alpha("*")))
       }
@@ -967,13 +967,13 @@ object DOMHelper {
     if(!lset_target.isEmpty) {     
       lset_target.foldLeft[AbsBool](BoolBot)((b, l_node) => {
         // childNodes
-        val lset_childNodes = Helper.Proto(h, l_node, AbsString.alpha("childNodes"))._2
+        val lset_childNodes = Helper.Proto(h, l_node, AbsString.alpha("childNodes")).locs
         lset_childNodes.foldLeft(b)((bb, l_child) => {
           val n_len = Operator.ToUInt32(Helper.Proto(h, l_child, AbsString.alpha("length")))
           AbsNumber.getUIntSingle(n_len) match {
             case Some(n) =>
               val n_index = (0 until n.toInt).indexWhere((i) => {                
-                BoolTrue <= Operator.bopSEq(Helper.Proto(h, l_child, AbsString.alpha(i.toString)), Value(lset_child))._1._3
+                BoolTrue <= Operator.bopSEq(Helper.Proto(h, l_child, AbsString.alpha(i.toString)), Value(lset_child)).pv._3
                 }
               )
               // exception
@@ -1014,7 +1014,7 @@ object DOMHelper {
 
   def getAttribute(h: Heap, l_elem: Loc, s_attr: AbsString): Value = {
     // read the list of attributes in the current node
-    val lset_attrs = Helper.Proto(h, l_elem, AbsString.alpha("attributes"))._2
+    val lset_attrs = Helper.Proto(h, l_elem, AbsString.alpha("attributes")).locs
     lset_attrs.foldLeft(ValueBot)((v, l_attrs) => {
       val v_attr_2 = Helper.HasOwnProperty(h, l_attrs, s_attr).getPair match {
         case (AbsBot, _) => ValueBot
@@ -1022,7 +1022,7 @@ object DOMHelper {
         case (AbsSingle, Some(b)) if !b => Value(NullTop)
         // in case that the current node may have an attribute with the given name
         case _ =>
-          val attr_lset = Helper.Proto(h, l_attrs, s_attr)._2 // get attribute
+          val attr_lset = Helper.Proto(h, l_attrs, s_attr).locs // get attribute
           attr_lset.foldLeft(ValueBot)((v, l_attr) => {
             v + Helper.Proto(h, l_attr, AbsString.alpha("value")) // get value
           })
@@ -1034,7 +1034,7 @@ object DOMHelper {
   def getAttribute(h: Heap, lset_elem: LocSet, s_attr: AbsString): Value = {
     lset_elem.foldLeft(ValueBot)((v, l_elem) => {
         // read the list of attributes in the current node
-        val lset_attrs = Helper.Proto(h, l_elem, AbsString.alpha("attributes"))._2
+        val lset_attrs = Helper.Proto(h, l_elem, AbsString.alpha("attributes")).locs
         val v_attr_1 = lset_attrs.foldLeft(ValueBot)((v, l_attrs) => {
           val v_attr_2 = Helper.HasOwnProperty(h, l_attrs, s_attr).getPair match {
             case (AbsBot, _) => ValueBot
@@ -1042,7 +1042,7 @@ object DOMHelper {
             case (AbsSingle, Some(b)) if !b => Value(NullTop)
             // in case that the current node may have an attribute with the given name
             case _ =>
-              val attr_lset = Helper.Proto(h, l_attrs, s_attr)._2 // get attribute
+              val attr_lset = Helper.Proto(h, l_attrs, s_attr).locs // get attribute
               attr_lset.foldLeft(ValueBot)((v, l_attr) => {
                 v + Helper.Proto(h, l_attr, AbsString.alpha("value")) // get value
               })
@@ -1056,11 +1056,11 @@ object DOMHelper {
   def removeAttribute(h: Heap, lset_elem: LocSet, s_attr: AbsString): Heap = {
     lset_elem.foldLeft(h)((_h, l_elem) => {
       // read the list of attributes in the current node
-      val lset_attrs = Helper.Proto(_h, l_elem, AbsString.alpha("attributes"))._2
+      val lset_attrs = Helper.Proto(_h, l_elem, AbsString.alpha("attributes")).locs
       lset_attrs.foldLeft(_h)((__h, l_attr) => {
         var h_1 = Helper.Delete(__h, l_attr, s_attr)._1
         val attributes_obj = h_1(l_attr)
-        val length_pval = attributes_obj("length")._1._1._1
+        val length_pval = attributes_obj("length")._1._1.pv
         // decrease 'length' of 'attributes' by 1
         val length_val = AbsNumber.getUIntSingle(Helper.toNumber(length_pval)) match {
           case Some(v) => AbsNumber.alpha(v-1)
@@ -1125,10 +1125,10 @@ object DOMHelper {
       }
 
       // read the list of attributes in the current node
-      val attributes_lset = Helper.Proto(h_in1, l_elem, AbsString.alpha("attributes"))._2
+      val attributes_lset = Helper.Proto(h_in1, l_elem, AbsString.alpha("attributes")).locs
       val h_ret = attributes_lset.foldLeft(h_in1)((h_in2, l_attributes) => {
         val attributes_obj = h_in2(l_attributes)
-        val length_pval = attributes_obj("length")._1._1._1
+        val length_pval = attributes_obj("length")._1._1.pv
         // increate 'length' of 'attributes' by 1
         val length_val = AbsNumber.getUIntSingle(Helper.toNumber(length_pval)) match {
           case Some(v) => AbsNumber.alpha(v+1)
@@ -1200,12 +1200,12 @@ object DOMHelper {
         }
 
         // read the list of attributes in the current node
-        val attributes_lset = Helper.Proto(h_in1, l_this, AbsString.alpha("attributes"))._2
+        val attributes_lset = Helper.Proto(h_in1, l_this, AbsString.alpha("attributes")).locs
         attributes_lset.foldLeft(HeapBot)((h_in2, l_attributes) => {
           val hasAttr = Helper.HasOwnProperty(h_in1, l_attributes, attr_name) 
           val h_f = if(BoolFalse <= hasAttr) {          
             val attributes_obj = h_in1(l_attributes)
-            val length_pval = attributes_obj("length")._1._1._1
+            val length_pval = attributes_obj("length")._1._1.pv
             // increate 'length' of 'attributes' by 1
             val length_val = AbsNumber.getUIntSingle(Helper.toNumber(length_pval)) match {
               case Some(v) => AbsNumber.alpha(v+1)
@@ -1221,9 +1221,9 @@ object DOMHelper {
             else
               HeapBot
           val h_t = if(BoolTrue <= hasAttr){
-            val attr_lset = Helper.Proto(h_in1, l_attributes, attr_name)._2
+            val attr_lset = Helper.Proto(h_in1, l_attributes, attr_name).locs
             attr_lset.foldLeft(HeapBot)((_h, l_attr) =>{
-              val child_lset = Helper.Proto(h_in1, l_attr, AbsString.alpha("firstChild"))._2
+              val child_lset = Helper.Proto(h_in1, l_attr, AbsString.alpha("firstChild")).locs
               val _h0 = child_lset.foldLeft(HeapBot)((__h, l_child) => {
                   val __h1 =Helper.PropStore(h_in1, l_child, AbsString.alpha("nodeValue"), Value(attr_val))
                   val __h2 =Helper.PropStore(__h1, l_child, AbsString.alpha("data"), Value(attr_val))
@@ -1257,9 +1257,9 @@ object DOMHelper {
         LocSetBot
       else {
         visited += l_current
-        val lset_sibling = Helper.Proto(h, l_current, AbsString.alpha("nextSibling"))._2
+        val lset_sibling = Helper.Proto(h, l_current, AbsString.alpha("nextSibling")).locs
         lset_sibling.foldLeft(LocSetBot)((ls, l_s) => {
-          val n_type = Helper.Proto(h, l_s, AbsString.alpha("nodeType"))._1._4
+          val n_type = Helper.Proto(h, l_s, AbsString.alpha("nodeType")).pv._4
           val lset1 =
             if (AbsNumber.alpha(DOMNode.ELEMENT_NODE) <= n_type)
               ls + l_s
@@ -1299,10 +1299,10 @@ object DOMHelper {
        // in case that the mapping already exists
        val h_t = 
          if(BoolTrue <= hasName) {
-           val loc_nodelist = mapped_node._1._1._2
+           val loc_nodelist = mapped_node._1._1.locs
            val new_h = loc_nodelist.foldLeft(HeapBot)((_h, l) => {
              val obj_nodelist = h(l)
-             val new_nodelist = obj_nodelist("length")._1._1._1._4.getSingle match {
+             val new_nodelist = obj_nodelist("length")._1._1.pv._4.getSingle match {
                case Some(n) => 
                  val len = n.toInt
                  obj_nodelist.update(
@@ -1350,7 +1350,7 @@ object DOMHelper {
               else h_1
     val nodelist_proplist = DOMNodeList.getInsList(0)
     val h_3 = if(BoolTrue <= Helper.HasOwnProperty(h_2, l_root, AbsString.alpha("childNodes"))){ 
-                val childNodes_lset = Helper.Proto(h_2, l_root, AbsString.alpha("childNodes"))._2
+                val childNodes_lset = Helper.Proto(h_2, l_root, AbsString.alpha("childNodes")).locs
                 childNodes_lset.foldLeft(h_2)((_h, l) => {
                   addInstance(_h, l, nodelist_proplist)
                 })
@@ -1358,7 +1358,7 @@ object DOMHelper {
               else h_2
     val htmlcollection_proplist = HTMLCollection.getInsList(0)
     val h_4 = if(BoolTrue <= Helper.HasOwnProperty(h_3, l_root, AbsString.alpha("children"))){ 
-                val children_lset = Helper.Proto(h_3, l_root, AbsString.alpha("children"))._2
+                val children_lset = Helper.Proto(h_3, l_root, AbsString.alpha("children")).locs
                 children_lset.foldLeft(h_3)((_h, l) => {
                   addInstance(_h, l, htmlcollection_proplist)
                 })
@@ -1387,7 +1387,7 @@ object DOMHelper {
           /* weak update of 'firstChild', 'lastChild', and 'childNodes' of the updated root node */
           val h_6 = Helper.PropStoreWeak(h_5, l_root, AbsString.alpha("firstChild"), Value(l_topnode))
           val h_7 = Helper.PropStoreWeak(h_6, l_root, AbsString.alpha("lastChild"), Value(l_topnode))
-          val childNodes_lset = Helper.Proto(h_7, l_root, AbsString.alpha("childNodes"))._2
+          val childNodes_lset = Helper.Proto(h_7, l_root, AbsString.alpha("childNodes")).locs
           val h_8 = childNodes_lset.foldLeft(h_7)((_h, l) => {
             Helper.PropStoreWeak(_h, l, AbsString.alpha("length"), Value(UInt))
             Helper.PropStoreWeak(_h, l, AbsString.alpha(Str_default_number), Value(l_topnode))
@@ -1396,7 +1396,7 @@ object DOMHelper {
           val h_9 = if(BoolTrue <= Helper.HasOwnProperty(h_8, l_root, AbsString.alpha("children"))){ 
             val (h_8_1, ctx_2_1, l_children) = cfgAddrToLoc(h_8, ctx_2, addresskey, cfg)
             val h_8_2 = addInstance(h_8_1, l_children, childNodes_proplist)
-            val children_lset = Helper.Proto(h_8_2, l_root, AbsString.alpha("children"))._2
+            val children_lset = Helper.Proto(h_8_2, l_root, AbsString.alpha("children")).locs
             val h_8_3 = children_lset.foldLeft(h_8_2)((_h, l) => {
               Helper.PropStoreWeak(_h, l, AbsString.alpha("length"), Value(UInt))
               Helper.PropStoreWeak(_h, l, AbsString.alpha(Str_default_number), Value(l_topnode))
@@ -1413,7 +1413,7 @@ object DOMHelper {
           val fragment = stringToDocumentFragment(t)
           val ((h_1, ctx_1), l_newroot) = buildDOMTree(_h, ctx, fragment, cfg, None, None, None, addresskey, false)
           // location set of 'firstChild' of the new DOM tree root
-          var firstChild_lset = Helper.Proto(h_1, l_newroot, AbsString.alpha("firstChild"))._2
+          var firstChild_lset = Helper.Proto(h_1, l_newroot, AbsString.alpha("firstChild")).locs
           var h_3 = h_1
           val l_root2 = if(l_root == l_newroot && isRecentLoc(l_root)){
             oldifyLoc(l_root)
@@ -1421,7 +1421,7 @@ object DOMHelper {
           while(!firstChild_lset.isEmpty) {
             val h_2 = DOMTree.removeChild(h_3, LocSet(l_newroot), firstChild_lset)
             h_3 = DOMTree.appendChild(h_2, LocSet(l_root2), firstChild_lset)
-            firstChild_lset = Helper.Proto(h_3, l_newroot, AbsString.alpha("firstChild"))._2
+            firstChild_lset = Helper.Proto(h_3, l_newroot, AbsString.alpha("firstChild")).locs
           }
           (h_3, ctx_1)
       }
@@ -1518,7 +1518,7 @@ object DOMHelper {
               val (h_t, ctx_t) =
                 // in case that the 'name' property already exists
                 if(BoolTrue <= hasName) {
-                   val loc_existing = propval._1._1._2
+                   val loc_existing = propval._1._1.locs
                    val (h1, ctx1, val_locset) = loc_existing.foldLeft((HeapBot, ContextBot, LocSetBot))((hcl, ll) => {
                      val obj_existing = h(ll)
                      val hasTagName = Helper.HasOwnProperty(h, ll, AbsString.alpha("tagName"))
@@ -1590,7 +1590,7 @@ object DOMHelper {
           val (h_t, ctx_t) = 
             // in case that the 'id' property already exists          
             if(BoolTrue <= hasId) {
-               val loc_existing = propval._1._1._2
+               val loc_existing = propval._1._1.locs
                val (h1, ctx1, val_locset) = loc_existing.foldLeft((HeapBot, ContextBot, LocSetBot))((hcl, ll) => {
                  val obj_existing = h_1(ll)
                  val hasTagName = Helper.HasOwnProperty(h_1, ll, AbsString.alpha("tagName"))
@@ -1666,7 +1666,7 @@ object DOMHelper {
             val (h_t, ctx_t) =
               // in case that the 'id' property already exists
               if(BoolTrue <= hasId) {
-                 val loc_existing = propval._1._1._2
+                 val loc_existing = propval._1._1.locs
                  val (h1, ctx1, val_locset) = loc_existing.foldLeft((HeapBot, ContextBot, LocSetBot))((hcl, ll) => {
                    val obj_existing = h(ll)
                    val hasTagName = Helper.HasOwnProperty(h, ll, AbsString.alpha("tagName"))
@@ -1725,7 +1725,7 @@ object DOMHelper {
             val (h_t, ctx_t) =
               // in case that the 'name' property already exists
               if(BoolTrue <= hasName) {
-                 val loc_existing = propval._1._1._2
+                 val loc_existing = propval._1._1.locs
                  val (h1, ctx1, val_locset) = loc_existing.foldLeft((HeapBot, ContextBot, LocSetBot))((hcl, ll) => {
                    val obj_existing = h(ll)
                    val hasTagName = Helper.HasOwnProperty(h, ll, AbsString.alpha("tagName"))
@@ -1831,7 +1831,7 @@ object DOMHelper {
            // in case that the mapping already exists
            val (h_t, ctx_t) =
              if(BoolTrue <= hasName) {
-               val nodelist_locset = mapped_node._1._1._2
+               val nodelist_locset = mapped_node._1._1.locs
                val newheap2 = nodelist_locset.foldLeft(HeapBot)((h, l) => {
                  val nodelist_obj = h_1(l)
                  val n_len = Operator.ToUInt32(Helper.Proto(h_1, l, AbsString.alpha("length")))
@@ -1879,7 +1879,7 @@ object DOMHelper {
            val (h_t, ctx_t) =
            // in case that the mapping already exists
              if(BoolTrue <= hasTag) {
-               val nodelist_locset = mapped_node._1._1._2
+               val nodelist_locset = mapped_node._1._1.locs
                val newheap2 = nodelist_locset.foldLeft(HeapBot)((h, l) => {
                  val nodelist_obj = h_2(l)
                  val n_len = Operator.ToUInt32(Helper.Proto(h_2, l, AbsString.alpha("length")))
@@ -1927,7 +1927,7 @@ object DOMHelper {
            val (h_t, ctx_t) =
              // in case that the mapping already exists
              if(BoolTrue <= hasClass) {
-               val nodelist_locset = mapped_node._1._1._2
+               val nodelist_locset = mapped_node._1._1.locs
                val newheap2 = nodelist_locset.foldLeft(HeapBot)((h, l) => {
                  val nodelist_obj = h_3(l)
                  val n_len = Operator.ToUInt32(Helper.Proto(h_3, l, AbsString.alpha("length")))
@@ -1955,12 +1955,12 @@ object DOMHelper {
 
        /* event target table update */
        val event_target_table = h_4(EventTargetTableLoc)
-       val load_targets: LocSet = event_target_table("#LOAD")._2._2
-       val unload_targets: LocSet = event_target_table("#UNLOAD")._2._2
-       val keyboard_targets: LocSet = event_target_table("#KEYBOARD")._2._2
-       val mouse_targets: LocSet = event_target_table("#MOUSE")._2._2
-       val touch_targets: LocSet = event_target_table("#TOUCH")._2._2
-       val other_targets: LocSet = event_target_table("#OTHER")._2._2
+       val load_targets: LocSet = event_target_table("#LOAD")._2.locs
+       val unload_targets: LocSet = event_target_table("#UNLOAD")._2.locs
+       val keyboard_targets: LocSet = event_target_table("#KEYBOARD")._2.locs
+       val mouse_targets: LocSet = event_target_table("#MOUSE")._2.locs
+       val touch_targets: LocSet = event_target_table("#TOUCH")._2.locs
+       val other_targets: LocSet = event_target_table("#OTHER")._2.locs
 
        val hasLoadEvent: Boolean = e.getAttribute("load")!="" || e.getAttribute("onload")!=""
        val hasUnloadEvent: Boolean = e.getAttribute("unload")!="" || e.getAttribute("onunload")!=""
@@ -2009,7 +2009,7 @@ object DOMHelper {
         // HTMLFormElement object
         val form_obj = h(l)
         val new_form_obj = form_obj.update(AbsString.alpha(name), PropValue(ObjectValue(targetloc, T, T, T)))
-        val elements_locset = form_obj("elements")._1._1._2
+        val elements_locset = form_obj("elements")._1._1.locs
         val newheap2 = elements_locset.foldLeft(h)((h, ll) => {
           val elements_obj = h(ll)
           val n_len = Operator.ToUInt32(Helper.Proto(h, ll, AbsString.alpha("length")))
@@ -2047,7 +2047,7 @@ object DOMHelper {
     tr match {
       // update the 'cells' property in HTMLTableRowElement
       case Some(l) =>
-        val cells_locset = Helper.Proto(h, l, AbsString.alpha("cells"))._2
+        val cells_locset = Helper.Proto(h, l, AbsString.alpha("cells")).locs
         val newheap2 = cells_locset.foldLeft(h)((_h, ll) => {
           val cells_obj = _h(ll)
           val n_len = Operator.ToUInt32(Helper.Proto(h, ll, AbsString.alpha("length")))
@@ -2074,7 +2074,7 @@ object DOMHelper {
     select match {
       // update the 'options' property in HTMLTableRowElement
       case Some(l) =>
-        val options_locset = Helper.Proto(h, l, AbsString.alpha("options"))._2
+        val options_locset = Helper.Proto(h, l, AbsString.alpha("options")).locs
         val newheap2 = options_locset.foldLeft(h)((_h, ll) => {
           val options_obj = _h(ll)
           val n_len = Operator.ToUInt32(Helper.Proto(h, ll, AbsString.alpha("length")))
@@ -2235,7 +2235,7 @@ object DOMHelper {
             // 'document' object
             val docobj = newheap(HTMLDocument.GlobalDocumentLoc)
 
-            val forms_locset = docobj("forms")._1._1._2
+            val forms_locset = docobj("forms")._1._1.locs
             val newheap2 = forms_locset.foldLeft(newheap)((h, l) => {
               val forms_obj = h(l)
               val n_len = Operator.ToUInt32(Helper.Proto(h, l, AbsString.alpha("length")))
@@ -2370,7 +2370,7 @@ object DOMHelper {
             /* 'document.images' update */
             // 'document' object
             val docobj = newheap(HTMLDocument.GlobalDocumentLoc)
-            val images_locset = docobj("images")._1._1._2
+            val images_locset = docobj("images")._1._1.locs
             val newheap2 = images_locset.foldLeft(newheap)((h, l) => {
               val images_obj = h(l)
               val n_len = Operator.ToUInt32(Helper.Proto(h, l, AbsString.alpha("length")))
@@ -2417,7 +2417,7 @@ object DOMHelper {
             // 'document' object
             val docobj = newheap(HTMLDocument.GlobalDocumentLoc)
 
-            val scripts_locset = docobj("scripts")._1._1._2
+            val scripts_locset = docobj("scripts")._1._1.locs
             val newheap2 = scripts_locset.foldLeft(newheap)((h, l) => {
               val scripts_obj = h(l)
               val n_len = Operator.ToUInt32(Helper.Proto(h, l, AbsString.alpha("length")))
@@ -2562,7 +2562,7 @@ object DOMHelper {
         // 'document' object
         val docobj = _newheap2(HTMLDocument.GlobalDocumentLoc)
         
-        val all_locset = docobj("all")._1._1._2
+        val all_locset = docobj("all")._1._1.locs
         val _newheap3 = all_locset.foldLeft(_newheap2)((h, l) => {
           val all_obj = h(l)
           val n_len = Operator.ToUInt32(Helper.Proto(h, l, AbsString.alpha("length")))

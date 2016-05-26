@@ -23,26 +23,23 @@ object Value {
   def apply(v: AbsString): Value = Value(PValue(v), LocSetBot)
 }
 
-case class Value(pvalue: PValue, locset: LocSet) {
-  /* tuple-like accessor */
-  val _1 = pvalue
-  val _2 = locset
+case class Value(pv: PValue, locs: LocSet) {
 
   /* partial order */
   def <= (that : Value): Boolean = {
-    if (this eq that) true 
+    if (this eq that) true
     else {
-      this.pvalue <= that.pvalue &&
-      this.locset.subsetOf(that.locset)
+      this.pv <= that.pv &&
+      this.locs.subsetOf(that.locs)
     }
   }
 
   /* not a partial order */
   def </ (that: Value): Boolean = {
-    if (this eq that) false 
+    if (this eq that) false
     else {
-      !(this.pvalue <= that.pvalue) ||
-      !(this.locset.subsetOf(that.locset))
+      !(this.pv <= that.pv) ||
+      !(this.locs.subsetOf(that.locs))
     }
   }
 
@@ -53,44 +50,44 @@ case class Value(pvalue: PValue, locset: LocSet) {
     else if (that eq ValueBot) this
     else {
       Value(
-        this.pvalue + that.pvalue,
-        this.locset ++ that.locset)
+        this.pv + that.pv,
+        this.locs ++ that.locs)
     }
   }
 
   /* meet */
   def <> (that: Value): Value = {
-    if (this eq that) this 
+    if (this eq that) this
     else {
       Value(
-        this.pvalue <> that.pvalue,
-        this.locset.intersect(that.locset))
+        this.pv <> that.pv,
+        this.locs.intersect(that.locs))
     }
   }
 
   /* substitute l_r by l_o */
   def subsLoc(l_r: Loc, l_o: Loc): Value = {
-    if (locset(l_r)) Value(pvalue, (locset - l_r) + l_o)
+    if (locs(l_r)) Value(pv, (locs - l_r) + l_o)
     else this
   }
-  
+
   /* weakly substitute l_r by l_o, that is keep l_r together */
   def weakSubsLoc(l_r: Loc, l_o: Loc): Value = {
-    if (locset(l_r)) Value(pvalue, locset + l_o)
+    if (locs(l_r)) Value(pv, locs + l_o)
     else this
   }
 
   def typeCount = {
-    if (locset.isEmpty)
-      pvalue.typeCount
+    if (locs.isEmpty)
+      pv.typeCount
     else
-      pvalue.typeCount + 1
+      pv.typeCount + 1
   }
 
   def typeKinds: String = {
     val sb = new StringBuilder()
-    sb.append(pvalue.typeKinds)
-    if(!locset.isEmpty) sb.append((if(sb.length > 0) ", " else "") + "Object")
+    sb.append(pv.typeKinds)
+    if(!locs.isEmpty) sb.append((if(sb.length > 0) ", " else "") + "Object")
     sb.toString
   }
 }

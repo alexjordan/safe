@@ -198,13 +198,13 @@ object ConcreteECMASemantics {
       }
     }
 
-    val lazyStream: Stream[Boolean] = (v1.locset.isEmpty) #::
-      (v2.locset.isEmpty) #::
-      absEq(v1.pvalue._1, v2.pvalue._1) #::
-      absEq(v1.pvalue._2, v2.pvalue._2) #::
-      absEq(v1.pvalue._3, v2.pvalue._3) #::
-      absEq(v1.pvalue._4, v2.pvalue._4) #::
-      absEq(v1.pvalue._5, v2.pvalue._5) #::
+    val lazyStream: Stream[Boolean] = (v1.locs.isEmpty) #::
+      (v2.locs.isEmpty) #::
+      absEq(v1.pv._1, v2.pv._1) #::
+      absEq(v1.pv._2, v2.pv._2) #::
+      absEq(v1.pv._3, v2.pv._3) #::
+      absEq(v1.pv._4, v2.pv._4) #::
+      absEq(v1.pv._5, v2.pv._5) #::
       Stream.empty
 
     !lazyStream.contains(false)
@@ -223,7 +223,7 @@ object ConcreteECMASemantics {
       val obj: Obj = v
       if (obj.dom("type")) {
         val objmap = obj.asMap
-        objmap("type")._1.objval._1._1._5.getSingle match {
+        objmap("type")._1.objval._1.pv._5.getSingle match {
           case Some("safe-testobj") =>
             //println(DomainPrinter.printObj(4, obj))
             val (resultMap, expectMap) = parseResultExpect(obj)
@@ -236,14 +236,14 @@ object ConcreteECMASemantics {
                     println("result%d: %s".format(index, result))
                     println("expect%d: %s".format(index, expect))
                     fail("%s: result '%s' does not match expected '%s'".format(
-                      objmap("description")._1.objval._1._1._5, result, expect))
+                      objmap("description")._1.objval._1.pv._5, result, expect))
                   }
                 case None =>
                   fail("No corresponding expect variable is detected for " + RESULT + index.toString)
               }
             }
           case Some("safe-errorobj") =>
-            fail("msg: " + objmap("reason")._1.objval._1._1._5)
+            fail("msg: " + objmap("reason")._1.objval._1.pv._5)
           case _ =>
             fail("Broken test harness (type property missing)")
         }
@@ -251,7 +251,7 @@ object ConcreteECMASemantics {
     }
 
     val globalObj = heap(GlobalLoc)
-    val numTests: Int = globalObj("SAFE_TESTS")._2.pvalue.numval.getSingle.getOrElse(-1.0).toInt
+    val numTests: Int = globalObj("SAFE_TESTS")._2.pv.numval.getSingle.getOrElse(-1.0).toInt
     if (numTests != numMatches) {
       fail("Test results checked: %d, expected: %d".format(numTests, numMatches))
     }

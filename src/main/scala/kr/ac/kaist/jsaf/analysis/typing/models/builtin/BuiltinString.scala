@@ -126,7 +126,7 @@ object BuiltinString extends ModelData {
         }),    
       "String.constructor" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // 15.5.2.1 new String( [value] )
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           val s = n_arglen.getAbsCase match {
@@ -148,7 +148,7 @@ object BuiltinString extends ModelData {
       "String.fromCharCode" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // 15.5.3.2 String.fromCharCode( [char0 [, char1[, ...]]] )
-          val arg_length = getArgValue(h, ctx, args, "length")._1._4
+          val arg_length = getArgValue(h, ctx, args, "length").pv._4
           val value_1 =
             if (AbsNumber.alpha(0) <= arg_length) Value(AbsString.alpha(""))
             else ValueBot
@@ -176,9 +176,9 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.toString" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val es = notGenericMethod(h, lset_this, "String")
-          val lset_string = lset_this.filter((l) => AbsString.alpha("String") <= h(l)("@class")._2._1._5)
+          val lset_string = lset_this.filter((l) => AbsString.alpha("String") <= h(l)("@class")._2.pv._5)
           val v = Value(Helper.defaultToString(h, lset_string))
 
           val (h_e, ctx_e) = Helper.RaiseException(h, ctx, es)
@@ -189,9 +189,9 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.valueOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val es = notGenericMethod(h, lset_this, "String")
-          val lset_string = lset_this.filter((l) => AbsString.alpha("String") <= h(l)("@class")._2._1._5)
+          val lset_string = lset_this.filter((l) => AbsString.alpha("String") <= h(l)("@class")._2.pv._5)
           val v = lset_string.foldLeft(ValueBot)((_v, l) => _v + h(l)("@primitive")._2)
 
           val (h_e, ctx_e) = Helper.RaiseException(h, ctx, es)
@@ -202,7 +202,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.charAt" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // 15.5.4.4 String.prototype.charAt(pos)
           val n_pos = Operator.ToInteger(getArgValue(h, ctx, args, "0"))
 
@@ -233,7 +233,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.charCodeAt" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // 15.5.4.5 String.prototype.charCodeAt(pos)
           val n_pos = Operator.ToInteger(getArgValue(h, ctx, args, "0"))
 
@@ -264,7 +264,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.concat" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           val n_arglen = Operator.ToUInt32(getArgValue(h, ctx, args, "length"))
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
@@ -289,7 +289,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.indexOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -319,7 +319,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.lastIndexOf" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -329,8 +329,8 @@ object BuiltinString extends ModelData {
           val s_search = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           val v_pos = getArgValue(h, ctx, args, "1")
           val v_pos1 =
-            if (v_pos._1._1 </ UndefBot)
-              Value(PValue(UndefBot, v_pos._1._2, v_pos._1._3, PosInf + v_pos._1._4, v_pos._1._5), v_pos._2)
+            if (v_pos.pv._1 </ UndefBot)
+              Value(PValue(UndefBot, v_pos.pv._2, v_pos.pv._3, PosInf + v_pos.pv._4, v_pos.pv._5), v_pos.locs)
             else v_pos
           val n_pos = Operator.ToInteger(v_pos1)
 
@@ -353,7 +353,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.localeCompare" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -383,14 +383,14 @@ object BuiltinString extends ModelData {
       "String.prototype.match" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // allocate new location
-          val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+          val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
           if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
           val addr_env = (cp._1._1, set_addr.head)
           val addr1 = cfg.getAPIAddress(addr_env, 0)
           val l_r = addrToLoc(addr1, Recent)
          
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -402,7 +402,7 @@ object BuiltinString extends ModelData {
           val regexp = getArgValue(h, ctx, args, "0")
           // 3. If Type(regexp) is Object and the value of the [[class]] internal property of regexp is "RegExp",
           //    then, let rx be regexp
-          val rx_lset = regexp._2.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2._1._5)
+          val rx_lset = regexp.locs.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2.pv._5)
           // 4, Else, let rx be a new RegExp object created as if by the expression new RegExp(regexp)
           //    where RegExp is the standard built-in constructor with that name
           // 4 case is not convered
@@ -425,10 +425,10 @@ object BuiltinString extends ModelData {
                 .update("input", PropValue(ObjectValue(S, T, T, T)))
                 .update(Str_default_number, PropValue(ObjectValue(StrTop, T, T, T)))
               val l = rx_lset.head
-              val src = h(l)("source")._1._1._1._5.getSingle
-              val b_g = h(l)("global")._1._1._1._3.getSingle
-              val b_i = h(l)("ignoreCase")._1._1._1._3.getSingle
-              val b_m = h(l)("multiline")._1._1._1._3.getSingle
+              val src = h(l)("source")._1._1.pv._5.getSingle
+              val b_g = h(l)("global")._1._1.pv._3.getSingle
+              val b_i = h(l)("ignoreCase")._1._1.pv._3.getSingle
+              val b_m = h(l)("multiline")._1._1.pv._3.getSingle
               (rx_lset.size, src, b_g, b_i, b_m, S.gamma) match {
                 // concrete case
                 case (1, Some(source), Some(g), Some(i), Some(m), Some(argset)) =>
@@ -486,27 +486,27 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.replace" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_callee = getArgValue(h, ctx, args, "callee")._2
+          val lset_callee = getArgValue(h, ctx, args, "callee").locs
           // argument value
           val argSearchValue = getArgValue(h, ctx, args, "0")
           val argReplaceValue = getArgValue(h, ctx, args, "1")
 
           val v_this = h(SinglePureLocalLoc)("@this")._2
-          val v_this_ = Value(PValue(UndefBot, NullBot, v_this._1._3, v_this._1._4, v_this._1._5), v_this._2)
+          val v_this_ = Value(PValue(UndefBot, NullBot, v_this.pv._3, v_this.pv._4, v_this.pv._5), v_this.locs)
 
           val es =
-            if (v_this._1._1 </ UndefBot || v_this._1._2 </ NullBot) HashSet[Exception](TypeError)
+            if (v_this.pv._1 </ UndefBot || v_this.pv._2 </ NullBot) HashSet[Exception](TypeError)
             else ExceptionBot
 
           // invoke v_this.toString()
           val string = Helper.toString(Helper.toPrimitive_better(h, v_this_))
 
-          val lset_regexp = argSearchValue._2.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2._1._5)
-          val lset_objs = argSearchValue._2.filter(l => AbsString.alpha("RegExp") != h(l)("@class")._2._1._5 && h(l)("@class")._2._1._5 </ StrBot)
-          val lsetf_replaceValue = argReplaceValue._2.filter(l => !h(l)("@function")._3.isEmpty)
-          val lseto_replaceValue = argReplaceValue._2.filter(l => h(l)("@function")._3.isEmpty)
-          val s_searchValue = Helper.toString(Helper.toPrimitive_better(h, Value(argSearchValue._1, lset_objs)))
-          val s_replaceValue_ = Helper.toString(Helper.toPrimitive_better(h, Value(argReplaceValue._1, lseto_replaceValue)))
+          val lset_regexp = argSearchValue.locs.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2.pv._5)
+          val lset_objs = argSearchValue.locs.filter(l => AbsString.alpha("RegExp") != h(l)("@class")._2.pv._5 && h(l)("@class")._2.pv._5 </ StrBot)
+          val lsetf_replaceValue = argReplaceValue.locs.filter(l => !h(l)("@function")._3.isEmpty)
+          val lseto_replaceValue = argReplaceValue.locs.filter(l => h(l)("@function")._3.isEmpty)
+          val s_searchValue = Helper.toString(Helper.toPrimitive_better(h, Value(argSearchValue.pv, lset_objs)))
+          val s_replaceValue_ = Helper.toString(Helper.toPrimitive_better(h, Value(argReplaceValue.pv, lseto_replaceValue)))
 
           val (he_, ctxe_) = Helper.RaiseException(h, ctx, es)
           val he_1 = he + he_
@@ -540,10 +540,10 @@ object BuiltinString extends ModelData {
                   case (Some(c_string_set), None, 1, Some(_)) if s_searchValue <= StrBot && c_string_set.size == 1 => {
                     val c_string = c_string_set.head
                     val l = lset_regexp.head
-                    val a_src = h(l)("source")._1._1._1._5
-                    val a_g = h(l)("global")._1._1._1._3
-                    val a_i = h(l)("ignoreCase")._1._1._1._3
-                    val a_m = h(l)("multiline")._1._1._1._3
+                    val a_src = h(l)("source")._1._1.pv._5
+                    val a_g = h(l)("global")._1._1.pv._3
+                    val a_i = h(l)("ignoreCase")._1._1.pv._3
+                    val a_m = h(l)("multiline")._1._1.pv._3
                     val a_idx = h(l)("lastIndex")._1._1
                     val src = a_src.getSingle
                     val b_g = a_g.getSingle
@@ -608,7 +608,7 @@ object BuiltinString extends ModelData {
                 case e: InternalError => {
                   // update lastIndex if regexp object's global is true
                   val h_1 = lset_regexp.foldLeft(h)((h_, l) => {
-                    if (BoolTrue <= h_(l)("global")._1._1._1._3)
+                    if (BoolTrue <= h_(l)("global")._1._1.pv._3)
                       Helper.PropStore(h_, l, AbsString.alpha("lastIndex"), Value(UInt))
                     else
                       h_
@@ -689,7 +689,7 @@ object BuiltinString extends ModelData {
 
       "String.prototype.slice" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -698,8 +698,8 @@ object BuiltinString extends ModelData {
           val n_start = Operator.ToInteger(getArgValue(h, ctx, args, "0"))
           val v_end = getArgValue(h, ctx, args, "1")
           val n_end =
-            if (v_end._1._1 </ UndefBot) {
-              Operator.ToInteger(Value(PValue(UndefBot, v_end._1._2, v_end._1._3, s_this.length + v_end._1._4, v_end._1._5), v_end._2))
+            if (v_end.pv._1 </ UndefBot) {
+              Operator.ToInteger(Value(PValue(UndefBot, v_end.pv._2, v_end.pv._3, s_this.length + v_end.pv._4, v_end.pv._5), v_end.locs))
             }
             else
               Operator.ToInteger(v_end)
@@ -735,7 +735,7 @@ object BuiltinString extends ModelData {
       // 2) Cover more corner cases (eg. when separator is undefined)
       "String.prototype.split" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -773,18 +773,18 @@ object BuiltinString extends ModelData {
             ((HeapBot, ContextBot), (he, ctxe))
           }
           else {
-            val lset_1 = v_arg._2.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2._1._5)
-            val lset_2 = v_arg._2.filter(l => {
-              val s = h(l)("@class")._2._1._5
+            val lset_1 = v_arg.locs.filter(l => AbsString.alpha("RegExp") <= h(l)("@class")._2.pv._5)
+            val lset_2 = v_arg.locs.filter(l => {
+              val s = h(l)("@class")._2.pv._5
               AbsString.alpha("RegExp") != s && s </ StrBot
             })
-            val s_separator = Helper.toString(Helper.toPrimitive(Value(v_arg._1, lset_2)))
+            val s_separator = Helper.toString(Helper.toPrimitive(Value(v_arg.pv, lset_2)))
 
             // String.prototype.split(string)
             val (str_ns, str_es) = if(!(s_separator <= StrBot))
             {
               // allocate new location
-              val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+              val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
               val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
               if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
               val addr_env = (cp._1._1, set_addr.head)
@@ -825,7 +825,7 @@ object BuiltinString extends ModelData {
             val (reg_ns, reg_es) = if (!lset_1.isEmpty)
             {
               // allocate new location
-              val lset_env = h(SinglePureLocalLoc)("@env")._2._2
+              val lset_env = h(SinglePureLocalLoc)("@env")._2.locs
               val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
               if (set_addr.size > 1) throw new InternalError("API heap allocation: Size of env address is " + set_addr.size)
               val addr_env = (cp._1._1, set_addr.head)
@@ -836,14 +836,14 @@ object BuiltinString extends ModelData {
               val cs_this_opt = s_this.gamma
 
               val isConcrete = lset_1.foldLeft(true)((o, l) => {
-                val src = h(l)("source")._1._1._1._5.getSingle
+                val src = h(l)("source")._1._1.pv._5.getSingle
                 src match {
                   case Some(x) => o
                   case None => false
                 }
               })
 
-              val n_limit = v_limit._1._4
+              val n_limit = v_limit.pv._4
               val n_limit_c = n_limit.getSingle 
               val isConcrete_limit = !n_limit_c.isEmpty || n_limit <= NumBot
 
@@ -856,7 +856,7 @@ object BuiltinString extends ModelData {
                 val limit = if(n_limit <= NumBot) 2^(32)-1 else n_limit_c.get
                 val s_this_set = cs_this_opt.get
                 lset_1.foldLeft(Obj.bottom)((o, l) => {
-                   val src = h(l)("source")._1._1._1._5.getSingle.get
+                   val src = h(l)("source")._1._1.pv._5.getSingle.get
                    val (matcher, _, _, _, _) = JSRegExpSolver.parse(src, "")
                    val o_array3_1: Obj = s_this_set.foldLeft(Obj.bottom)((o2, S) => {
                      // 3, Let A be a new array created ...
@@ -956,7 +956,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.substring" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -965,8 +965,8 @@ object BuiltinString extends ModelData {
           val n_start = Operator.ToInteger(getArgValue(h, ctx, args, "0"))
           val v_end = getArgValue(h, ctx, args, "1")
           val n_end =
-            if (v_end._1._1 </ UndefBot) {
-              Operator.ToInteger(Value(PValue(UndefBot, v_end._1._2, v_end._1._3, s_this.length + v_end._1._4, v_end._1._5), v_end._2))
+            if (v_end.pv._1 </ UndefBot) {
+              Operator.ToInteger(Value(PValue(UndefBot, v_end.pv._2, v_end.pv._3, s_this.length + v_end.pv._4, v_end.pv._5), v_end.locs))
             }
             else
               Operator.ToInteger(v_end)
@@ -998,7 +998,7 @@ object BuiltinString extends ModelData {
 
       "String.prototype.substr" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -1010,7 +1010,7 @@ object BuiltinString extends ModelData {
           val v_length = getArgValue(h, ctx, args, "1")
           // 3. If length is undefined, use +∞; otherwise call ToInteger(length).
           val n_length =
-            if (v_length._1._1 </ UndefBot) {
+            if (v_length.pv._1 </ UndefBot) {
               PosInf             
             }
             else
@@ -1053,7 +1053,7 @@ object BuiltinString extends ModelData {
 
       "String.prototype.toLowerCase" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -1069,7 +1069,7 @@ object BuiltinString extends ModelData {
         
       "String.prototype.toLocaleLowerCase" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -1084,7 +1084,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.toUpperCase" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -1099,7 +1099,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.toLocaleUpperCase" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -1114,7 +1114,7 @@ object BuiltinString extends ModelData {
         }),
       "String.prototype.trim" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          val lset_this = h(SinglePureLocalLoc)("@this")._2._2
+          val lset_this = h(SinglePureLocalLoc)("@this")._2.locs
           // [[default Value]] ??
           val lset_prim = lset_this.filter((l) => BoolTrue <= h(l).domIn("@primitive"))
           // TODO: v_this must be the result of [[DefaultValue]](string)
@@ -1141,7 +1141,7 @@ object BuiltinString extends ModelData {
             }
           } map { kv =>
             // map to concrete string
-            kv._2._1._2._1._5.getSingle
+            kv._2._1._2.pv._5.getSingle
           }
 
           // all args must be concrete single strings
