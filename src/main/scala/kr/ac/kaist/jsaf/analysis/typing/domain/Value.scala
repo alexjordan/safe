@@ -9,21 +9,37 @@
 
 package kr.ac.kaist.jsaf.analysis.typing.domain
 
-import scala.collection.immutable.HashSet
+import scala.runtime.ScalaRunTime._hashCode
 
 object Value {
   /* convenience constructors */
-  def apply(v: Loc): Value = Value(PValueBot, LocSet(v))
-  def apply(v: LocSet): Value = Value(PValueBot, v)
-  def apply(v: PValue): Value = Value(v, LocSetBot)
-  def apply(v: AbsUndef): Value = Value(PValue(v), LocSetBot)
-  def apply(v: AbsNumber): Value = Value(PValue(v), LocSetBot)
-  def apply(v: AbsBool): Value = Value(PValue(v), LocSetBot)
-  def apply(v: AbsNull): Value = Value(PValue(v), LocSetBot)
-  def apply(v: AbsString): Value = Value(PValue(v), LocSetBot)
+  def apply(v: Loc): Value = new Value(PValueBot, LocSet(v))
+  def apply(v: LocSet): Value = new Value(PValueBot, v)
+  def apply(v: PValue): Value = new Value(v, LocSetBot)
+  def apply(v: AbsUndef): Value = new Value(PValue(v), LocSetBot)
+  def apply(v: AbsNumber): Value = new Value(PValue(v), LocSetBot)
+  def apply(v: AbsBool): Value = new Value(PValue(v), LocSetBot)
+  def apply(v: AbsNull): Value = new Value(PValue(v), LocSetBot)
+  def apply(v: AbsString): Value = new Value(PValue(v), LocSetBot)
+  def apply(pv: PValue, locs: LocSet) = new Value(pv, locs)
 }
 
-case class Value(pv: PValue, locs: LocSet) {
+final class Value(val pv: PValue, val locs: LocSet) extends Product2[PValue,LocSet] {
+
+  // Value is now a Product
+  override def _1 = pv
+  override def _2 = locs
+  override def hashCode() = _hashCode(this)
+  override def canEqual(that: Any) = that.isInstanceOf[Value]
+  override def equals(that: Any) = that match {
+    case that: Value => this.hashCode() == that.hashCode()
+    case _ => false
+  }
+  // TODO optimized equals?
+//  override def equals(that: Any) = that match {
+//    case that: Value if this.pv == that.pv && this.locs == that.locs => that.canEqual(this)
+//    case _ => false
+//  }
 
   /* partial order */
   def <= (that : Value): Boolean = {
