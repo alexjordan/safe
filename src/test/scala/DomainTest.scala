@@ -1,8 +1,10 @@
 package kr.ac.kaist.jsaf.tests
 
-import junit.framework.{Test, TestSuite}
-import junit.framework.Assert._
-import junit.framework.TestCase
+import org.scalatest.junit.AssertionsForJUnit
+import org.junit.Assert._
+import org.junit.Before
+import org.junit.Test
+import org.junit.Ignore
 import kr.ac.kaist.jsaf.Shell
 import kr.ac.kaist.jsaf.analysis.typing.{AddressManager, Helper, Operator, domain}
 
@@ -11,13 +13,13 @@ import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.tests.TestHelper._
 
 
-class DomainTest extends TestCase("DomainTest") {
+class DomainTest extends AssertionsForJUnit() {
 
-  override def setUp(): Unit = {
+  @Before def setUp(): Unit = {
     AddressManager.reset()
   }
 
-  def testExperiment = {
+  @Ignore def testExperiment = {
     println(toValue("1") + toValue("2"))
     println(toValue("1") + toValue("x"))
     println(toValue(1) <= Value(domain.NumTop))
@@ -31,7 +33,7 @@ class DomainTest extends TestCase("DomainTest") {
     println(toValue("") + Value(AbsUndef.UndefTop))
   }
 
-  def testConcat = {
+  @Ignore def testConcat = {
     assertEquals(AbsStringSet.alpha("foo") concat AbsString.alpha("bar"), strAlpha("foobar"))
     Shell.params.opt_MaxStrSetSize = 2
     assertEquals(strsAlpha("foo", "bar") concat AbsString.alpha("baz"), strsAlpha("foobaz", "barbaz"))
@@ -43,7 +45,7 @@ class DomainTest extends TestCase("DomainTest") {
     assertEquals(strAlpha("foo") concat StrBot, StrBot)
   }
 
-  def testOrder = {
+  @Test def testOrder = {
     assertFalse(toValue("") <= (toValue("foo") + Value(AbsUndef.UndefTop)))
     assertTrue((toValue("") + Value(AbsUndef.UndefTop)) <= (Value(AbsString.StrTop) + Value(AbsUndef.UndefTop)))
     assertTrue(Value(AbsStringSet.OtherStr) <= (Value(AbsString.StrTop) + Value(AbsUndef.UndefTop)))
@@ -55,7 +57,7 @@ class DomainTest extends TestCase("DomainTest") {
       case (v1: Value, v2: Value) => v1 <= v2 && v2 <= v1
     }
 
-  def testObjectStore = {
+  @Test def testObjectStore = {
     var o = Obj.empty
     o = o.update(strsAlpha("foo", "bar"), PropValue(toValue(42))) // update with abstract string set
     assertTrue(o.dom("foo"))  // foo is a possible property key
@@ -75,7 +77,7 @@ class DomainTest extends TestCase("DomainTest") {
     assertEquals(BoolTrue, o.domIn("bar"))  // after the strong update, 'bar' can no longer be absent
   }
 
-  def testStringConcat = {
+  @Ignore def testStringConcat = {
     Shell.params.opt_MaxStrSetSize = 2
     val a = toValue("foo")
     val b = Value(strsAlpha("bar", "baz"))
