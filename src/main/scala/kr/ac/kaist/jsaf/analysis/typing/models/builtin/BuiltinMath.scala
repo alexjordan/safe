@@ -431,8 +431,7 @@ object BuiltinMath extends ModelData {
         })),
       "Math.random" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
-          ImprecisionTracker.random(fun)
-          ((Helper.ReturnStore(h, Value(NumTop)), ctx), (he, ctxe))
+          ((Helper.ReturnStore(h, Value(AbsNumber.alpha(scala.math.random))), ctx), (he, ctxe))
         }),
       ("Math.round" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {

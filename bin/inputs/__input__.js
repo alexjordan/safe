@@ -4,7 +4,6 @@ location.pathname="/";
 location.hostname="";
 location.host="";
 navigator.userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/6.1.3 Safari/537.75.14";
-Math.random = function() { return 32;};
 navigator.cookieEnabled = false
 document.cookie = "";
 // Plug-ins
