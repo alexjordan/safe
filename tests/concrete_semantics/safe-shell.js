@@ -10,7 +10,6 @@ var SECT_SUFFIX = ' of test - ';
 
 var gDelayTestDriverEnd = false;
 
-var BUGNUMBER = '';
 var summary = '';
 var description = '';
 var expected = '';
@@ -42,8 +41,25 @@ function TestCase(n, d, e, a)
   this.__expect1 = e;
   this.__result1 = a;
   this.reason = '';
-  this.bugnumber = typeof(BUGNUMER) != 'undefined' ? BUGNUMBER : '';
-  this.type = 'safe-shell';
+  this.bugnumber = typeof(BUGNUMBER) != 'undefined' ? BUGNUMBER : '';
+  this.type = 'safe-testobj';
+}
+
+function TestError(msg)
+{
+  this.reason = msg
+  this.type = 'safe-errorobj';
+}
+
+// test262 $ERROR function
+function $ERROR(msg) {
+  new TestError(msg)
+}
+
+// test262 assert
+function assert() {}
+assert.sameValue = function (actual, expected, message) {
+  new TestCase("name", message, expected, actual)
 }
 
 function startTest() {}

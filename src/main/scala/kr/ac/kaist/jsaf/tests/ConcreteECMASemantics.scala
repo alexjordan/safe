@@ -23,12 +23,9 @@ import kr.ac.kaist.jsaf.nodes.Program
 import kr.ac.kaist.jsaf.nodes_util.NodeRelation
 import kr.ac.kaist.jsaf.scala_src.useful.Options._
 
-class ConcreteECMASemantics(dir: String, tc: String) extends TestCase(tc) {
+class ConcreteECMASemantics(testfile: File) extends TestCase(testfile.getName) {
 
   import ConcreteECMASemantics._
-
-  // "no", "1callsite", "1obj", "1tajs"
-  val CONTEXT_SENSITIVITY = "1callsite"
 
   private class NullOutputStream extends OutputStream {
     override def write(x: Int) = ()
@@ -45,7 +42,7 @@ class ConcreteECMASemantics(dir: String, tc: String) extends TestCase(tc) {
     try {
       // Initialize AddressManager
       AddressManager.reset()
-      val typing = analyze(new File(dir, tc))
+      val typing = analyze(testfile)
       checkResult(typing)
     } finally {
       // recover stdout, stderr
@@ -60,7 +57,7 @@ class ConcreteECMASemantics(dir: String, tc: String) extends TestCase(tc) {
     Config.setAssertMode(true)
 
     def findShell(f: File): Option[File] = {
-      if (f == null || !file.exists())
+      if (f == null || !f.exists())
         return None
       val list = f.listFiles()
       list.foreach(x => {
@@ -109,12 +106,10 @@ class ConcreteECMASemantics(dir: String, tc: String) extends TestCase(tc) {
     // typing
     val typing: TypingInterface = new Typing(cfg, locclone = false, quiet = false)
 
-    CONTEXT_SENSITIVITY match {
-      case "no" => Config.setContextSensitivityMode(Config.Context_Insensitive)
-      case "1callsite" => Config.setContextSensitivityMode(Config.Context_OneCallsite)
-      case "1obj" => Config.setContextSensitivityMode(Config.Context_OneObject)
-      case "1tajs" => Config.setContextSensitivityMode(Config.Context_OneObjectTAJS)
-    }
+    // 10 callsite sensitive
+    Config.setContextSensitivityMode(Config.Context_KCallsite)
+    Config.setContextSensitivityDepth(10)
+
 
     Config.setTypingInterface(typing)
     Config.setAssertMode(true)
@@ -198,24 +193,29 @@ object ConcreteECMASemantics {
       val obj: Obj = v
       if (obj.dom("type")) {
         val objmap = obj.asMap
-        if (objmap("type")._1.objval._1._1._5 <= AbsString.alpha("safe-shell")) {
-          //println(DomainPrinter.printObj(4, obj))
-          val (resultMap, expectMap) = parseResultExpect(obj)
-          for ((index, result) <- resultMap.toSeq.sortBy(_._1)) {
-            expectMap.get(index) match {
-              case Some(expect) =>
-                if (valueEq(expect, result)) {
-                  numMatches += 1
-                } else {
-                  println("result%d: %s".format(index, result))
-                  println("expect%d: %s".format(index, expect))
-                  fail("%s: result '%s' does not match expected '%s'".format(
-                    objmap("description")._1.objval._1._1._5, result, expect))
-                }
-              case None =>
-                fail("No corresponding expect variable is detected for " + RESULT + index.toString)
+        objmap("type")._1.objval._1._1._5.getSingle match {
+          case Some("safe-testobj") =>
+            //println(DomainPrinter.printObj(4, obj))
+            val (resultMap, expectMap) = parseResultExpect(obj)
+            for ((index, result) <- resultMap.toSeq.sortBy(_._1)) {
+              expectMap.get(index) match {
+                case Some(expect) =>
+                  if (valueEq(expect, result)) {
+                    numMatches += 1
+                  } else {
+                    println("result%d: %s".format(index, result))
+                    println("expect%d: %s".format(index, expect))
+                    fail("%s: result '%s' does not match expected '%s'".format(
+                      objmap("description")._1.objval._1._1._5, result, expect))
+                  }
+                case None =>
+                  fail("No corresponding expect variable is detected for " + RESULT + index.toString)
+              }
             }
-          }
+          case Some("safe-errorobj") =>
+            fail("msg: " + objmap("reason")._1.objval._1._1._5)
+          case _ =>
+            fail("Broken test harness (type property missing)")
         }
       }
     }
