@@ -776,7 +776,7 @@ object BuiltinArray extends ModelData {
           })
           ((Helper.ReturnStore(h_1, Value(lset_this)), ctx), (he, ctxe))
       })),
-      ("Array.prototype.splice" -> (
+      "Array.prototype.splice" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val lset_env = h(SinglePureLocalLoc)("@env")._2._2
           val set_addr = lset_env.foldLeft[Set[Address]](Set())((a, l) => a + locToAddr(l))
@@ -790,6 +790,12 @@ object BuiltinArray extends ModelData {
           val n_arglen = Operator.ToUInt32(getArgValue(h_1, ctx_1, args, "length"))
           val n_start = Operator.ToInteger(getArgValue(h_1, ctx_1, args, "0"))
           val n_count = Operator.ToInteger(getArgValue(h_1, ctx_1, args, "1"))
+
+          AbsNumber.getUIntSingle(n_arglen) match {
+            case Some(n) if n == 1 => System.err.println("WARNING: splice called with 1 arg, validate JS3/6 compatible")
+            case _ => ()
+          }
+
           val (h_2, o) = (n_start.getSingle, n_count.getSingle) match {
             case (Some(start), Some(count)) =>
               lset_this.foldLeft((HeapBot, Obj.bottom))((_ho, l) => {
@@ -798,21 +804,21 @@ object BuiltinArray extends ModelData {
                 val n_len = Operator.ToUInt32(Helper.Proto(h_1, l, AbsString.alpha("length")))
                 AbsNumber.getUIntSingle(n_len) match {
                   case Some(n_len) => {
-                    val from =
+                    val actualStart =
                       if (start < 0) max(n_len + start, 0).toInt
                       else min(start, n_len).toInt
                     // for browser compatibility
-                    val delCount = AbsNumber.getUIntSingle(n_arglen) match {
+                    val actualDeleteCount = AbsNumber.getUIntSingle(n_arglen) match {
                       case Some(n_arglen) if n_arglen==1 =>  n_len.toInt 
-                      case _ => min(max(count, 0), n_len - start).toInt
+                      case _ => min(max(count, 0), n_len - actualStart).toInt
                     }
-                    val o_new = Helper.NewArrayObject(AbsNumber.alpha(delCount))
-                    val o_1 = (0 until delCount).foldLeft(o_new)((__o, i) => {
+                    val o_new = Helper.NewArrayObject(AbsNumber.alpha(actualDeleteCount))
+                    val o_1 = (0 until actualDeleteCount).foldLeft(o_new)((__o, i) => {
                       val b = Helper.HasProperty(h_1, l, AbsString.alpha(i.toString))
                       val _o1 =
                         if (BoolTrue <= b)
                           __o.update(AbsString.alpha(i.toString),
-                            PropValue(ObjectValue(Helper.Proto(h_1, l, AbsString.alpha((from+i).toString)),BoolTrue,BoolTrue,BoolTrue)))
+                            PropValue(ObjectValue(Helper.Proto(h_1, l, AbsString.alpha((actualStart+i).toString)),BoolTrue,BoolTrue,BoolTrue)))
                         else Obj.bottom
                       val _o2 =
                         if (BoolFalse <= b) __o
@@ -822,11 +828,11 @@ object BuiltinArray extends ModelData {
                     val _h1 = AbsNumber.getUIntSingle(n_arglen) match {
                       case Some(n_arglen) => {
                         val add_count = if(0 <= (n_arglen.toInt - 2)) n_arglen.toInt - 2 else 0
-                        val move_start = start + count
-                        if (add_count < delCount) {
+                        val move_start = actualStart + actualDeleteCount
+                        if (add_count < actualDeleteCount) {
                           val __h1 = (move_start.toInt until n_len.toInt).foldLeft(h_1)((__h, i) => {
                             val s_from = AbsString.alpha(i.toString)
-                            val s_to = AbsString.alpha((i - count+add_count).toInt.toString)
+                            val s_to = AbsString.alpha((i - actualDeleteCount+add_count).toInt.toString)
                             val v = Helper.Proto(__h, l, s_from)
                             val b = Helper.HasProperty(__h, l, s_from)
                             val __h1 =
@@ -838,10 +844,10 @@ object BuiltinArray extends ModelData {
                             __h1 + __h2
                           })
                           val __h2 = (0 until add_count).foldLeft(__h1)((__h, i) =>
-                            Helper.PropStore(__h, l, AbsString.alpha((start + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
-                          val new_length = n_len + add_count - delCount
+                            Helper.PropStore(__h, l, AbsString.alpha((actualStart + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
+                          val new_length = n_len + add_count - actualDeleteCount
                           val k = n_len;
-                          val ss = n_len - delCount + add_count
+                          val ss = n_len - actualDeleteCount + add_count
                           val __h3 = (ss.toInt until k.toInt).foldLeft(__h2)((__h, i) =>
                             Helper.Delete(__h, l, AbsString.alpha(i.toString))._1)
                           Helper.PropStore(__h3, l,  AbsString.alpha("length"), Value(AbsNumber.alpha(new_length)))
@@ -849,7 +855,7 @@ object BuiltinArray extends ModelData {
                         else {
                           val __h1 = (0 until (n_len-move_start).toInt).foldLeft(h_1)((__h, i) => {
                             val s_from = AbsString.alpha((n_len -1 - i).toInt.toString)
-                            val s_to = AbsString.alpha((n_len -1 -i + add_count - count).toInt.toString)
+                            val s_to = AbsString.alpha((n_len -1 -i + add_count - actualDeleteCount).toInt.toString)
                             val v = Helper.Proto(__h, l, s_from)
                             val b = Helper.HasProperty(__h, l, s_from)
                             val __h1 =
@@ -861,8 +867,8 @@ object BuiltinArray extends ModelData {
                             __h1 + __h2
                           })
                           val __h2 = (0 until add_count).foldLeft(__h1)((__h, i) =>
-                            Helper.PropStore(__h, l, AbsString.alpha((start + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
-                          val new_length: Int = (n_len + add_count - count).toInt
+                            Helper.PropStore(__h, l, AbsString.alpha((actualStart + i).toInt.toString), getArgValue(__h, ctx_1, args, (i+2).toString)))
+                          val new_length: Int = (n_len + add_count - actualDeleteCount).toInt
                           Helper.PropStore(__h2, l,  AbsString.alpha("length"), Value(AbsNumber.alpha(new_length)))
                         }
                       }
@@ -914,7 +920,7 @@ object BuiltinArray extends ModelData {
           }
           else
             ((HeapBot, ContextBot), (he, ctxe))
-        })),
+        }),
       ("Array.prototype.unshift" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           val lset_this = h(SinglePureLocalLoc)("@this")._2._2
