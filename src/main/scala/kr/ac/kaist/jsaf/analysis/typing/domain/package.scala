@@ -243,4 +243,6 @@ package object domain {
 
   val LPBot = LPSet(HashMap[Loc,Set[String]]())
   val LBot = LocSetBot
+
+  class NonConcreteException(msg: String) extends RuntimeException(msg)
 }

@@ -9,16 +9,19 @@
 
 package kr.ac.kaist.jsaf.analysis.typing.models.builtin
 
-import scala.math.{min,max,floor, abs}
-import kr.ac.kaist.jsaf.analysis.cfg.{CFGExpr, CFG, InternalError, FunctionId}
+import scala.math.{abs, floor, max, min}
+import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGExpr, FunctionId, InternalError}
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => F, BoolTrue => T}
 import kr.ac.kaist.jsaf.analysis.typing.models._
 import kr.ac.kaist.jsaf.analysis.typing._
-import kr.ac.kaist.jsaf.analysis.typing.{AccessHelper=>AH}
+import kr.ac.kaist.jsaf.analysis.typing.{AccessHelper => AH}
+
 import scala.collection.immutable.HashSet
 import kr.ac.kaist.jsaf.utils.regexp.JSRegExpSolver
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
+
+import scala.util.Try
 
 object BuiltinString extends ModelData {
 
@@ -35,7 +38,8 @@ object BuiltinString extends ModelData {
     ("@hasinstance",             AbsConstValue(PropValueNullTop)),
     ("prototype",                AbsConstValue(PropValue(ObjectValue(Value(ProtoLoc), F, F, F)))),
     ("length",                   AbsConstValue(PropValue(ObjectValue(AbsNumber.alpha(1), F, F, F)))),
-    ("fromCharCode",             AbsBuiltinFunc("String.fromCharCode", 1))
+    ("fromCharCode",             AbsBuiltinFunc("String.fromCharCode", 1)),
+    ("__strset",                 AbsBuiltinFunc("String.__strset", 1))
   )
 
   private val prop_proto: List[(String, AbsProperty)] = List(
@@ -1093,6 +1097,33 @@ object BuiltinString extends ModelData {
             ((Helper.ReturnStore(h, Value(s)), ctx), (he, ctxe))
           else
             ((HeapBot, ContextBot), (he, ctxe))
+        }),
+      "String.__strset" -> (
+        (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
+          // helper to test if string converts to integer
+          def tryToInt(s: String) = Try(s.toInt).toOption
+
+          val arg_obj = getConcreteArgsObj(h, ctx, args)
+          val str_args = arg_obj.asMap filter { kv =>
+            // filter out any properties other than 0,1,2,...
+            tryToInt(kv._1) match {
+              case Some(i) => i >= 0
+              case None => false
+            }
+          } map { kv =>
+            // map to concrete string
+            kv._2._1._2._1._5.getSingle
+          }
+
+          // all args must be concrete single strings
+          val strs = str_args map {
+            case Some(ss) => ss
+            case None => throw new NonConcreteException("non-concrete arg passed to String.__strset")
+          }
+
+          // create string set and return
+          val strset: AbsString = AbsStringSet.alpha(strs.to[HashSet])
+          ((Helper.ReturnStore(h, Value(strset)), ctx), (he, ctxe))
         })
     )
   }

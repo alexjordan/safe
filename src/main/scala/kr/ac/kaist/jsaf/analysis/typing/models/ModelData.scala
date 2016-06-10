@@ -29,6 +29,19 @@ trait ModelData {
     v
   }
 
+  /**
+    * Returns the arguments object if concrete, throws exception otherwise
+    * @param h
+    * @param ctx
+    * @param args
+    */
+  protected def getConcreteArgsObj(h : Heap, ctx: Context, args: CFGExpr): Obj = {
+    val l_args = SE.V(args,h,ctx)._1.locset
+    if (l_args.size != 1)
+      throw new NonConcreteException("Concrete arguments object expected")
+    h(l_args.head)
+  }
+
   protected def getAddrList_use(): LPSet = {
     LPSet(SinglePureLocalLoc, "@env")
   }
