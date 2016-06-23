@@ -68,13 +68,15 @@ object EventTarget extends DOM {
           val s_type = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
           val v_fun = getArgValue(h, ctx, args, "1")
           val b_capture = Helper.toBoolean(getArgValue(h, ctx, args, "2"))
-          if (s_type </ StrBot && v_fun </ ValueBot && b_capture </ BoolBot) {
+
+          if (s_type </ StrBot && !v_fun._2.isEmpty && b_capture </ BoolBot) {
             /* unsound, ingnore capture flag */
             val h_1 = DOMHelper.addEventHandler(h, s_type, v_fun, Value(lset_this))
             ((Helper.ReturnStore(h_1, Value(UndefTop)), ctx), (he, ctxe))
-          }
-          else
+          } else {
+            System.err.println("* Warning: addEventListener reached with incomplete arguments")
             ((HeapBot, ContextBot), (he, ctxe))
+          }
         })),
       // do nothing : could be more precise
       ("EventTarget.removeEventListener" -> (
@@ -101,13 +103,14 @@ object EventTarget extends DOM {
             val s_type = Helper.toString(Helper.toPrimitive_better(h, getArgValue(h, ctx, args, "0")))
             val v_fun = getArgValue(h, ctx, args, "1")
             val b_capture = Helper.toBoolean(getArgValue(h, ctx, args, "2"))
-            if (s_type </ StrBot && v_fun </ ValueBot && b_capture </ BoolBot) {
+            if (s_type </ StrBot && !v_fun._2.isEmpty && b_capture </ BoolBot) {
               /* unsound, ingnore capture flag */
               val h_1 = DOMHelper.addEventHandler(h, s_type, v_fun, Value(lset_this))
               ((Helper.ReturnStore(h_1, Value(UndefTop)), ctx), (he, ctxe))
-            }
-            else
+            } else {
+              System.err.println("* Warning: addEventListener reached with incomplete arguments")
               ((HeapBot, ContextBot), (he, ctxe))
+            }
           })),
       // do nothing : could be more precise
       ("window.EventTarget.removeEventListener" -> (
