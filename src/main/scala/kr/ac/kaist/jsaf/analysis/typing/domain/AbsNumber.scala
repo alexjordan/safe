@@ -9,6 +9,8 @@
 
 package kr.ac.kaist.jsaf.analysis.typing.domain
 
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
+
 object AbsNumber {
   sealed abstract class AbsNumberCase
   case object NumTopCase extends AbsNumberCase
@@ -245,25 +247,30 @@ class AbsNumber(_kind: AbsNumber.AbsNumberCase) extends AbsBase[Double] {
   }
 
   /* join */
-  def + (that: AbsNumber) = (this.kind, that.kind) match {
-    case (AbsNumber.NumTopCase, _) => this
-    case (_, AbsNumber.NumTopCase) => that
-    case (AbsNumber.NumBotCase, _) => that
-    case (_, AbsNumber.NumBotCase) => this
-    case (AbsNumber.PosInfCase, AbsNumber.NegInfCase) => Infinity
-    case (AbsNumber.NegInfCase, AbsNumber.PosInfCase) => Infinity
-    case (AbsNumber.UIntSingleCase(a), AbsNumber.UIntSingleCase(b)) =>
-      if (a==b) this
-      else UInt
-    case (AbsNumber.NUIntSingleCase(a), AbsNumber.NUIntSingleCase(b)) =>
-      if (a==b) this
-      else NUInt
-    case _ =>
-      (this<=that, that<=this) match {
-        case (true, _) => that
-        case (_, true) => this
-        case _ => NumTop
-      }
+  def + (that: AbsNumber) = {
+    val result = (this.kind, that.kind) match {
+      case (AbsNumber.NumTopCase, _) => this
+      case (_, AbsNumber.NumTopCase) => that
+      case (AbsNumber.NumBotCase, _) => that
+      case (_, AbsNumber.NumBotCase) => this
+      case (AbsNumber.PosInfCase, AbsNumber.NegInfCase) => Infinity
+      case (AbsNumber.NegInfCase, AbsNumber.PosInfCase) => Infinity
+      case (AbsNumber.UIntSingleCase(a), AbsNumber.UIntSingleCase(b)) =>
+        if (a==b) this
+        else UInt
+      case (AbsNumber.NUIntSingleCase(a), AbsNumber.NUIntSingleCase(b)) =>
+        if (a==b) this
+        else NUInt
+      case _ =>
+        (this<=that, that<=this) match {
+          case (true, _) => that
+          case (_, true) => this
+          case _ => NumTop
+        }
+    }
+    if (this.isConcrete && that.isConcrete && !result.isConcrete)
+      ImprecisionTracker.joinLoss(this, that, result)
+    result
   }
 
   /* meet */

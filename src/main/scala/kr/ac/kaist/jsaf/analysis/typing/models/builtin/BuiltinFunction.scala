@@ -38,15 +38,16 @@
 
 package kr.ac.kaist.jsaf.analysis.typing.models.builtin
 
-import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGExpr, LEntry, LExit, LExitExc, InternalError, FunctionId}
+import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGExpr, FunctionId, InternalError, LEntry, LExit, LExitExc}
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => F, BoolTrue => T}
 import kr.ac.kaist.jsaf.analysis.typing.models._
 import kr.ac.kaist.jsaf.analysis.typing._
-import kr.ac.kaist.jsaf.analysis.typing.{AccessHelper=>AH}
+import kr.ac.kaist.jsaf.analysis.typing.{AccessHelper => AH}
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.Shell
 import kr.ac.kaist.jsaf.ShellParameters
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 object BuiltinFunction extends ModelData {
 
@@ -150,7 +151,8 @@ object BuiltinFunction extends ModelData {
           val (h_1, ctx_1) = (h, ctx) // Helper.Oldify(h, ctx, addr1)
           val (h_2, ctx_2) = Helper.Oldify(h_1, ctx_1, addr2)
           val (h_3, ctx_3) = Helper.Oldify(h_2, ctx_2, addr3)
-          val lset_this = h_3(SinglePureLocalLoc)("@this")._2.locs
+          val v_this = h_3(SinglePureLocalLoc)("@this")._2
+          val lset_this = v_this.locs
 
           // 1.
 //          val cond = lset_this.exists((l) => BoolFalse <= Helper.IsCallable(h_3,l))
@@ -219,9 +221,9 @@ object BuiltinFunction extends ModelData {
           val h_4 = h_3.update(l_r3, o_arg3)
 
           // *  in our own semantics, this value should be object
-          val v_this = getArgValue(h_4, ctx_3, args, "0")
-          val lset_argthis = Helper.getThis(h_4, v_this)
-          val v_this2 =  Value(PValue(UndefBot, NullBot, v_this.pv._3, v_this.pv._4, v_this.pv._5), lset_argthis)
+          val v_argthis = getArgValue(h_4, ctx_3, args, "0")
+          val lset_argthis = Helper.getThis(h_4, v_argthis)
+          val v_this2 =  Value(PValue(UndefBot, NullBot, v_argthis.pv._3, v_argthis.pv._4, v_argthis.pv._5), lset_argthis)
           val (callee_this, h_5, ctx_5, es3) = Helper.toObject(h_4, ctx_3, v_this2, addr4)
 
           // XXX: stop if thisArg or arguments is LocSetBot(ValueBot)
@@ -256,7 +258,9 @@ object BuiltinFunction extends ModelData {
               })
             })
             //////////////////////////////////////////////////
-            
+            // check number of possible functions to be called
+            ImprecisionTracker.applyViaLocations(v_this, lset_f, fun)
+
             lset_f.foreach((l_f) => {
               val o_f = h_5(l_f)
               o_f("@function")._3.foreach((fid) => {

@@ -42,6 +42,7 @@ import kr.ac.kaist.jsaf.nodes.{IRRoot, Program}
 import kr.ac.kaist.jsaf.nodes_util.{JSFromHTML, NodeUtil}
 import kr.ac.kaist.jsaf.scala_src.nodes.{SProgram, STopLevel}
 import edu.rice.cs.plt.tuple.{Option => JOption}
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 import kr.ac.kaist.jsaf.analysis.typing.domain.Obj
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMBuilder
 import kr.ac.kaist.jsaf.tests.TestHelper
@@ -67,6 +68,8 @@ private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val maxStrSet = opt[Int]("max-strset-size", descr = "max string set size", validate = _ > 0, default = Some(1))
   val maxIterations = opt[Int]("max-iter", short = 'l', descr = "stop after n iterations max")
   val timeout = opt[Int]("timeout", descr = "timeout in seconds", validate = _ > 0)
+  val noImprecisionLog = opt[Boolean]("no-imprecision-log", descr = "do not ouput imprecision logging")
+  val noImprecisionStop = opt[Boolean]("no-imprecision-stop", descr = "do not stop on catastrophic imprecision")
   requireOne(inputFiles, htmlFile)
 }
 
@@ -130,6 +133,14 @@ object RunAnalysis {
 
     Config.maxIterations = conf.maxIterations.getOrElse(0)
     Config.startDebugAtIteration = conf.debugAfter.toOption
+    
+    // imprecision log enabled by default
+    conf.noImprecisionLog.orElse(Some(true)).get match {
+      case Some(disabled) if disabled => ImprecisionTracker.disableLog
+      case _ => ImprecisionTracker.enableLog
+    }
+    // stop unless disabled
+    ImprecisionTracker.stopEnabled = !conf.noImprecisionStop.get.getOrElse(false)
   }
 
   def parseJS(files: Seq[String]) = {

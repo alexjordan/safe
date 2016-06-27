@@ -10,11 +10,12 @@
 package kr.ac.kaist.jsaf.analysis.typing.models
 
 import java.io._
+
 import scala.collection.immutable.HashMap
 import kr.ac.kaist.jsaf.compiler.Predefined
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
-import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse=>F, BoolTrue=>T}
+import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => F, BoolTrue => T}
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMCore._
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml._
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml5._
@@ -22,12 +23,13 @@ import kr.ac.kaist.jsaf.analysis.typing.models.DOMObject._
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMSvg._
 import kr.ac.kaist.jsaf.analysis.typing._
 import kr.ac.kaist.jsaf.analysis.cfg.{CFG, FunctionId}
-import kr.ac.kaist.jsaf.{ShellParameters, Shell}
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
+import kr.ac.kaist.jsaf.{Shell, ShellParameters}
 import org.apache.html.dom.HTMLDocumentImpl
 import org.cyberneko.html.parsers._
 import org.xml.sax.InputSource
-import org.w3c.dom.{Element, Node, Document, DocumentFragment}
-import org.w3c.dom.{Attr, DocumentType, Text, Comment, NodeList}
+import org.w3c.dom.{Document, DocumentFragment, Element, Node}
+import org.w3c.dom.{Attr, Comment, DocumentType, NodeList, Text}
 
 object DOMHelper {
   val quiet = 
@@ -528,7 +530,9 @@ object DOMHelper {
       else
         LocSetBot
     }
-    search(LocSetBot, l_root)
+    val locs = search(LocSetBot, l_root)
+    ImprecisionTracker.trackDOMLookup(s, locs)
+    locs
   }
 
   def findByProp(h: Heap, l_root: Loc, prop_name: String, v: Value): LocSet = {

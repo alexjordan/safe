@@ -8,6 +8,7 @@ package kr.ac.kaist.jsaf.analysis.imprecision
 
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
+import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.HTMLCollection
 
 import scala.collection.mutable.Queue
 
@@ -31,7 +32,7 @@ object NoHint extends ImprecisionHint {
 }
 
 
-case class StringHint(msg: String, inst: CFGInst) extends ImprecisionHint {
+case class JoinHint(msg: String, inst: CFGInst) extends ImprecisionHint {
   override def toString = s"$msg @ " + (inst.getInfo match {
       case Some(info) => info.getSpan
       case None => "unknown"
@@ -48,25 +49,19 @@ case class RandomHint(msg: String) extends ImprecisionHint {
 
 object ImprecisionTracker {
 
-  private val stopEnabled = false
+  var stopEnabled = false
   private var wlSize = 0
   private var domTracking: DOMLookup = EmptyDOMLookup
 
   sealed abstract class DOMLookup {
-    def handleReturn(ret: PropValue): Option[ImprecisionHint] = None
+    def handleReturn(heap: Heap, ret: PropValue): Option[ImprecisionHint] = None
   }
 
   object EmptyDOMLookup extends DOMLookup
 
   class DOMLookupByKey(val key: AbsString, val src: StackTraceElement) extends DOMLookup {
-    override def handleReturn(ret: PropValue): Option[ImprecisionHint] = {
-      // definite null
-      if (ret._2 == Value(NullTop))
-        return None
-
-      // over-/under-approximated result
-      val locs = ret._1._1.locs
-      if (locs.isEmpty || locs.size > 1) {
+    override def handleReturn(heap: Heap, ret: PropValue): Option[ImprecisionHint] = {
+      def createHint = {
         val lookupLoc = Instruction match {
           case Some(inst) => inst.getInfo match {
             case Some(info) => s" @ ${info.getSpan}"
@@ -74,8 +69,31 @@ object ImprecisionTracker {
           }
           case None => ""
         }
-        //log(s"DOM lookup loss: ${key}")
-        return Some(ModelHint(s"DOM lookup loss: ${key}${lookupLoc}", src))
+        log(s"DOM lookup loss: ${key}")
+        ModelHint(s"DOM lookup loss: ${key}${lookupLoc}", src)
+      }
+
+      // definite null
+      if (ret._2 == Value(NullTop))
+        return None
+
+      // check for over-/under-approximated result
+      val locs = ret._1._1.locs
+      if (locs.size == 1) {
+        val o = heap(locs.head)
+        val protoval = o("@proto")._2
+        assert(protoval.locs.size == 1)
+        protoval.locs.head match {
+          case HTMLCollection.loc_proto =>
+            if (o("@default_number") </ PropValueBot)
+              // non-deterministic collection
+              return Some(createHint)
+          case ObjProtoLoc => // single object being returned
+          case _ => throw new InternalError(s"unexpted DOM return proto: ${DomainPrinter.printValue(protoval)}")
+        }
+      } else if (locs.isEmpty || locs.size > 1) {
+        // no or more than one object being returned
+        return Some(createHint)
       }
 
       None
@@ -88,8 +106,9 @@ object ImprecisionTracker {
   var InstHint: ImprecisionHint = NoHint
 
   // Helpers
-  private def log(x: Any) = System.out.println(x)
-
+  private var log = (x: Any) => () // logging disabled by default
+  def disableLog { log = (x: Any) => () }
+  def enableLog { log = (x: Any) => System.out.println(x) }
   private def prefix(kind: String): String = s"lossy-$kind[i=$Iteration]"
 
   private def stopFixpoint(msg: String) = {
@@ -153,6 +172,13 @@ object ImprecisionTracker {
     }
   }
 
+  def applyViaLocations(v: Value, funLocs: LocSet, fun: String) = {
+    report(s"apply (${funLocs.size} @ $fun)", v.imphint)
+    if (funLocs.size > 1) {
+      stopFixpoint("imprecise apply")
+    }
+  }
+
   def impreciseModel(model: String): Unit = {
     val st = Thread.currentThread().getStackTrace
     InstHint += ModelHint(model, st(2))
@@ -181,7 +207,7 @@ object ImprecisionTracker {
   }
 
   def joinLoss(lhs: AbsString, rhs: AbsString, res: AbsString) = {
-    InstHint += StringHint(s"join $lhs + $rhs -> $res", Instruction.get)
+    InstHint += JoinHint(s"str-join $lhs + $rhs -> $res", Instruction.get)
 
     val span = Instruction.get.getInfo match {
       case Some(info) => info.getSpan
@@ -190,15 +216,25 @@ object ImprecisionTracker {
     //log(s"${prefix("join")}: $lhs + $rhs -> $res @ $span")
   }
 
+  def joinLoss(lhs: AbsNumber, rhs: AbsNumber, res: AbsNumber) = {
+    InstHint += JoinHint(s"num-join $lhs + $rhs -> $res", Instruction.get)
+
+    val span = Instruction.get.getInfo match {
+      case Some(info) => info.getSpan
+      case None => "unknown"
+    }
+    log(s"${prefix("num-join")}: $lhs + $rhs -> $res @ $span")
+  }
+
   def trackDOMLookup(id: AbsString, result: LocSet) = {
     val st = Thread.currentThread().getStackTrace
-    if (id.isConcrete)
+    //if (id.isConcrete)
       domTracking = new DOMLookupByKey(id, st(2))
   }
 
   def DOMReturn(heap: Heap): Heap = {
     val ret: PropValue = heap(SinglePureLocalLoc)("@return")
-    val impHint = domTracking.handleReturn(ret)
+    val impHint = domTracking.handleReturn(heap, ret)
     if (impHint.nonEmpty) {
       Value.hint(ret._2, impHint.get)
       //return heap.update(SinglePureLocalLoc, heap(SinglePureLocalLoc).update("@return", hinted))
