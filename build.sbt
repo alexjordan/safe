@@ -10,7 +10,7 @@ libraryDependencies += "junit" % "junit" % "4.11" % "test"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
 
-libraryDependencies += "org.rogach" %% "scallop" % "1.0.0"
+libraryDependencies += "org.rogach" %% "scallop" % "2.0.1"
 
 libraryDependencies += "org.scalactic" %% "scalactic" % "2.2.6"
 
