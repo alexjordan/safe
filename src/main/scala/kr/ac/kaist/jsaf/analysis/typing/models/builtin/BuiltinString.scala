@@ -38,8 +38,8 @@ object BuiltinString extends ModelData {
     ("@hasinstance",             AbsConstValue(PropValueNullTop)),
     ("prototype",                AbsConstValue(PropValue(ObjectValue(Value(ProtoLoc), F, F, F)))),
     ("length",                   AbsConstValue(PropValue(ObjectValue(AbsNumber.alpha(1), F, F, F)))),
-    ("fromCharCode",             AbsBuiltinFunc("String.fromCharCode", 1)),
-    ("__strset",                 AbsBuiltinFunc("String.__strset", 1))
+    ("fromCharCode",             AbsBuiltinFunc("String.fromCharCode", 1))
+    /*,("__strset",                 AbsBuiltinFunc("String.__strset", 1))*/
   )
 
   private val prop_proto: List[(String, AbsProperty)] = List(
@@ -1097,8 +1097,8 @@ object BuiltinString extends ModelData {
             ((Helper.ReturnStore(h, Value(s)), ctx), (he, ctxe))
           else
             ((HeapBot, ContextBot), (he, ctxe))
-        }),
-      "String.__strset" -> (
+        })
+      /*,"String.__strset" -> (
         (sem: Semantics, h: Heap, ctx: Context, he: Heap, ctxe: Context, cp: ControlPoint, cfg: CFG, fun: String, args: CFGExpr) => {
           // helper to test if string converts to integer
           def tryToInt(s: String) = Try(s.toInt).toOption
@@ -1124,7 +1124,7 @@ object BuiltinString extends ModelData {
           // create string set and return
           val strset: AbsString = AbsStringSet.alpha(strs.to[HashSet])
           ((Helper.ReturnStore(h, Value(strset)), ctx), (he, ctxe))
-        })
+        })*/
     )
   }
 
