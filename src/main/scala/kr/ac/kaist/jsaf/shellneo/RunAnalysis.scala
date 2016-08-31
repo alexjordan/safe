@@ -168,6 +168,8 @@ object RunAnalysis {
     // Check global variables in initial heap against list of predefined variables.
     init.checkPredefined
 
+    val analyzeStartTime = System.nanoTime
+
     // Analyze
     typing.analyze(init)
 
@@ -178,6 +180,7 @@ object RunAnalysis {
 
     printf("# Peak memory(mb): %.2f\n", MemoryMeasurer.peakMemory)
     printf("# Result heap memory(mb): %.2f\n", MemoryMeasurer.measureHeap)
+    printf("# Analysis took %.2fs\n", (System.nanoTime - analyzeStartTime) / 1000000000.0)
     println("\n* Statistics *")
     println("# Total state count: " + typing.getStateCount)
 
