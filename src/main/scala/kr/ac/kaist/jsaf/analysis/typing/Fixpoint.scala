@@ -131,6 +131,10 @@ class Fixpoint(cfg: CFG, worklist: Worklist, inTable: Table, quiet: Boolean, loc
       if(Shell.params.opt_Timeout > 0) {
         if((System.nanoTime() - startTime) / 1000000000 > Shell.params.opt_Timeout) {isTimeout = true; return}
       }
+      if (Config.maxIterations > 0 && count >= Config.maxIterations) {
+        isTimeout = true
+        return
+      }
 
       // Read a state
       val inS = readTable(cp)

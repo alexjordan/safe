@@ -34,6 +34,7 @@ private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val test = opt[Boolean]("test", descr = "expose abstract types for testing")
   val jquery = opt[Boolean]("jquery", descr = "enable jQuery model")
   val maxStrSet = opt[Int]("max-strset-size", descr = "max string set size", validate = _ > 0, default = Some(1))
+  val maxIterations = opt[Int]("max-iter", short = 'l', descr = "stop after n iterations max")
   val timeout = opt[Int]("timeout", descr = "timeout in seconds", validate = _ > 0)
   requireOne(inputFiles, htmlFile)
 }
@@ -95,6 +96,8 @@ object RunAnalysis {
 
     if (conf.timeout.isSupplied)
       Shell.params.opt_Timeout = conf.timeout()
+
+    Config.maxIterations = conf.maxIterations.getOrElse(0)
   }
 
   def parseJS(files: Seq[String]) = {

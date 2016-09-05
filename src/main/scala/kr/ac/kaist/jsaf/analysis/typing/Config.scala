@@ -204,4 +204,9 @@ object Config {
    */
   var debugger = false
   def setDebugger(b: Boolean) = debugger = b
+
+  /**
+   * Stop analysis after n iterations (0 -> disabled)
+   */
+  var maxIterations: Int = 0
 }
