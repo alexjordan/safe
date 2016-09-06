@@ -31,6 +31,7 @@ private class ShellConf(args: Seq[String]) extends ScallopConf(args) {
   val cfgDump = opt[Boolean]("cfgdump")
   val heapVerbose = opt[Int]("heap-verbose", validate = (0 until 4) contains _ )
   val trace = opt[Boolean]("trace", descr = "trace output for AI semantics")
+  val debugAfter = opt[Int](descr = "start debug after a certain iteration")
   val test = opt[Boolean]("test", descr = "expose abstract types for testing")
   val jquery = opt[Boolean]("jquery", descr = "enable jQuery model")
   val maxStrSet = opt[Int]("max-strset-size", descr = "max string set size", validate = _ > 0, default = Some(1))
@@ -98,6 +99,7 @@ object RunAnalysis {
       Shell.params.opt_Timeout = conf.timeout()
 
     Config.maxIterations = conf.maxIterations.getOrElse(0)
+    Config.startDebugAtIteration = conf.debugAfter.toOption
   }
 
   def parseJS(files: Seq[String]) = {

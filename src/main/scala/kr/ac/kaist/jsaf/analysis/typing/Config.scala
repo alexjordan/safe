@@ -209,4 +209,9 @@ object Config {
    * Stop analysis after n iterations (0 -> disabled)
    */
   var maxIterations: Int = 0
+
+  /**
+   * Enable heavy-weight debugging at a certain iteration
+   */
+  var startDebugAtIteration: Option[Int] = None
 }
