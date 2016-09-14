@@ -9,6 +9,11 @@
 #    This distribution may include materials developed by third parties.
 ################################################################################
 
+if [ ! $SAFE_HOME ]; then
+  >&2 echo "SAFE_HOME not set"
+  exit 1
+fi
+
 export WKSPACE=$SAFE_HOME
 
 cd $WKSPACE
