@@ -29,6 +29,7 @@
  ******************************************************************************/
 
 import de.johoop.ant4sbt.Ant4Sbt._
+import Tests._
 
 name := "JSAF"
 
@@ -48,6 +49,19 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
 
 parallelExecution in Test := false
+
+fork in Test := true
+
+def singleTests(tests: Seq[TestDefinition]) =
+  tests map { test =>
+    new Group(
+      name = test.name,
+      tests = Seq(test),
+      runPolicy = SubProcess(javaOptions = Seq.empty[String]))
+  }
+
+// Add the following to the `Project` settings
+testGrouping in Test <<= definedTests in Test map singleTests
 
 antSettings
 
