@@ -119,6 +119,11 @@ class DomainTest extends AssertionsForJUnit() {
     // assertTrue(o <= p) // fails by design?
   }
 
+  @Test def testMeetString = {
+    val a = NumStr <> StrTop + StrBot
+    assertTrue(a.isAllNums)
+  }
+
   @Ignore def testStringConcat = {
     Shell.params.opt_MaxStrSetSize = 2
     val a = toValue("foo")
