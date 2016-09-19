@@ -490,7 +490,7 @@ private val prop_const: List[(String, AbsProperty)] = List(
           //val b4 = if(v_arg._1._4 </ NumBot) F else T
           //val b5 = if(v_arg._1._5 </ StrBot) F else T
           val b2 = v_arg._2.foldLeft(BoolBot:AbsBool)((b,l) => {
-            if(AbsString.alpha("Function") <= h(l)(AbsString.alpha("@class"))._2._1._5 &&
+            if(AbsString.alpha("Function") <= h(l)("@class")._2._1._5 &&
                T <= h(l).domIn("@function") && h(l)("@function")._1._1._2.isEmpty) b + T
                else b + F
           })
