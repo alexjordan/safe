@@ -89,21 +89,21 @@ class DomainTest extends AssertionsForJUnit() {
 
   @Test def testObjectStore = {
     var o = Obj.empty
-    o = o.update(strsAlpha("foo", "bar"), PropValue(toValue(42))) // update with abstract string set
+    o = o.update(strsAlpha("foo", "bar"), makePropVal(toValue(42))) // update with abstract string set
     assertTrue(o.dom("foo"))  // foo is a possible property key
     assertEquals(BoolTop, o.domIn("foo"))  // but may be absent (thus BoolTop)
     assertTrue(o.dom("bar"))  // bar is a possible property key
     assertEquals(BoolTop, o.domIn("bar"))  // but may be absent (thus BoolTop)
     assertTrue(o.domIn("no such key") eq BoolFalse)  // key does definitely not exist
-    o = o.update(StrTop, PropValue(toValue("white horse")))  // update with string top
+    o = o.update(StrTop, makePropVal(toValue("white horse")))  // update with string top
     assertTrue(o.domIn("no such key") eq BoolTop)  // now any key may exist
     assertTrue(absEqHelper(o("no such key")._2, toValue("white horse")))  // its value is still concrete
     val size = o.size
-    o = o.update(StrTop, PropValue(toValue("red horse")))  // string value no longer concrete
+    o = o.update(StrTop, makePropVal(toValue("red horse")))  // string value no longer concrete
     assertEquals(size, o.size)  // size unchanged
-    o = o.update("baz", PropValue(toValue(42)))  // strong update with concrete string
+    o = o.update("baz", makePropVal(toValue(42)))  // strong update with concrete string
     assertEquals(size + 1, o.size)  // object map size increased by 1
-    o = o.update("bar", PropValue(toValue(42)))  // strong update with concrete string
+    o = o.update("bar", makePropVal(toValue(42)))  // strong update with concrete string
     assertEquals(BoolTrue, o.domIn("bar"))  // after the strong update, 'bar' can no longer be absent
   }
 
@@ -127,7 +127,7 @@ class DomainTest extends AssertionsForJUnit() {
     println(DomainPrinter.printValue(result))
 
     var o = Obj.empty
-    o = o.update(strsAlpha("foo", "bar"), PropValue(toValue(42))) // update with abstract string set
+    o = o.update(strsAlpha("foo", "bar"), makePropVal(toValue(42))) // update with abstract string set
     println(DomainPrinter.printObj(2, o))
   }
 }

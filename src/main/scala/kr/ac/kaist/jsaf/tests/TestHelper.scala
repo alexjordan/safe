@@ -66,6 +66,9 @@ object TestHelper {
   def toValue(in: Any) =
     toValueL(List(in))
 
+  def makePropVal(v: Value) =
+    PropValue(ObjectValue(v, BoolTrue, BoolTrue, BoolTrue))
+
   val RESULT = "__result"
   val EXPECT = "__expect"
   type CheckMap = Map[Int, Value]
