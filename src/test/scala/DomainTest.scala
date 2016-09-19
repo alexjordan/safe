@@ -107,6 +107,18 @@ class DomainTest extends AssertionsForJUnit() {
     assertEquals(BoolTrue, o.domIn("bar"))  // after the strong update, 'bar' can no longer be absent
   }
 
+  @Test def testObjectPrecedes = {
+    var o = Obj.empty
+    var p = Obj.empty
+    assertTrue(o <= p)
+    o = o.update("@class", makePropVal(toValue(StrTop)))
+    assertFalse(o <= p)
+    p = p.update(StrTop, makePropVal(toValue(StrTop)))
+    println(DomainPrinter.printObj(0, o))
+    println(DomainPrinter.printObj(2, p))
+    // assertTrue(o <= p) // fails by design?
+  }
+
   @Ignore def testStringConcat = {
     Shell.params.opt_MaxStrSetSize = 2
     val a = toValue("foo")

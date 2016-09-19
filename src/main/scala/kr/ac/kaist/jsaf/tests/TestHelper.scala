@@ -43,6 +43,7 @@ object TestHelper {
     var v: Value = ValueBot
     for (i <- in) {
       v = i match {
+        case s: AbsString => Value(s)
         case u: AbsUndef if u.isTop => v + Value(AbsUndef.alpha)
         case n: AbsNumber => n.getAbsCase match {
           case AbsSingle if !(n.getSingle.isDefined && AbsNumber.isNum(n)) => v + Value(n)
