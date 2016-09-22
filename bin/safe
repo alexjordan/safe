@@ -9,9 +9,33 @@
 #    This distribution may include materials developed by third parties.
 ################################################################################
 
+function abspath() {
+  local path=$1
+  local pwd_restore="$(pwd)"
+
+  local dir=$(dirname "$path")
+  if [ -d "$dir" ]; then
+    cd "$dir"
+    path=$(basename "$path")
+    # follow chain of symlinks
+    while [ -L "$path" ]; do
+      path=$(readlink "$path")
+      cd $(dirname "$path")
+      path=$(basename "$path")
+    done
+    echo "$(pwd -P)/$path"
+    cd "$pwd_restore"
+  else
+    echo "Trying to resolve non-existent relative path $path, don't want to use PWD."
+    exit 1
+  fi
+}
+
+
 if [ -z "$SAFE_HOME" ]; then
-  echo "You need to set SAFE_HOME to the directory containing SAFE"
-  exit 1
+  self=`abspath $0`
+  SAFE_HOME=`dirname $self`/..
+  export SAFE_HOME
 fi
 
 if (uname | egrep CYGWIN > /dev/null) ; then
