@@ -249,6 +249,7 @@ class CoreTest extends FlatSpec with BeforeAndAfterAll {
   val parser = new ArgParser(CmdBase, testSafeConfig)
   val heapBuildConfig = HeapBuild.defaultConfig
   val analyzeConfig = Analyze.defaultConfig
+  heapBuildConfig.AbsString = TaintStringSet(0)
   parser.addRule(heapBuildConfig, HeapBuild.name, HeapBuild.options)
   parser.addRule(analyzeConfig, Analyze.name, Analyze.options)
   parser(List(s"-json=$testJSON"))
@@ -267,13 +268,13 @@ class CoreTest extends FlatSpec with BeforeAndAfterAll {
     analyzeHelper("[HTMLDOM]", HtmlTest, file)
   }
 
-  val test262TestDir = testDir + "test262"
-  for (file <- shuffle(walkTree(new File(test262TestDir))))
-    analyzeHelper("[Test262]", Test262Test, file)
+  //val test262TestDir = testDir + "test262"
+  //for (file <- shuffle(walkTree(new File(test262TestDir))))
+  //  analyzeHelper("[Test262]", Test262Test, file)
 
-  val benchTestDir = testDir + "benchmarks"
-  for (file <- shuffle(walkTree(new File(benchTestDir))))
-    analyzeHelper("[Benchmarks]", BenchTest, file)
+  //  val benchTestDir = testDir + "benchmarks"
+  //  for (file <- shuffle(walkTree(new File(benchTestDir))))
+  //    analyzeHelper("[Benchmarks]", BenchTest, file)
 
   override def afterAll(): Unit = {
     val file = new File(analysisDeatil)

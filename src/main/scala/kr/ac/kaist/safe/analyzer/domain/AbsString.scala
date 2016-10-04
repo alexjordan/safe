@@ -56,5 +56,7 @@ trait AbsStringUtil extends AbsDomainUtil[Str, AbsString] {
   // abstraction from all non-number string
   val Other: AbsString
 
+  val Untainted: AbsString
+
   def fromCharCode(n: AbsNumber): AbsString
 }

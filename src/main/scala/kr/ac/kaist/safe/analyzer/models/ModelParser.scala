@@ -119,7 +119,9 @@ object ModelParser extends RegexParsers with JavaTokenParsers {
     result
   }
   def mergeJsModels(dir: String): JSModel = {
-    val fileNames: List[String] = new File(dir).list.toList
+    val fileNames: List[String] = new File(dir).listFiles(new FileFilter {
+      override def accept(file: File): Boolean = !file.isHidden
+    }).map(_.getName()).toList
     val mergeModel = fileNames.foldLeft(JSModel(Heap(HashMap()), Nil, 0)) {
       case (model, fileName) =>
         model + ModelParser.parseFile(dir + fileName).get
@@ -173,7 +175,8 @@ object ModelParser extends RegexParsers with JavaTokenParsers {
   private lazy val jsStrT: Parser[StringT.type] = "string" ^^^ { StringT }
   private lazy val jsNumT: Parser[NumberT.type] = "number" ^^^ { NumberT }
   private lazy val jsBoolT: Parser[BoolT.type] = "bool" ^^^ { BoolT }
-  private lazy val jsPrimType: Parser[Value] = jsStrT | jsNumT | jsBoolT
+  private lazy val jsUntT: Parser[UntaintedT.type] = "untainted" ^^^ { UntaintedT }
+  private lazy val jsPrimType: Parser[Value] = jsStrT | jsNumT | jsBoolT | jsUntT
 
   // JavaScript value
   private lazy val jsLoc: Parser[Loc] = "#" ~> """[_\[\]0-9a-zA-Z.<>]+""".r ^^ { Loc(_) }

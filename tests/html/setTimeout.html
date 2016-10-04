@@ -6,6 +6,11 @@
       setTimeout('var a=a;' + payload, 1); 
       var __result1 = payload;
       var __expect1 = @StrTop;
+
+      var port = window.location.port;
+      setTimeout('var a=a;' + port, 1); 
+      var __result2 = port;
+      var __expect2 = @Untainted;
     </script>
   </body>
 </html>

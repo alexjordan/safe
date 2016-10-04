@@ -438,6 +438,7 @@ class Semantics(
     case (NodeUtil.INTERNAL_BOOL_TOP) => Some(AbsBool.Top)
     case (NodeUtil.INTERNAL_NUM_TOP) => Some(AbsNumber.Top)
     case (NodeUtil.INTERNAL_STR_TOP) => Some(AbsString.Top)
+    case (NodeUtil.INTERNAL_STR_UNTAINTED) => Some(AbsString.Untainted)
     case (NodeUtil.INTERNAL_EVAL_ERR) => Some(AbsValue(BuiltinEvalError.loc))
     case (NodeUtil.INTERNAL_RANGE_ERR) => Some(AbsValue(BuiltinRangeError.loc))
     case (NodeUtil.INTERNAL_REF_ERR) => Some(AbsValue(BuiltinRefError.loc))

@@ -162,6 +162,7 @@ Heap: {
     [[Extensible]]: true,
     [[Prototype]]: #Object.prototype,
     "hash": <string, T, T, T>,
+    "port": <untainted, T, T, T>,
     "replace": <#Location.prototype.replace, T, T, T>
   },
   #Location.prototype.replace: {

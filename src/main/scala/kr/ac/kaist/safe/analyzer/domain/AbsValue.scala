@@ -25,6 +25,7 @@ abstract class TypeValue(name: String) extends Value {
   override def toString: String = name
 }
 case object StringT extends TypeValue("string")
+case object UntaintedT extends TypeValue("untainted")
 case object NumberT extends TypeValue("number")
 case object BoolT extends TypeValue("bool")
 
@@ -64,6 +65,7 @@ object DefaultValue extends AbsValueUtil {
     case StringT => apply(AbsString.Top)
     case NumberT => apply(AbsNumber.Top)
     case BoolT => apply(AbsBool.Top)
+    case UntaintedT => apply(AbsString.Untainted)
   }
 
   def apply(pvalue: AbsPValue): AbsValue = Bot.copy(pvalue = pvalue)

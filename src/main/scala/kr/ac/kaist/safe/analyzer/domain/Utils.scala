@@ -20,7 +20,7 @@ object Utils {
     absNull: AbsNullUtil = DefaultNull,
     absBool: AbsBoolUtil = DefaultBool,
     absNumber: AbsNumberUtil = DefaultNumber,
-    absString: AbsStringUtil = StringSet(0),
+    absString: AbsStringUtil = TaintStringSet(0),
     absLoc: AbsLocUtil = DefaultLoc,
     aaddrType: AAddrType = RecencyAAddr
   ): Unit = {

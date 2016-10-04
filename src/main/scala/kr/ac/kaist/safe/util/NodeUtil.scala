@@ -191,6 +191,7 @@ object NodeUtil {
   val INTERNAL_BOOL_TOP = internalAPIName("BoolTop")
   val INTERNAL_NUM_TOP = internalAPIName("NumTop")
   val INTERNAL_STR_TOP = internalAPIName("StrTop")
+  val INTERNAL_STR_UNTAINTED = internalAPIName("Untainted")
   val INTERNAL_EVAL_ERR = internalAPIName("EvalErr")
   val INTERNAL_RANGE_ERR = internalAPIName("RangeErr")
   val INTERNAL_REF_ERR = internalAPIName("RefErr")
@@ -214,6 +215,7 @@ object NodeUtil {
     INTERNAL_BOOL_TOP,
     INTERNAL_NUM_TOP,
     INTERNAL_STR_TOP,
+    INTERNAL_STR_UNTAINTED,
     INTERNAL_EVAL_ERR,
     INTERNAL_RANGE_ERR,
     INTERNAL_REF_ERR,
