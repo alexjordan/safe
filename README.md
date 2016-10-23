@@ -78,6 +78,11 @@ Guessing JS_HOME=/home/aljordan/work/safe
 
 ```
 
+### Running Benchmarks
+
+See README in the `benchmarks` directory.
+
+### References
 
 [1] Magnus Madsen and Esben Andreasen| String analysis for dynamic field access.
     In A| Cohen, editor, Compiler Construction, volume 8409 of Lecture Notes in
