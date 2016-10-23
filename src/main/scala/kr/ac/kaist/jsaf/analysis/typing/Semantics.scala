@@ -6,6 +6,35 @@
 
     This distribution may include materials developed by third parties.
  ***************************************************************************** */
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
 
 package kr.ac.kaist.jsaf.analysis.typing
 
@@ -15,21 +44,21 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.{Map => MMap}
 import kr.ac.kaist.jsaf.analysis.visualization.Visualization
 import kr.ac.kaist.jsaf.{Shell, ShellParameters}
-
 import kr.ac.kaist.jsaf.analysis.asserts._
 import kr.ac.kaist.jsaf.analysis.asserts.{ASSERTHelper => AH}
 import kr.ac.kaist.jsaf.analysis.cfg._
 import kr.ac.kaist.jsaf.analysis.typing.domain._
 import kr.ac.kaist.jsaf.bug_detector.Range15_4_5_1
-import kr.ac.kaist.jsaf.nodes_util.{EJSOp, IRFactory, NodeUtil => NU, DOMStatistics}
+import kr.ac.kaist.jsaf.nodes_util.{DOMStatistics, EJSOp, IRFactory, NodeUtil => NU}
 import kr.ac.kaist.jsaf.nodes.IROp
 import kr.ac.kaist.jsaf.analysis.typing.{SemanticsExpr => SE}
-import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolTrue => BTrue, BoolFalse => BFalse}
-import kr.ac.kaist.jsaf.analysis.typing.models.{DOMHelper, ModelManager, JQueryModel}
+import kr.ac.kaist.jsaf.analysis.typing.domain.{BoolFalse => BFalse, BoolTrue => BTrue}
+import kr.ac.kaist.jsaf.analysis.typing.models.{DOMHelper, JQueryModel, ModelManager}
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMHtml.HTMLTopElement
 import kr.ac.kaist.jsaf.analysis.typing.models.jquery.JQuery
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 import kr.ac.kaist.jsaf.Shell
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 
 class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
   // Inter-procedural edge set.
@@ -60,14 +89,13 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
   def E(cp1: ControlPoint, cp2: ControlPoint, ctx: Context, obj: Obj, s: State): State = {
     cp2 match {
       case ((_, LEntry),_) =>
-        /*
-        if(s._1 <= HeapBot) {
-         System.out.println("== "+cp1 +" -> "+cp2+" ==")
-         System.out.println(DomainPrinter.printHeap(4, s._1, cfg))
+        // call edge
+        if(Config.traceAI) {
+         System.out.println("== "+cp1.show +" -> "+cp2.show+" ==")
+         //System.out.println(DomainPrinter.printHeap(4, s._1, cfg))
          System.out.println("== Object ==")
          System.out.println(DomainPrinter.printObj(4, obj))
-        }*/
-        // call edge
+        }
         if (s._1 == HeapBot) {
           StateBot
         } else {
@@ -252,63 +280,13 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
         case Block(insts) => {
           insts.foldLeft(((h, ctx), (HeapBot, ContextBot)))(
             (states, inst) => {
+              ImprecisionTracker.nextInstruction(inst)
               val ((h_new, ctx_new), (he_new, ctxe_new)) = I(cp, inst, states._1._1, states._1._2, states._2._1, states._2._2, inTable)
               // System.out.println("##### Instruction : " + inst)
               // System.out.println("in heap#####\n" + DomainPrinter.printHeap(4, states._1._1, cfg))
               //System.out.println("out heap#####\n" + DomainPrinter.printHeap(4, h_new, cfg))
               // System.out.println("outexc heap#####\n" + DomainPrinter.printHeap(4, he_new, cfg))
               // System.out.println("out context#####\n" + DomainPrinter.printContext(4, ctx_new))
-              if(compareOption) {  
-                // change heap location for preanalyzed PureLocalLoc
-                val _obj = h_new(SinglePureLocalLoc)
-                val _h_new = h_new.remove(SinglePureLocalLoc).update(preCFG.getMergedPureLocal(cp._1._1), _obj) 
-                
-                if (!(_h_new <= preState._1) && !Config.quietMode) { // && ctx_new <= preState._2)) {
-                System.err.println("\n\n *** PreAnalyzed Heap should include analyzed heap using current option ***")
-                System.err.println("   = Instruction : " + inst)
-                /*
-                System.err.println("   * dump heap")
-                System.err.println(DomainPrinter.printHeap(4, _h_new, cfg))
-                */
-                // get all locations in a dense heap
-                // pre-analyzed heap should include all dense heap
-                val lset = _h_new.map.keySet
-                lset.foreach(l => {
-                  // for each object
-                  val o1 = _h_new(l)
-                  val preHeap = preState._1
-                  preHeap.map.get(l) match {
-                    case Some(o2) => {
-                      // for each property
-                      val props = o1.getAllProps ++ o2.getAllProps
-                  props.foreach((prop) => {
-                    val pv_1 = o1(prop)
-                    val pv_2 = o2(prop)
-                    if (pv_1._1 <= pv_2._1 && pv_1._2 <= pv_2._2) {
-                          // dense <= pre && pre <= dense which means that equals...
-                          // dense <= pre && pre </ dense which means that pre is greater than dense OK!
-                    } else {
-                      if (pv_2._1 <= pv_1._1 && pv_2._2 <= pv_1._2 && !Config.quietMode) {
-                        // dense </ pre && pre <= dense
-                        System.err.println("more imprecise result for ("+DomainPrinter.printLoc(l)+"("+l+"),"+prop+")")
-                        System.err.println("dense   : "+ DomainPrinter.printObj(0, o1.restrict_(Set(prop))))
-                        System.err.println("pre     : "+ DomainPrinter.printObj(0, o2.restrict_(Set(prop))))
-                      } else if (!Config.quietMode) {
-                        // dense </ pre && pre </ dense
-                        System.err.println("different result for ("+DomainPrinter.printLoc(l)+"("+l+"),"+prop+")")
-                        System.err.println("dense   : "+ DomainPrinter.printObj(0, o1.restrict_(Set(prop))))
-                        System.err.println("pre     : "+ DomainPrinter.printObj(0, o2.restrict_(Set(prop))))
-                      }
-                    }
-                  })
-                }
-                case None => {
-                  if (!Config.quietMode)
-                    System.err.println("location "+DomainPrinter.printLoc(l)+" is missing in sparse-ddg result.")
-                }
-                  }
-                })
-              }}
               ((h_new, ctx_new), (he_new, ctxe_new))
               // val h_merged = states._1._1 + h_new
               // val c_merged = states._1._2 + ctx_new
@@ -525,6 +503,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                 val lset = SE.V(obj, h, ctx)._1._2
                 // iterate over set of strings for index
                 val sset = Helper.toStringSet(Helper.toPrimitive_better(h, v_index))
+                ImprecisionTracker.propStore(sset, v_index, info)
                 val (h_2, ctx_2, es_2) = sset.foldLeft((HeapBot, ctx, es_index ++ es_rhs))((res, s) => {
                 //if(s.gamma.isEmpty) {
                 //  println("StrTopCase : " + s)
@@ -698,7 +677,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val fvalue = Value(PValueBot, LocSet(l_r1))
           val h_4 = h_3.update(l_r1, Helper.NewFunctionObject(fid, Value(l_r3), l_r2, n))
           val h_5 = h_4.update(l_r2, o_new.update("constructor", PropValue(ObjectValue(fvalue, BTrue, BFalse, BTrue)), exist = true))
-          val h_6 = h_5.update(l_r3, o_env.update(name, PropValue(ObjectValue(fvalue, BFalse, BoolBot, BFalse))))
+          val h_6 = h_5.update(l_r3, o_env.update(name.toString, PropValue(ObjectValue(fvalue, BFalse, BoolBot, BFalse))))
           val h_7 = Helper.VarStore(h_6, lhs, fvalue)
           (noStop(h_7, ctx_3), (he, ctxe))
         }
@@ -879,16 +858,17 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
               }}
             }}
           }}
-           
-          //if(lset_f.size > 20) {
-          //  println("lset_size " + lset_f.size + " more than 20!! at node : " + cfg.findEnclosingNode(i))
-          //  throw new RuntimeException("*** lset_size!!!")
-          //}
+
+          // check number of possible functions to be called
+          ImprecisionTracker.callViaLocations(lset_f, info)
 
           // for actual call
           lset_f.foreach {l_f => {
             val o_f = h_1(l_f)
             val fids = o_f("@function")._3
+            if (o_f.dom("displayName")) {
+              cfg.setFuncDisplayName(fids, o_f.concretePropAs[String]("displayName").get)
+            }
             fids.foreach {fid => {
               if (Config.typingInterface != null && !cfg.isUserFunction(fid))
                 Config.typingInterface.setSpan(info.getSpan)
@@ -1175,11 +1155,11 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
                       } catch {
                         // not a concrete case
                         case e: InternalError => {
-                          init_obj.update(AbsString.NumTop, PropValue(StrTop))
+                          init_obj.update(NumStr, PropValue(StrTop))
                         }
                       }
                     } else {
-                      init_obj.update(AbsString.NumTop, PropValue(StrTop))
+                      init_obj.update(NumStr, PropValue(StrTop))
                     }
 
                   val list_obj_2 = if (v._1._1 </ UndefBot || v._1._2 </ NullBot) {
@@ -1299,6 +1279,7 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
           val filename = info.getSpan.getFileNameOnly
           // jQuery modeling : add an heap information for jQuery
           if(Config.jqMode && NU.isModeledLibrary(filename)){
+            println(s"** File '${filename}' is assumed to be modeled and will not be loaded")
             val globalObj = h(GlobalLoc)
             val env_obj = Obj.empty.update("_$", globalObj("$")).update("_jQuery", globalObj("jQuery"))
             val newGlobalObj = globalObj.update("$", PropValue(ObjectValue(Value(JQuery.ConstLoc), BFalse, BFalse, BFalse))).update(
@@ -1438,7 +1419,6 @@ class Semantics(cfg: CFG, worklist: Worklist, locclone: Boolean) {
       case _ =>
         SE.V(expr, h, ctx)
     }
-
     val (h_e, ctx_e) = Helper.RaiseException(h, ctx, es)
     if(BoolTrue <= Helper.toBoolean(v)) {
         /*

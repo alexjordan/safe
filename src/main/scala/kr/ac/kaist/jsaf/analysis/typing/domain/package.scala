@@ -6,15 +6,47 @@
 
     This distribution may include materials developed by third parties.
  ***************************************************************************** */
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
 
 package kr.ac.kaist.jsaf.analysis.typing
 
+import kr.ac.kaist.jsaf.Shell
 import kr.ac.kaist.jsaf.analysis.cfg.FunctionId
+
 import scala.collection.immutable.HashSet
 import scala.collection.immutable.HashMap
 import kr.ac.kaist.jsaf.analysis.cfg.InternalError
-import kr.ac.kaist.jsaf.analysis.lib.{HeapTreeMap, ObjTreeMap, LocTreeSet, IntTreeSet}
+import kr.ac.kaist.jsaf.analysis.lib.{HeapTreeMap, IntTreeSet, LocTreeSet, ObjTreeMap}
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
+import kr.ac.kaist.jsaf.analysis.typing.domain.StringConfig.StrDomainType
 
 package object domain {
   /* abstract location */
@@ -44,32 +76,35 @@ package object domain {
   val UInt = AbsNumber.UInt
   val NUInt = AbsNumber.NUInt
 
-  val StrTop = AbsString.StrTop
-  val StrBot = AbsString.StrBot
-  val NumStr = AbsStringSet.NumStr
-  val OtherStr = AbsStringSet.OtherStr
+  def StrDomainDefault: StrDomainType = PreConfig.strings.getStrDoms
 
-  type StrDomainType = Int
-  val StrDomainSet: StrDomainType = 0
-  val StrDomainAutomata: StrDomainType = 1
-  val StrDomainDefault = StrDomainSet
+  val StrTop   = AbsString.stringFromCase(AbsString.StrTopCase)
+  val StrBot   = AbsString.stringFromCase(AbsString.StrBotCase)
+  val NumStr: AbsString   = AbsString.stringFromCase(AbsStringNumOth.NumStrCase)
+  val OtherStr: AbsString = AbsString.stringFromCase(AbsStringNumOth.OthStrCase)
+
+  if (AbsString.alpha("0").gamma.isEmpty && !Shell.params.opt_force_strdom) {
+    println("ERROR!!! The chosen domain is not able to represent a single, "
+      + "concrete string! This compromises the analysis.")
+    throw new java.lang.ExceptionInInitializerError("string domain cannot handle concrete")
+  }
 
   // interface between two abstract domains.
   def absUndefToString(au: AbsUndef): AbsString = {
-    if (au.isTop) AbsString.alpha("undefined") // AbsString.alpha("undefined")
+    if (au.isTop) AbsString.alpha("undefined")
     else StrBot
   }
   def absNullToString(an: AbsNull): AbsString = {
-    if (an.isTop) AbsString.alpha("null") // AbsString.alpha("null")
+    if (an.isTop) AbsString.alpha("null")
     else StrBot
   }
 
   def absBoolToString(ab: AbsBool): AbsString = {
     ab.getPair match {
-      case (AbsTop, _) => OtherStr // AbsString.alpha("true") + AbsString.alpha("false")
-      case (AbsBot, _) => StrBot
-      case (AbsSingle, Some(true)) => AbsString.alpha("true") // AbsString.alpha("true")
-      case (AbsSingle, Some(false)) => AbsString.alpha("false") // AbsString.alpha("false")
+      case (AbsTop, _) => AbsString.alpha("true") + AbsString.alpha("false")
+      case (AbsBot, _) => AbsString.alpha("true") <> AbsString.alpha("false")
+      case (AbsSingle, Some(true)) => AbsString.alpha("true")
+      case (AbsSingle, Some(false)) => AbsString.alpha("false")
       case _ => throw new InternalError("AbsBool does not have an abstract value for multiple values.")
     }
   }
@@ -243,4 +278,6 @@ package object domain {
 
   val LPBot = LPSet(HashMap[Loc,Set[String]]())
   val LBot = LocSetBot
+
+  class NonConcreteException(msg: String) extends RuntimeException(msg)
 }

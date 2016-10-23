@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Extracts the results and put them into .csv files.
+
+# Results of html benchmarks by varying the set size only
+python3 logs2csv.py results/*.html*.txt | grep -v "name|" | grep "|tj,no|\||tj,js,ci,sh,ps|\||ci,no,ss\||ss,ci|\||ss|\||hy|\||js|\||sf|\||tj|" | grep "38.html\|59.html\|67.html\|33.html\|60.html\|57.html\|61.html" | awk -F"|" '$4 >= 3 {print $0}' | sort -t"|" -n > results_html_par.csv
+
+# Results of html benchmarks with default domains only.
+python3 logs2csv.py results/*.html*.txt | grep -v "name|" | awk -F"|" '$4 <= 3 {print $0}' | sort -t"|" -n > results_html_def.csv
+
+# Results of js benchmarks with default domains only.
+python3 logs2csv.py results/*.js*.txt | grep -v "name|" | awk -F"|" '$4 <= 3 {print $0}' | sort -t"|" -n > results_js_def.csv
+
+cat results_html_def.csv results_js_def.csv > results_all_def.csv

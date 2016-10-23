@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Script used to generate a list of jobs of the form name|domain|size where:
+#
+# name:   is the path of the program to be analysed
+# domain: is the name of the neosafe option for the string domain, e.g., "ci" 
+#         for Character Inclusion domain or ss for String Set domain
+# size:   is the maximum string set size (the special value 'def' stands for the
+#         default string set size) for string domains relying on a string set.
+#
+# For example, the job "foo.js|ps,ss|5" analyses the file foo.js with the direct
+# product of Prefix-Suffix and StringSet domains, with max. set size = 5.
+
+all=tj,js,ci,sh,ps
+
+# for i in 38 59 67 33 60 57 61 #35 40
+# do
+#   for d in #tj,no #$all #ci,no,ss #sf js hy #ci,no,ss #ps,ci,sh,js #ss sf js hy #ss,ci
+#   do
+#     for k in 8 16 32 64 128
+#       do
+#         echo $i'.html|'$d'|'$k
+#       done
+#   done
+# done
+
+for i in `ls *.html`
+do
+  for d in ns,co #tj,no #hy js sf ci,co co,no
+  do
+    echo $i'|'$d'|def'
+  done
+  #echo "$i|$all|3"
+done
+
+for i in `ls *.js | grep -v "jquery-1.7.0.js"`
+do
+  for d in ns,co #tj,no #hy js sf ci,co co,no ps,co sh,co co
+  do
+    echo $i'|'$d'|def'
+  done
+  #echo "$i|$all|3"
+#   echo $i'|ci,no,ss|3'
+#   echo $i'|ss|3'
+done

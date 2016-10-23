@@ -1,0 +1,24 @@
+In order to reproduce the experiments of the paper:
+
+  "Combining String Abstract Domains for JavaScript Analysis: An Evaluation"
+
+you need to have the proper version of SAFE installed and:
+
+1. Generate a list of jobs of the form "name|domain|size" (the make_jobs_list
+   script will help you) and redirect the list of jobs to a corresponding file,
+   let us say <JOBS_LIST>
+
+2. Run the script run_jobs, which analyses each program of <JOBS_LIST> and, at
+   the end of its execution, moves the logs of the results (in .txt format) into
+   a result directory, let us say <RESULTS_DIR>.
+   run_jobs relies on analyze_strdom_param.sh script, which in turn uses the 
+   script analyze.inc.sh for analysing a single program
+
+3. Once the logs of the results are moved into <RESULTS_DIR>, we can extract the
+   corresponding .csv files with results2csv script, which in turn uses the
+   logs2csv.py script.
+   From the .csv files one can use the stript csv2stats for generating the 
+   statistics of the analysis.
+
+Note that you need to modify the input/output variables of such scripts in order
+to properly run them on your machine.

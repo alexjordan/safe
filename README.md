@@ -1,97 +1,89 @@
-SAFE
+
+SAFE (with string domains)
 ====
 
-### News
+### Preamble
 
-SAFE is now available at GitHub.  Older versions are still available at:
+This is the top-level directory for collaboration between the University of
+Melbourne and Oracle Labs on security verification (ARC linkage project
+LP140100437).
 
-    http://safe.kaist.ac.kr
+This repository contains the string abstract domains we currently implemented in SAFE in this [folder](src/main/scala/kr/ac/kaist/jsaf/analysis/typing/domain/), i.e.:
 
-but note that we use **sbt** instead of **ant** to build SAFE, which required slight restructuring of source directories.
+|File|Description|
+|---|---|
+| AbsString.scala|Base class for all the abstract string domains |
+| AbsStringAutomata.scala|DFA domain (to be implemented) |
+| AbsStringCharIncl.scala|Character Inclusion (CI) domain |
+| AbsStringConst.scala|Constant String (CS) domain |
+| AbsStringHash.scala|String Hash domain, see [1] |
+| AbsStringJSAI.scala|JSAI default string domain, see [2] |
+| AbsStringNumOth.scala|Numeric/Other domain, used by SAFE |
+| AbsStringNumSplOth.scala|Numeric/Special/Other domain, used by JSAI |
+| AbsStringPrefSuff.scala|Prefix-Suffix (PS) domain |
+| AbsStringProd.scala|Cartesian (actually, direct) product of domains |
+| AbsStringSAFE.scala|SAFE default string domain |
+| AbsStringSet.scala|String Set domain, see [1] |
 
-### Introduction
+### Qickstart
 
-SAFE is a scalable and pluggable analysis frameowkr for JavaScript web applications developed by the Programming Language Research Group at KAIST:
+Building and testing SAFE (in sbt):  
+```bash
+# launch SBT with Java 7 runtime
+sbt -java-home /usr/lib/jvm/java-7-oracle
+ 
+ # set proxy for SBT to download software packages
+-Dhttps.proxyHost=your.https.proxy.com -Dhttps.proxyPort=80
+ 
+# compiling in sbt should work by just using:
+> compile
+ 
+# if there are problems with the ant compile task that `compile` depends on, try:
+> antRun clean compile
+> antRun compile
 
-    http://plrg.kaist.ac.kr
+Running SAFE analysis using the `neosafe` command line tool :  
+```bash
+# default analysis
+bin/neosafe foo.js
 
-We provide a formal specification of the SAFE framework:
+# HTML (DOM-enabled) analysis
+bin/neosafe --html foo.html
 
-    http://plrg.kaist.ac.kr/redmine/projects/jsf/repository/revisions/master/show/doc/manual
-    
-and our papers on SAFE are available at:
+# configure string domains
+bin/neosafe --max-strset-size 32 --strdom=ss,ci,no foo.js
 
-  * http://plrg.kaist.ac.kr/_media/research/publications/fool2012.pdf
-  * http://plrg.kaist.ac.kr/_media/research/publications/oopsla12.pdf
-  * http://plrg.kaist.ac.kr/_media/research/publications/dls13.pdf
-  * http://plrg.kaist.ac.kr/_media/research/publications/modularity14.pdf
-  * http://plrg.kaist.ac.kr/_media/research/publications/fse14.pdf
+# show help
+% ~/work/safe/bin/neosafe --help
+Guessing JS_HOME=/home/aljordan/work/safe
+  -b, --benchmark                benchmark default settings (KAIST-lsa/regex)
+  -c, --cfgdump
+      --debug-after  <arg>       start debug after a certain iteration
+  -d, --dom                      dom mode
+  -e, --exitdump
+      --heap-verbose  <arg>
+  -h, --html  <arg>              html file for analysis
+  -j, --jquery                   enable jQuery model
+  -l, --max-iter  <arg>          stop after n iterations max
+  -m, --max-strset-size  <arg>   max string set size
+  -n, --no-imprecision-log       do not ouput imprecision logging
+      --no-imprecision-stop      do not stop on catastrophic imprecision
+  -q, --quiet                    less debug output
+  -s, --stats                    dump full statistics
+      --strdom  <arg>            enable advanced string domains
+      --test                     expose abstract types for testing
+      --timeout  <arg>           timeout in seconds
+  -t, --trace                    trace output for AI semantics
+      --help                     Show help message
 
-Our academic colleagues using SAFE are:
+```
 
-  * http://rosaec.snu.ac.kr @ Seoul National University
-  * http://www.kframework.org/index.php/Main_Page @ University of Illinois at Urbana-Champaign
-  * http://www.cse.ust.hk/~hunkim/ @ HKUST
 
-and our project has been supported by:
+[1] Magnus Madsen and Esben Andreasen| String analysis for dynamic field access.
+    In A| Cohen, editor, Compiler Construction, volume 8409 of Lecture Notes in
+    Computer Science, pages 197–217| Springer, 2014.
 
-  * Korea Ministry of Education, Science and Technology(MEST)
-  * National Research Foundation of Korea(NRF)
-  * Samsung Electronics
-  * S-Core., Ltd.
-  * Google
-  * Microsoft Research Asia
-
-### Requirements
-
-We assume you are using an operating system with a Unix-style shell (for example, Mac OS X, Linux, or Cygwin on Windows).  Assuming **JS_HOME** points to the SAFE directory, you will need to have access to the following:
-
-  * J2SDK 1.7.  See http://java.sun.com/javase/downloads/index.jsp
-  * sbt version 0.13 or later.  See http://www.scala-sbt.org
-  * Bash version 2.5 or later, installed at /bin/bash.  See http://www.gnu.org/software/bash/
-  * xtc, copied as $JS_HOME/bin/xtc.jar.  See http://cs.nyu.edu/rgrimm/xtc/
-
-In your shell startup script, add $JS_HOME/bin to your path.  The shell scripts in this directory are Bash scripts.  To run them, you must have Bash accessible in /bin/bash.
-
-### Installation
-
-After launching sbt, type **antRun clean compile** and then **compile**.
-
-Once you have built the framework, you can call it from any directory, on any JavaScript file, simply by typing one of available commands at a command line.  You can see the available commands by typing:
-
-    bin/jsaf
-    bin/jsaf help
-
-### Run Tests
-
-Still inside sbt, type **antRun test**.
-
-### CRES: Clone Refactor for ECMAScript
-
-====
-
-CRES is an open-source clone refactoring plugin for Eclipse.
-
-### Installation
-
-1. Install the following using Eclipse's update manager:
- * Eclipse 4 Core Tools. [Update Site] [e4]
- * JavaScript Development Tools. [Update Site] [JSDT]
-2. Copy the file **kr.ac.kaist.jsaf.clone\_refactor\_[osx|linux].jar**
-in the [dist] [disturl] directory to the **plugins** directory of Eclipse
-3. Restart Eclipse
-
-[e4]:
-http://download.eclipse.org/e4/downloads/drops/S-0.17-201501051100/repository/
-[JSDT]: http://download.eclipse.org/webtools/repository/luna/
-[disturl]: https://github.com/sukyoung/safe/tree/master/dist
-
-### Usage
-
-1. Launch the plugin from the menu or toolbar of Eclipse.
-2. From the **Configuration Dialog**, select a project from the workspace to be analyzed and configure the minimum size of clones.
-3. From the **Clone View**,
- * Double click any fragments to view the duplicated portion in the text editor.
- * Select two duplicated fragments from the same group and compare their differences using **Compare** from the toolbar.
- * Select at least two duplicated fragments from the same group and view the refactoring suggestions using **Pull Up Method** from the toolbar.
-
+[2] Vineeth Kashyap, Kyle Dewey, Ethan A| Kuefner, John Wagner, Kevin Gibbons,
+    John Sarracino, Ben Wiedermann, and Ben Hardekopf| JSAI: A static analysis
+    platform for JavaScript| In Proceedings of the 22nd ACM SIGSOFT International
+    Symposium on Foundations of Software Engineering, pages 121–132| ACM Publ., 2014.

@@ -6,13 +6,43 @@
 
     This distribution may include materials developed by third parties.
  ******************************************************************************/
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
 
 package kr.ac.kaist.jsaf.shell
 
-import java.io.{File, IOException, BufferedWriter, FileWriter}
+import java.io.{BufferedWriter, File, FileWriter, IOException}
 import java.util.HashMap
+
 import scala.collection.JavaConversions
-import kr.ac.kaist.jsaf.analysis.cfg.{DotWriter, CFG, CFGBuilder}
+import kr.ac.kaist.jsaf.analysis.cfg.{CFG, CFGBuilder, DotWriter}
 import kr.ac.kaist.jsaf.analysis.typing._
 import kr.ac.kaist.jsaf.analysis.typing.models.DOMBuilder
 import kr.ac.kaist.jsaf.analysis.visualization.Visualization
@@ -21,13 +51,14 @@ import kr.ac.kaist.jsaf.bug_detector.{BugDetector, StrictModeChecker}
 import kr.ac.kaist.jsaf.exceptions.UserError
 import kr.ac.kaist.jsaf.nodes.{IRRoot, Program}
 import kr.ac.kaist.jsaf.nodes_util._
-import kr.ac.kaist.jsaf.{Shell, ShellParameters, ProjectProperties}
+import kr.ac.kaist.jsaf.{ProjectProperties, Shell, ShellParameters}
 import kr.ac.kaist.jsaf.useful.{MemoryMeasurer, Pair, Useful}
 import kr.ac.kaist.jsaf.tests.SemanticsTest
 import edu.rice.cs.plt.tuple.{Option => JOption}
+import kr.ac.kaist.jsaf.analysis.imprecision.ImprecisionTracker
 import kr.ac.kaist.jsaf.scala_src.nodes._
 import kr.ac.kaist.jsaf.scala_src.useful.Lists._
-import kr.ac.kaist.jsaf.analysis.typing.domain.DomainPrinter
+import kr.ac.kaist.jsaf.analysis.typing.domain._
 
 ////////////////////////////////////////////////////////////////////////////////
 // Analyze
@@ -48,6 +79,9 @@ object AnalyzeMain {
 
     // Initialize AddressManager
     AddressManager.reset()
+
+    // Set string domain from shell variable
+    PreConfig.strings = new CmdLineStringConfig(Shell.params.opt_strdom)
 
     if (Shell.params.FileNames.length == 0) throw new UserError("Need a file to analyze")
     val fileName: String = Shell.params.FileNames(0)
@@ -74,8 +108,6 @@ object AnalyzeMain {
       Config.setAssertMode(!Shell.params.opt_NoAssert)
       System.out.println("Assert mode disabled.")
     }
-
-    if (Shell.params.opt_Compare) Config.setCompareMode
 
     // Context-sensitivity for main analysis
     var context: Int = -1
@@ -190,6 +222,8 @@ object AnalyzeMain {
       Config.setDomMode
     }
 
+    // currently always on (in this branch)
+    ImprecisionTracker.enableLog
 
     if (!quiet) System.out.println("Context-sensitivity mode is \"" + kr.ac.kaist.jsaf.analysis.typing.CallContext.getModeName + "\".")
 
@@ -198,6 +232,7 @@ object AnalyzeMain {
     val analyzeStartTime = System.nanoTime
     if (!quiet) System.out.println("\n* Initialize *")
 
+    
     // Initialize AbsString cache
     kr.ac.kaist.jsaf.analysis.typing.domain.AbsString.initCache
 

@@ -1,19 +1,49 @@
 /*******************************************************************************
-    Copyright (c) 2012-2014, S-Core, KAIST.
-    All rights reserved.
-
-    Use is subject to license terms.
-
-    This distribution may include materials developed by third parties.
+ * Copyright (c) 2012-2014, S-Core, KAIST.
+ * All rights reserved.
+ **
+ *Use is subject to license terms.
+ **
+ *This distribution may include materials developed by third parties.
  ***************************************************************************** */
+/*******************************************************************************
+ Copyright (c) 2016, Oracle and/or its affiliates.
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+ * Neither the name of KAIST, S-Core, Oracle nor the names of its contributors
+   may be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ This distribution may include materials developed by third parties.
+ ******************************************************************************/
 
 package kr.ac.kaist.jsaf.analysis.typing.domain
 
 import kr.ac.kaist.jsaf.analysis.cfg.InternalError
 import kr.ac.kaist.jsaf.analysis.lib.ObjTreeMap
-import kr.ac.kaist.jsaf.analysis.typing.{NotYetImplemented, Config}
+import kr.ac.kaist.jsaf.analysis.typing.{Config, NotYetImplemented, PreConfig}
 import kr.ac.kaist.jsaf.analysis.typing.AddressManager._
 
+import scala.reflect.runtime.universe._
 import scala.collection.mutable
 
 class Obj(_map: ObjMap) {
@@ -27,34 +57,14 @@ class Obj(_map: ObjMap) {
         case Some(b) => b
         case None =>
           val rtn = {
-            val this_contained =
-              if (Config.preAnalysis) {
-                !map.exists(this_kv => {
-                  val that_pva = that.lookup(this_kv._1)
-                  if (this_kv._1 == "@class") false
-                  else (this_kv._2._1 </ that_pva._1) || (this_kv._2._2 </ that_pva._2)
-                })
-              }
-              else {
-                this.map.submapOf(that.map)
-              }
-
+            val this_contained = this.map.submapOf(that.map)
             if (!this_contained) false
             else {
               val that_only = that.map.entryDiff(this.map)
-              if (Config.preAnalysis) {
-                !that_only.exists(that_kv => {
-                  val this_pva = this.lookup(that_kv._1)
-                  if (that_kv._1 == "@class") false
-                  else (this_pva._1 </ that_kv._2._1) || (this_pva._2 </ that_kv._2._2)
-                })
-              }
-              else {
-                !that_only.exists(that_kv => {
-                  val this_pva = this.lookup(that_kv._1)
-                  (this_pva._1 </ that_kv._2._1) || (this_pva._2 </ that_kv._2._2)
-                })
-              }
+              !that_only.exists(that_kv => {
+                val this_pva = this.lookup(that_kv._1)
+                (this_pva._1 </ that_kv._2._1) || (this_pva._2 </ that_kv._2._2)
+              })
             }
           }
 
@@ -239,9 +249,9 @@ class Obj(_map: ObjMap) {
   def dom(x: String): Boolean = map.contains(x)
 
   def apply(s: AbsString): PropValue = {
-    s.gamma match {
+    val pvOrig = s.gamma match {
       case Some(xs) =>
-        xs.foldLeft[PropValue](PropValueBot)((r, x) => r + this(x))
+        return xs.foldLeft[PropValue](PropValueBot)((r, x) => r + this(x))
       case _ => s.getAbsCase match {
         case AbsMulti =>
           if (s.isAllNums) {
@@ -264,6 +274,29 @@ class Obj(_map: ObjMap) {
           val propv3 = this.map(Str_default_other)._1
           propv1 + propv2 + propv3
         case _ => PropValueBot
+      }
+    }
+
+    val pvRefined = {
+      val pset = map.keySet.filter(x => !(x.take(1) == "@") && s.matches(x))
+      val propv1 = pset.foldLeft[PropValue](PropValueBot)((_pv, x) => _pv + this(x))
+      val propv2 = this.map(Str_default_number)._1 + this.map(Str_default_other)._1
+      propv1 + propv2
+    }
+
+    // return most precise version of the property value
+    s.gamma match {
+      case Some(xs) => throw new AssertionError("Unreachable.") // match above returns for concrete 's'
+      case None => {
+        if (pvOrig == pvRefined) {
+          pvOrig // doesn't matter
+        } else if (pvOrig <= pvRefined) {
+          pvOrig // match-based lookup was less precise, use original
+          //println("matching apply loss")
+        } else {
+          //println("matching apply gain?")
+          pvRefined // match-based lookup improves result
+        }
       }
     }
   }
@@ -297,64 +330,19 @@ class Obj(_map: ObjMap) {
 
   /* update */
   def update(s: AbsString, propv:PropValue): Obj = {
-    if (this.isBottom) Obj.bottom
-    else if (Config.preAnalysis) {
-      s.gamma match {
-        case Some(xs) => // weak update
-          xs.foldLeft(this)((r, x) => r + update(x, propv))
-        case _ => s.getAbsCase match {
-          case AbsMulti =>
-            if (s.isAllNums) {
-              val number = map(Str_default_number)._1 + propv
-              // ignore internal or non-writable properties
-              val pset = map.keySet.filter(x => !(x.take(1) == "@") && AbsString.alpha(x) <= NumStr && BoolTrue <= map(x)._1._1._2)
-              // weak update
-              val map1 = pset.foldLeft(map)((m, x) => {
-                val pva = propv + m(x)._1
-                val abs = m(x)._2
-                if (AbsentTop <= abs && pva <= number) m - x
-                else m + (x -> (pva, abs))
-              })
-              Obj(map1 + (Str_default_number -> (number, AbsentTop)))
-            } else {
-              val other = map(Str_default_other)._1 + propv
-              // ignore internal or non-writable properties
-              val pset = map.keySet.filter(x => !(x.take(1) == "@") && AbsString.alpha(x) <= OtherStr && BoolTrue <= map(x)._1._1._2)
-              // weak update
-              val map1 = pset.foldLeft(map)((m, x) => {
-                val pva = propv + m(x)._1
-                val abs = m(x)._2
-                if (AbsentTop <= abs && pva <= other) m - x
-                else m + (x -> (pva, abs))
-              })
-              Obj(map1 + (Str_default_other -> (other, AbsentTop)))
-            }
-            case AbsTop =>
-              val number = map(Str_default_number)._1 + propv
-              val other = map(Str_default_other)._1 + propv
-              // ignore internal or non-writable properties
-              val pset = map.keySet.filter(x => !(x.take(1) == "@") && BoolTrue <= map(x)._1._1._2)
-              // weak update
-              val map1 = pset.foldLeft(map)((m, x) => {
-                val ax = AbsString.alpha(x)
-                val pva = propv + m(x)._1
-                val abs = m(x)._2
-                if (AbsentTop <= abs && ax <= NumStr && pva <= number) m - x
-                else if (AbsentTop <= abs && ax <= OtherStr && pva <= other) m - x
-                else m + (x -> (pva, abs))
-              })
-              Obj(map1 + (Str_default_number -> (number, AbsentTop),
-                  Str_default_other -> (other, AbsentTop)))
-            case AbsBot => Obj.bottom
-            case _ => throw new InternalError("impossible case.") 
-        }
-      }
-    } else {
-      s.gamma match {
+    if (Obj.checkPropsValid)
+      assert(s.getSingle.getOrElse(".").take(1) == "@" || propv.isValid, "Object update with invalid property value")
+
+    if (this.isBottom)
+      return Obj.bottom
+
+    val oOrig = s.gamma match {
         case Some(xs) =>
-         if (xs.size == 1) // strong update
-           Obj(map.updated(xs.head, (propv, AbsentBot)))
-          else // weak update
+         if (xs.size == 1) {
+           //assert(!xs.head.startsWith("@default"))
+           // strong update
+           return Obj(map.updated(xs.head, (propv, AbsentBot)))
+         } else // weak update
            xs.foldLeft(this)((r, x) => r + update(x, propv))
         case _ =>
           s.getAbsCase match {
@@ -404,27 +392,56 @@ class Obj(_map: ObjMap) {
             case _ => throw new InternalError("impossible case.") 
         }
       }
+
+    val oRefined = {
+      val number = map(Str_default_number)._1 + propv
+      val other = map(Str_default_other)._1 + propv
+      // ignore internal or non-writable properties
+      val pset = map.keySet.filter(x => !(x.take(1) == "@") && BoolTrue <= map(x)._1._1._2 && s.matches(x))
+      // weak update
+      val map1 = pset.foldLeft(map)((m, x) => {
+        val ax = AbsString.alpha(x)
+        val pva = propv + m(x)._1
+        val abs = m(x)._2
+
+        if (AbsentTop <= abs && ax <= NumStr && pva <= number) m - x
+        else if (AbsentTop <= abs && ax <= OtherStr && pva <= other) m - x
+        else m + (x ->(pva, abs))
+
+      })
+      Obj(map1 +(Str_default_number ->(number, AbsentTop),
+        Str_default_other ->(other, AbsentTop)))
+    }
+
+    // returns the most precise version of the updated object
+    s.gamma match {
+      // matching-based update should not be better than a concrete update
+      case Some(xs) if xs.size == 1 && xs.head.startsWith("@") => oOrig
+      case Some(xs) => {
+        assert(oOrig <= oRefined)
+        oOrig
+      }
+      // update with abstract string that cannot be gammafied
+      case None => {
+        if (oOrig == oRefined) {
+          oOrig // doesn't matter
+        } else if (oOrig <= oRefined) {
+          oOrig // match-based is less precise, use original
+          //println("matching update loss")
+        } else {
+          //println("matching update gain?")
+          oRefined // match-based improves result
+        }
+      }
     }
   }
 
   // absent value is set to AbsentBot because it is strong update.
   def update(x: String, propv: PropValue, exist: Boolean = false): Obj = {
+    if (Obj.checkPropsValid)
+      assert(x.take(1) == "@" || propv.isValid, "Object update with invalid property value")
     if (this.isBottom) Obj.bottom
-    else if (Config.preAnalysis) {
-      // weak update
-      map.get(x) match {
-        case None =>
-          val ax = AbsString.alpha(x)
-          val number = map(Str_default_number)._1
-          val other = map(Str_default_other)._1
-          if (ax <= NumStr && propv <= number) this
-          else if (ax <= OtherStr && propv <= other) this
-          else if (exist) Obj(map.updated(x, (propv, AbsentBot)))
-          else Obj(map.updated(x, (propv, AbsentTop)))
-        case Some(pva) =>
-          Obj(map.updated(x, (pva._1 + propv, pva._2)))
-      }
-    } else {
+    else {
       if (x.startsWith("@default"))
         Obj(map.updated(x, (propv, AbsentTop)))
       else
@@ -538,18 +555,6 @@ class Obj(_map: ObjMap) {
     }
   }
 
-  /* to make old locations after preanalysis */
-  def oldify(): Obj = {
-    Obj(map.map(data => {
-      val (s, old_o) = data
-      val new_o =
-        PropValue(ObjectValue(Value(old_o._1._1._1._1, oldifyLoc(old_o._1._1._1._2)),
-          old_o._1._1._2, old_o._1._1._3, old_o._1._1._4),
-          old_o._1._3)
-      s -> (new_o, old_o._2)
-    }))
-  }
-
   // internal locations exist the only one in the heap
   private def oldifyLoc(locSet: LocSet): LocSet = {
     locSet.foldLeft(locSet)((lset, loc) => if(locToAddr(loc) < 0) lset else lset + addrToLoc(locToAddr(loc), Old))
@@ -566,6 +571,20 @@ class Obj(_map: ObjMap) {
   def asMap = map.toMap
 
   def size: Int = this.map.size
+
+  def concretePropAs[T: TypeTag](propName: String): Option[T] = {
+    def primitiveToConcrete(pv: PValue): Option[T] = {
+      typeOf[T] match {
+        case t if t =:= typeOf[String] => pv._5.getSingle.asInstanceOf[Option[T]]
+        case t if t =:= typeOf[Int] => pv._4.getSingle.asInstanceOf[Option[T]]
+        case _ => throw new NotImplementedError()
+      }
+    }
+    map.get(propName) match {
+      case Some(pva) => primitiveToConcrete(pva._1._2._1)
+      case None => None
+    }
+  }
 }
 
 object Obj {
@@ -584,4 +603,6 @@ object Obj {
   val cache: mutable.WeakHashMap[Pair[ObjMap,ObjMap], Boolean] = mutable.WeakHashMap()
   def cacheUpdate(l: ObjMap, r: ObjMap, b: Boolean) = cache += ((l,r) -> b)
   def cacheLookup(l: ObjMap, r: ObjMap): Option[Boolean] = cache.get((l,r))
+
+  var checkPropsValid = false
 }
