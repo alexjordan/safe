@@ -21,11 +21,22 @@ This repository contains the string abstract domains we currently implemented in
 | AbsStringNumOth.scala|Numeric/Other domain, used by SAFE |
 | AbsStringNumSplOth.scala|Numeric/Special/Other domain, used by JSAI |
 | AbsStringPrefSuff.scala|Prefix-Suffix (PS) domain |
-| AbsStringProd.scala|Cartesian (actually, direct) product of domains |
+| AbsStringProd.scala|Direct product of domains |
 | AbsStringSAFE.scala|SAFE default string domain |
 | AbsStringSet.scala|String Set domain, see [1] |
 
-### Qickstart
+### Requirements
+
+This distribution of the SAFE framework tries to be as self-contained as
+possible, bundled with Scala 2.10.6 and all other libraries it depends on in
+the `lib` directory. To build and run SAFE, these are required:
+
+  * J2SDK 1.7.  See http://java.sun.com/javase/downloads/index.jsp
+  * sbt version 0.13 or later.  See http://www.scala-sbt.org
+  * Bash version 2.5 or later, installed at /bin/bash.  See http://www.gnu.org/software/bash/
+
+
+### Quickstart
 
 Building and testing SAFE (in sbt):  
 ```bash
