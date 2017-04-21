@@ -33,10 +33,12 @@ do
 
   for fil in $files_2017_java $files_2017_rats $files_2017_scala
   do
-    res=`grep "2017, KAIST" $fil`
+    res=`grep "Copyright" $fil`
     if strdiff "$res" "2017, KAIST" ; then
-      if (strdiff "$fil" "main/java/kr/ac/kaist/safe/parser/JS.java") ; then
-        echo "  $fil"
+      if strdiff "$res" "Oracle" ; then
+        if (strdiff "$fil" "main/java/kr/ac/kaist/safe/parser/JS.java") ; then
+          echo "  $fil"
+        fi
       fi
     fi
   done
