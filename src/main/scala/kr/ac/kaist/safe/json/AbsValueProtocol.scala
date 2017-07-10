@@ -106,7 +106,7 @@ object AbsValueProtocol extends DefaultJsonProtocol {
     def write(str: AbsString): JsValue = str.json
 
     def read(value: JsValue): AbsString = value match {
-      case JsArray(Vector(JsNumber(size), v)) => StringSet(size.toInt).fromJson(v)
+      case JsArray(Vector(JsNumber(size), v)) => TaintStringSet(size.toInt).fromJson(v)
       case _ => throw AbsStringParseError(value)
     }
   }
