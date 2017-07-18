@@ -1,7 +1,7 @@
 Scalable Analysis Framework for ECMAScript (SAFE) Version 2.0 / PLDI 2017 Taint Analysis Tutorial
 ===========
 
-This is a taint analysis prototype for SAFE 2.0 presented at PLDI 2017.
+This is a taint analysis prototype for SAFE 2.0 presented at PLDI 2017. The `tutorial slides`_ can be found on the website of `PLRG @ KAIST`_.
 
 | **Main files**
 * `<src/main/scala/kr/ac/kaist/safe/analyzer/domain/string/TaintStringSet.scala>`_
@@ -10,6 +10,7 @@ This is a taint analysis prototype for SAFE 2.0 presented at PLDI 2017.
 
 The small test cases used during the tutorial (in `<tests/taint>`_) are excerpts from `IBM's microbenchmarks`_ and `Firing Range`_.
 
+.. _tutorial slides: http://plrg.kaist.ac.kr/lib/exe/fetch.php?media=research:publications:pldi2017_tutorial2.pdf
 .. _IBM's microbenchmarks: http://researcher.ibm.com/researcher/files/us-pistoia/IBMJavaScriptUnitTests.zip
 .. _Firing Range: https://github.com/google/firing-range
 
