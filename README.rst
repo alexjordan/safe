@@ -3,6 +3,10 @@ Scalable Analysis Framework for ECMAScript (SAFE) Version 2.0 / PLDI 2017 Taint 
 
 This is a taint analysis prototype for SAFE 2.0 presented at PLDI 2017. The `tutorial slides`_ can be found on the website of `PLRG @ KAIST`_.
 
+**Running taint analysis** ::
+
+    bin/safe taint -heapBuilder:jsModel tests/taint/02-setTimeout.html
+
 | **Main files**
 * `<src/main/scala/kr/ac/kaist/safe/analyzer/domain/string/TaintStringSet.scala>`_
 * `<src/main/scala/kr/ac/kaist/safe/phase/TaintDetect.scala>`_
