@@ -10,6 +10,13 @@ NOTE:
 <body>
 
 <script>
+// SAFE taint config
+__sinks = {
+	"(info only) doc.writeln": document.writeln
+};
+Object.freeze(__sinks);
+// end
+
 function A() {
  this.f = new Object(); 
 }
@@ -23,7 +30,7 @@ B.prototype = a;
 
 var b = new B();
 var doc = document;
-var w = "write";
+var w = "writeln";
 doc[w](b.f);
 </script>
 

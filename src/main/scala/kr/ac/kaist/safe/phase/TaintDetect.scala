@@ -61,7 +61,7 @@ case object TaintDetect extends PhaseObj[(CFG, Int, TracePartition, Semantics), 
   // Sink configuration
   val globalSinks = List("setInterval", "setTimeout", "eval")
   val mappedSinks = Map(
-    "document" -> List("write", "writeln"),
+    "document" -> List("write"),
     "location" -> List("replace")
   )
 
@@ -150,7 +150,20 @@ case object TaintDetect extends PhaseObj[(CFG, Int, TracePartition, Semantics), 
       case _ => throw new AssertionError("expected single location")
     }
 
-    // Helper: lookup a sink function and add its internal ID to the taintSinks set
+    // Helper: add sink function's internal ID to the taintSinks set
+    def addSinkFunc(funcObj: AbsObject, name: String): Unit = {
+      val fs = funcObj(ICall).fidset
+      assert(fs.size == 1, "expected single location")
+      val sink = fs.head
+
+      // Report duplicates
+      if (taintSinks.contains(sink))
+        Console.err.println(s"Sink '$name' already exists")
+      else
+        taintSinks += sink
+    }
+
+    // Helper: lookup a sink function and add it the taintSinks set
     def addSink[T](objName: T, funcName: String): Unit = {
       val o: AbsObject = objName match {
         case l: Loc => st.heap.get(l)
@@ -158,15 +171,7 @@ case object TaintDetect extends PhaseObj[(CFG, Int, TracePartition, Semantics), 
       }
 
       val fo = getSingleLoc(o.Get(funcName, st.heap).locset)
-      val fs = fo(ICall).fidset
-      assert(fs.size == 1, "expected single location")
-      val sink = fs.head
-
-      // Report duplicates
-      if (taintSinks.contains(sink))
-        Console.err.println(s"Sink '$funcName' already exists")
-      else
-        taintSinks += sink
+      addSinkFunc(fo, funcName)
     }
 
     // Add sinks from configuration
@@ -179,6 +184,25 @@ case object TaintDetect extends PhaseObj[(CFG, Int, TracePartition, Semantics), 
         addSinkForObj(f)
       }
     }
+
+    // Add sinks from a special global __sinks object in the user code, e.g.
+    // __sinks = { "sink description": some_sink_function };
+    // rhs value in __sinks must be a reference to a function object
+    if (g.HasProperty(AbsString("__sinks"), st.heap) == AbsBool.True) {
+      val o = getSingleLoc(g.Get("__sinks", st.heap).locset)
+      o.abstractKeySet match {
+        case ConFin(set) => set foreach { key =>
+          val sinkName: String = key.getSingle match {
+            case ConOne(s) => s
+            case _ => throw new AssertionError("expected concrete __sink property key")
+          }
+          val fo = getSingleLoc(o.Get(key, st.heap).locset)
+          addSinkFunc(fo, sinkName)
+        }
+        case ConInf() => throw new AssertionError("expected concrete __sink object")
+      }
+    }
+
     println(s"num sinks: ${taintSinks.size}")
 
     // Run taint detection
