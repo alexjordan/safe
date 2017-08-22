@@ -66,7 +66,7 @@ case object HeapBuild extends PhaseObj[CFG, HeapBuildConfig, (CFG, Worklist, Sem
   val options: List[PhaseOption[HeapBuildConfig]] = List(
     ("silent", BoolOption(c => c.silent = true),
       "messages during heap building are muted."),
-    ("maxStrSetSize", NumOption((c, n) => if (n > 0) c.AbsString = StringSet(n)),
+    ("maxStrSetSize", NumOption((c, n) => if (n > 0) c.AbsString = TaintStringSet(n)),
       "the analyzer will use the AbsString Set domain with given size limit n."),
     ("aaddrType", StrOption((c, s) => s match {
       case "normal" => c.aaddrType = NormalAAddr
@@ -100,7 +100,7 @@ case class HeapBuildConfig(
   var AbsNull: AbsNullUtil = DefaultNull,
   var AbsBool: AbsBoolUtil = DefaultBool,
   var AbsNumber: AbsNumberUtil = DefaultNumber,
-  var AbsString: AbsStringUtil = StringSet(0),
+  var AbsString: AbsStringUtil = TaintStringSet(0),
   var callsiteSensitivity: Int = 0,
   var loopSensitivity: Int = 0,
   var snapshot: Option[String] = None,
