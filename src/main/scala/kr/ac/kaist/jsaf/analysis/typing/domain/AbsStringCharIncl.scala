@@ -195,15 +195,31 @@ class AbsStringCharIncl(_kind: AbsStringCase) extends AbsString(_kind) {
     }
   }
 
-  override def trim: AbsString = this.kind match {
-    case AbsStringCharIncl.LUCase(l, u)
-      => if (u.mkString.trim.isEmpty)
-           new AbsStringCharIncl(IHashSet(), IHashSet())
-         else
-           this
-    case _ 
-      => cast(super.trim)
+  override def trim: AbsString = {
+
+    // Example: If 'str' is input to trim transformer in abstract-domain
+    // str = [{'␣','a'}, {'␣','a','b','c'}]
+    // trim should output [{'a'}, {'␣','a','b','c'}]
+
+    this.kind match {
+      case AbsStringCharIncl.LUCase(l, u)
+          => {
+
+            // remove whitespace characters from must set
+            val lowerTr = l.filter(x => !x.isWhitespace)
+
+            val upperFilt = u.filter(x => !x.isWhitespace)
+            val upperFiltSz = upperFilt.size
+
+            // make may set null it only contains whitespace charater else return u
+            val upperTr = if (upperFilt.size == 0) new IHashSet[Char]() else u
+            new AbsStringCharIncl(lowerTr, upperTr)
+          }
+      case _
+          => cast(super.trim)
+    }
   }
+
 
   override def concat (that: AbsString) = {
     val cthat = cast(that)
@@ -231,7 +247,7 @@ class AbsStringCharIncl(_kind: AbsStringCase) extends AbsString(_kind) {
         => if (!(l2 subsetOf u1))
              BoolFalse
            else
-             if (u2.size <= 1 && (u2 subsetOf l1))
+             if (u2.size == 0)
                BoolTrue
              else
                BoolTop
